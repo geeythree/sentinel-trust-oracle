@@ -12,5 +12,10 @@ agent_log.json
 # Telegram session
 *.session
 
+# Project-local docs (keep locally, not in repo)
+CLAUDE.md
+PLAN.md
+hackathon_context.md
+
 # OS
 .DS_Store
