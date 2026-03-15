@@ -1,0 +1,16 @@
+# Python
+__pycache__/
+*.pyc
+.env
+env/
+venv/
+
+# Runtime logs
+agent_log.json
+.telegram_ingest_state.json
+
+# Telegram session
+*.session
+
+# OS
+.DS_Store

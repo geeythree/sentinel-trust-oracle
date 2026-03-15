@@ -1,0 +1,75 @@
+{
+  "type": "https://eips.ethereum.org/EIPS/eip-8004#registration-v1",
+  "name": "Sentinel — Agent Trust Oracle",
+  "version": "1.0.0",
+  "description": "Autonomous agent that verifies ERC-8004 agent identities, checks endpoint liveness, analyzes on-chain history, and writes verifiable trust scores to the Reputation Registry via EAS attestations on Base.",
+  "image": "",
+  "services": [
+    {
+      "name": "mcp",
+      "endpoint": "stdio://sentinel-trust-oracle",
+      "version": "1.0",
+      "skills": ["verify_agent", "check_reputation"],
+      "domains": ["trust", "identity", "security"]
+    }
+  ],
+  "active": true,
+  "operator": {
+    "wallet": "",
+    "erc8004_agent_id": null
+  },
+  "evaluator": {
+    "wallet": ""
+  },
+  "chain": {
+    "network": "base",
+    "chain_id": 8453,
+    "testnet": {
+      "network": "base-sepolia",
+      "chain_id": 84532
+    },
+    "registries": {
+      "identity_mainnet": "0x8004A169FB4a3325136EB29fA0ceB6D2e539a432",
+      "identity_sepolia": "0x8004A818BFB912233c491871b3d84c89A494BD9e",
+      "reputation_mainnet": "0x8004BAa17C55a88189AE136b182e5fdA19dE9b63",
+      "reputation_sepolia": "0x8004B663056A597Dffe9eCcC1965A193B7388713",
+      "eas": "0x4200000000000000000000000000000000000021"
+    }
+  },
+  "tools": [
+    {"name": "erc8004_identity_read", "type": "blockchain"},
+    {"name": "erc8004_reputation_read", "type": "blockchain"},
+    {"name": "erc8004_reputation_write", "type": "blockchain"},
+    {"name": "eas_attestation", "type": "blockchain"},
+    {"name": "http_liveness_check", "type": "api"},
+    {"name": "venice_api", "type": "llm", "model": "qwen3-235b-a22b-instruct-2507"}
+  ],
+  "task_categories": [
+    "agent_trust_verification",
+    "identity_verification",
+    "reputation_evaluation"
+  ],
+  "evaluation_rubric": {
+    "dimensions": [
+      "identity_completeness",
+      "endpoint_liveness",
+      "onchain_history",
+      "venice_trust_analysis"
+    ],
+    "weights": {
+      "identity_completeness": 0.20,
+      "endpoint_liveness": 0.25,
+      "onchain_history": 0.25,
+      "venice_trust_analysis": 0.30
+    },
+    "scale": "0-100 per dimension"
+  },
+  "compute_budget": {
+    "max_tool_calls_per_evaluation": 15
+  },
+  "privacy": {
+    "llm_provider": "venice",
+    "data_retention": "none",
+    "rationale": "Agent metadata and trust analysis are processed via Venice's no-data-retention inference. The querying agent's intent is never exposed."
+  }
+}

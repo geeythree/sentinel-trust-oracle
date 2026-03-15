@@ -1,0 +1,8 @@
+web3==7.14.1
+requests>=2.31.0
+tenacity>=8.2.0
+python-dotenv>=1.0.0
+eth-account>=0.13.0
+mcp>=1.0.0
+pytest>=7.4.0
+pytest-mock>=3.12.0
