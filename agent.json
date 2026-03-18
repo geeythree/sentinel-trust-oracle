@@ -16,11 +16,10 @@
   "active": true,
   "x402Support": false,
   "operator": {
-    "wallet": "",
-    "erc8004_agent_id": null
+    "wallet": "0xA8E23950073B9ee31433F327Ee63798939EAB0c3"
   },
   "evaluator": {
-    "wallet": ""
+    "wallet": "0xb85f6995E093411DfEB88c484D3A318a78A9f106"
   },
   "chain": {
     "network": "base",

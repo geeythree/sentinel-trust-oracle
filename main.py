@@ -35,6 +35,11 @@ def parse_args() -> argparse.Namespace:
     challenge.add_argument("--evaluation-id", type=str, required=True)
     challenge.add_argument("--reason", type=str, required=True)
 
+    # Watch mode (continuous autonomous evaluation)
+    watch = subparsers.add_parser("watch", help="Continuously discover and evaluate agents (autonomous loop)")
+    watch.add_argument("--interval", type=int, default=300, help="Seconds between discovery rounds (default: 300)")
+    watch.add_argument("--max-agents", type=int, default=5, help="Max agents per round")
+
     # MCP server mode
     subparsers.add_parser("mcp-server", help="Start MCP server (stdio transport)")
 
@@ -126,6 +131,9 @@ def main() -> int:
         print(f"Schema registered! UID: {schema_uid}")
         print(f"Add to .env: EAS_SCHEMA_UID={schema_uid}")
 
+    elif args.mode == "watch":
+        _run_watch_mode(orchestrator, blockchain, args)
+
     elif args.mode == "challenge":
         tx_hash = blockchain.create_validation_attestation(
             evaluation_id=args.evaluation_id,
@@ -137,6 +145,38 @@ def main() -> int:
         print(f"TX: {blockchain.get_explorer_url(tx_hash)}")
 
     return 0
+
+
+def _run_watch_mode(orchestrator, blockchain, args) -> None:
+    """Continuous autonomous loop: discover → evaluate → sleep → repeat."""
+    import time
+    from config import config
+
+    round_num = 0
+    last_block = blockchain.get_latest_block() - config.DISCOVERY_BLOCK_RANGE
+
+    print(f"\nSentinel WATCH mode — evaluating every {args.interval}s (Ctrl+C to stop)")
+    print("=" * 60)
+
+    try:
+        while True:
+            round_num += 1
+            current_block = blockchain.get_latest_block()
+            print(f"\n[Round {round_num}] Scanning blocks {last_block}..{current_block}")
+
+            results = orchestrator.run_discovery_mode(
+                last_block, current_block, args.max_agents
+            )
+            _print_summary(results)
+
+            last_block = current_block + 1
+
+            published = sum(1 for r in results if r.tx_hash)
+            print(f"\n[Round {round_num}] {len(results)} evaluated, {published} published. "
+                  f"Next scan in {args.interval}s...")
+            time.sleep(args.interval)
+    except KeyboardInterrupt:
+        print(f"\nWatch mode stopped after {round_num} rounds.")
 
 
 def _load_manual_agents(args, discovery) -> list:
