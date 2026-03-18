@@ -1,4 +1,4 @@
-"""Pipeline coordinator: discover -> verify identity -> check liveness -> analyze onchain -> venice trust -> score -> publish."""
+"""Pipeline coordinator: discover -> plan -> verify identity -> check liveness -> analyze onchain -> venice trust -> score -> publish."""
 from __future__ import annotations
 
 import json
@@ -109,7 +109,24 @@ class Orchestrator:
             print("No registered agents found in the specified block range.")
             return []
 
-        print(f"Discovered {len(agents)} registered agents. Evaluating...")
+        # === PLANNING STEP ===
+        # Rank agents by priority: newer registrations first, then by agent_id.
+        # This ensures recently registered agents get evaluated before older ones
+        # and provides a deterministic evaluation order.
+        agents = self._plan_evaluation_order(agents)
+        print(f"Discovered {len(agents)} registered agents. Evaluation plan:")
+        for idx, a in enumerate(agents):
+            block_info = f" (block {a.block_number})" if a.block_number else ""
+            print(f"  {idx+1}. Agent #{a.agent_id}{block_info}")
+
+        self._logger.log_action(
+            agent_role=AgentRole.PLANNER,
+            action_type=ActionType.STATE_TRANSITION,
+            tool=None,
+            payload={"step": "plan", "agents_planned": [a.agent_id for a in agents]},
+            result={"status": "plan_complete", "evaluation_order": [a.agent_id for a in agents]},
+            latency_ms=0,
+        )
 
         # Evaluate each agent
         results = []
@@ -128,6 +145,24 @@ class Orchestrator:
                 continue
 
         return results
+
+    def _plan_evaluation_order(self, agents: list[DiscoveredAgent]) -> list[DiscoveredAgent]:
+        """Plan: rank agents by evaluation priority.
+
+        Priority rules:
+        1. Newer registrations first (higher block_number)
+        2. Agents with URIs containing 'ipfs' or 'https' ranked above data: URIs
+        3. Deterministic tiebreak by agent_id (ascending)
+        """
+        def priority_key(a: DiscoveredAgent):
+            # Higher block = more recent = higher priority (negate for descending)
+            block_score = -(a.block_number or 0)
+            # Prefer IPFS/HTTPS URIs over data: URIs
+            uri = a.agent_uri.lower() if a.agent_uri else ""
+            uri_score = 0 if (uri.startswith("https://") or uri.startswith("ipfs://")) else 1
+            return (uri_score, block_score, a.agent_id)
+
+        return sorted(agents, key=priority_key)
 
     def run_manual_mode(
         self,
@@ -438,11 +473,29 @@ class Orchestrator:
         )
 
     def _update_dashboard(self, results: list[TrustVerdict]) -> None:
-        """Write evaluation results to dashboard/results.json."""
+        """Merge evaluation results into dashboard/results.json (accumulative)."""
         try:
-            dashboard_data = [r.to_dashboard_dict() for r in results]
             config.DASHBOARD_RESULTS_PATH.parent.mkdir(parents=True, exist_ok=True)
+
+            # Load existing results
+            existing = []
+            if config.DASHBOARD_RESULTS_PATH.exists():
+                try:
+                    with open(config.DASHBOARD_RESULTS_PATH, "r") as f:
+                        existing = json.load(f)
+                except (json.JSONDecodeError, ValueError):
+                    existing = []
+
+            # Build lookup of existing results by agent_id
+            existing_by_id = {r["agent_id"]: r for r in existing if isinstance(r, dict)}
+
+            # Merge new results (overwrite if same agent_id, append if new)
+            for r in results:
+                existing_by_id[r.agent.agent_id] = r.to_dashboard_dict()
+
+            # Write merged results sorted by agent_id
+            merged = sorted(existing_by_id.values(), key=lambda x: x.get("agent_id", 0))
             with open(config.DASHBOARD_RESULTS_PATH, "w") as f:
-                json.dump(dashboard_data, f, indent=2)
+                json.dump(merged, f, indent=2)
         except Exception as e:
             print(f"[WARNING] Failed to update dashboard: {e}", file=sys.stderr)

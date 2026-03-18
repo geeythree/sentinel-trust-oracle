@@ -213,7 +213,9 @@
     // Load agent.json for wallet info
     async function loadAgent() {
         try {
-            const resp = await fetch('../agent.json');
+            // Try relative path first (local dev), then root path (GitHub Pages)
+            let resp = await fetch('../agent.json');
+            if (!resp.ok) resp = await fetch('agent.json');
             if (!resp.ok) return;
             const agent = await resp.json();
             document.getElementById('operator-wallet').textContent = agent.operator?.wallet || 'Not set';

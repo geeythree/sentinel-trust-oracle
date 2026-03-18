@@ -3,7 +3,7 @@ name: Deploy Dashboard to GitHub Pages
 on:
   push:
     branches: [main]
-    paths: [dashboard/**]
+    paths: [dashboard/**, agent.json]
   workflow_dispatch:
 
 permissions:
@@ -23,6 +23,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Copy agent.json into dashboard for GitHub Pages
+        run: cp agent.json dashboard/agent.json
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:

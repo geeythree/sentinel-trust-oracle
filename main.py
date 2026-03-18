@@ -40,6 +40,10 @@ def parse_args() -> argparse.Namespace:
     watch.add_argument("--interval", type=int, default=300, help="Seconds between discovery rounds (default: 300)")
     watch.add_argument("--max-agents", type=int, default=5, help="Max agents per round")
 
+    # Self-evaluation mode
+    self_eval = subparsers.add_parser("self-eval", help="Sentinel evaluates itself (circular trust demo)")
+    self_eval.add_argument("--agent-id", type=int, default=33465, help="Sentinel's own ERC-8004 agent ID")
+
     # MCP server mode
     subparsers.add_parser("mcp-server", help="Start MCP server (stdio transport)")
 
@@ -134,6 +138,9 @@ def main() -> int:
     elif args.mode == "watch":
         _run_watch_mode(orchestrator, blockchain, args)
 
+    elif args.mode == "self-eval":
+        _run_self_evaluation(orchestrator, blockchain, args)
+
     elif args.mode == "challenge":
         tx_hash = blockchain.create_validation_attestation(
             evaluation_id=args.evaluation_id,
@@ -158,25 +165,84 @@ def _run_watch_mode(orchestrator, blockchain, args) -> None:
     print(f"\nSentinel WATCH mode — evaluating every {args.interval}s (Ctrl+C to stop)")
     print("=" * 60)
 
+    consecutive_failures = 0
+    max_consecutive_failures = 5
+
     try:
         while True:
             round_num += 1
-            current_block = blockchain.get_latest_block()
-            print(f"\n[Round {round_num}] Scanning blocks {last_block}..{current_block}")
+            try:
+                current_block = blockchain.get_latest_block()
+                print(f"\n[Round {round_num}] Scanning blocks {last_block}..{current_block}")
 
-            results = orchestrator.run_discovery_mode(
-                last_block, current_block, args.max_agents
-            )
-            _print_summary(results)
+                results = orchestrator.run_discovery_mode(
+                    last_block, current_block, args.max_agents
+                )
+                _print_summary(results)
 
-            last_block = current_block + 1
+                last_block = current_block + 1
+                consecutive_failures = 0  # reset on success
 
-            published = sum(1 for r in results if r.tx_hash)
-            print(f"\n[Round {round_num}] {len(results)} evaluated, {published} published. "
-                  f"Next scan in {args.interval}s...")
+                published = sum(1 for r in results if r.tx_hash)
+                print(f"\n[Round {round_num}] {len(results)} evaluated, {published} published. "
+                      f"Next scan in {args.interval}s...")
+            except KeyboardInterrupt:
+                raise  # re-raise to outer handler
+            except Exception as e:
+                consecutive_failures += 1
+                backoff = min(args.interval * consecutive_failures, 900)
+                print(f"\n[Round {round_num}] ERROR: {e}")
+                print(f"  Consecutive failures: {consecutive_failures}/{max_consecutive_failures}")
+                if consecutive_failures >= max_consecutive_failures:
+                    print(f"  Too many failures. Stopping watch mode.")
+                    break
+                print(f"  Retrying in {backoff}s...")
+                time.sleep(backoff)
+                continue
+
             time.sleep(args.interval)
     except KeyboardInterrupt:
         print(f"\nWatch mode stopped after {round_num} rounds.")
+
+
+def _run_self_evaluation(orchestrator, blockchain, args) -> None:
+    """Sentinel evaluates itself — circular trust demonstration."""
+    from agent_discovery import AgentDiscovery
+
+    sentinel_id = args.agent_id
+    print(f"\nSentinel SELF-EVALUATION — Agent #{sentinel_id}")
+    print("=" * 60)
+    print("Sentinel is evaluating its own identity, liveness, and trust.")
+    print("This demonstrates a circular trust model: a trust oracle that")
+    print("practices what it preaches.\n")
+
+    # Discover ourselves
+    discovery = orchestrator._discovery
+    sentinel = discovery.discover_agent_by_id(sentinel_id)
+
+    # Run full evaluation pipeline
+    result = orchestrator.evaluate_single(sentinel)
+    _print_summary([result])
+
+    # Submit self-feedback via AUDITOR wallet
+    if result.tx_hash:
+        print(f"\nSelf-evaluation published via EVALUATOR wallet.")
+        try:
+            reason = (f"Self-assessment: score={result.composite_score}, "
+                      f"confidence={result.evaluation_confidence}, "
+                      f"identity={result.dimensions.identity_completeness}, "
+                      f"liveness={result.dimensions.endpoint_liveness}")
+            self_tx = blockchain.submit_self_feedback(
+                aqe_agent_id=sentinel_id,
+                value=result.composite_score,
+                tag1="self_assessment",
+                tag2=f"conf_{result.evaluation_confidence}",
+                reason=reason,
+            )
+            print(f"Self-feedback submitted via AUDITOR wallet.")
+            print(f"TX: {blockchain.get_explorer_url(self_tx)}")
+        except Exception as e:
+            print(f"Self-feedback skipped (AUDITOR not configured or error): {e}")
 
 
 def _load_manual_agents(args, discovery) -> list:

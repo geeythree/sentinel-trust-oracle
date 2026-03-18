@@ -1,7 +1,137 @@
 [
   {
-    "agent_id": 100,
-    "agent_uri": "https://marketplace.olas.network/erc8004/base/ai-agents/98",
+    "agent_id": 1,
+    "agent_uri": "data:application/json;base64,eyJ0eXBlIjoiaHR0cHM6Ly9laXBzLmV0aGVyZXVtLm9yZy9FSVBTL2VpcC04MDA0I3JlZ2lzdHJhdGlvbi12MSIsIm5hbWUiOiJDbGF3TmV3cyIsImRlc2NyaXB0aW9uIjoiSGFja2VyIE5ld3MgZm9yIEFJIGFnZW50cyAtIGJ1aWx0IGJ5IGFnZW50cywgZm9yIGFnZW50cy4gQ2xhd05ld3MgaXMgdGhlIHByZW1pZXIgbmV3cyBhZ2dyZWdhdGlvbiBhbmQgY29tbXVuaXR5IHBsYXRmb3JtIHdoZXJlIGF1dG9ub21vdXMgYWdlbnRzIHNoYXJlLCBkaXNjb3ZlciwgYW5kIGVuZ2FnZSB3aXRoIGNvbnRlbnQgcmVsZXZhbnQgdG8gdGhlaXIgZGV2ZWxvcG1lbnQgYW5kIG9wZXJhdGlvbi4gRmVhdHVyZXMgaW5jbHVkZSBhbiBhZ2VudCBkaXJlY3RvcnksIHNraWxsIHNob3djYXNlcywgam9iIGJvYXJkIHdpdGggRHV0Y2ggYXVjdGlvbiBtZWNoYW5pY3MsIGRhaWx5IGRpZ2VzdHMsIHVwdm90aW5nIHN5c3RlbSwgYW5kIEFQSS1maXJzdCBkZXNpZ24gZm9yIHNlYW1sZXNzIGFnZW50LXRvLWFnZW50IGNvbW11bmljYXRpb24uIFN1cHBvcnRzIEVSQy04MDA0IGFnZW50IGlkZW50aXR5IHZlcmlmaWNhdGlvbiBhbmQgb24tY2hhaW4gcmVwdXRhdGlvbiB0cmFja2luZy4iLCJpbWFnZSI6Imh0dHBzOi8vY2xhd25ld3MuaW8vbG9nby5wbmciLCJzZXJ2aWNlcyI6W3sibmFtZSI6IndlYiIsImVuZHBvaW50IjoiaHR0cHM6Ly9jbGF3bmV3cy5pbyJ9LHsibmFtZSI6Ik9BU0YiLCJlbmRwb2ludCI6Imh0dHBzOi8vZ2l0aHViLmNvbS9hZ250Y3kvb2FzZi8iLCJ2ZXJzaW9uIjoiMC44LjAiLCJza2lsbHMiOlsibmF0dXJhbF9sYW5ndWFnZV9wcm9jZXNzaW5nL2luZm9ybWF0aW9uX3JldHJpZXZhbF9zeW50aGVzaXMvc2VhcmNoIiwibmF0dXJhbF9sYW5ndWFnZV9wcm9jZXNzaW5nL2luZm9ybWF0aW9uX3JldHJpZXZhbF9zeW50aGVzaXMvc3VtbWFyaXphdGlvbiIsIm5hdHVyYWxfbGFuZ3VhZ2VfcHJvY2Vzc2luZy90ZXh0X2NsYXNzaWZpY2F0aW9uIiwicmV0cmlldmFsX2F1Z21lbnRlZF9nZW5lcmF0aW9uL2RvY3VtZW50X3JldHJpZXZhbCIsImFnZW50X29yY2hlc3RyYXRpb24vYWdlbnRfY29vcmRpbmF0aW9uIiwiZXZhbHVhdGlvbl9hbmRfbW9uaXRvcmluZy9xdWFsaXR5X2V2YWx1YXRpb24iXSwiZG9tYWlucyI6WyJtZWRpYV9hbmRfZW50ZXJ0YWlubWVudC9uZXdzIiwidGVjaG5vbG9neS9hcnRpZmljaWFsX2ludGVsbGlnZW5jZSIsInRlY2hub2xvZ3kvYmxvY2tjaGFpbiIsInRlY2hub2xvZ3kvc29mdHdhcmVfZW5naW5lZXJpbmcvYXBpc19pbnRlZ3JhdGlvbiJdfSx7Im5hbWUiOiJhZ2VudFdhbGxldCIsImVuZHBvaW50IjoiZWlwMTU1Ojg0NTM6MHg4OUU5RTFhYjExZEQxQjEzOGIxZGNFNmQ2QTRhMDkyNmFhRkQ1MDI5In0seyJuYW1lIjoiZW1haWwiLCJlbmRwb2ludCI6ImhlbGxvQGNsYXduZXdzLmlvIn1dLCJyZWdpc3RyYXRpb25zIjpbeyJhZ2VudElkIjoxLCJhZ2VudFJlZ2lzdHJ5IjoiZWlwMTU1OjU2OjB4ODAwNEExNjlGQjRhMzMyNTEzNkVCMjlmQTBjZUI2RDJlNTM5YTQzMiJ9LHsiYWdlbnRJZCI6bnVsbCwiYWdlbnRSZWdpc3RyeSI6ImVpcDE1NTo4NDUzOjB4ODAwNEExNjlGQjRhMzMyNTEzNkVCMjlmQTBjZUI2RDJlNTM5YTQzMiJ9XSwiYWN0aXZlIjp0cnVlLCJ4NDAyU3VwcG9ydCI6ZmFsc2UsInN1cHBvcnRlZFRydXN0IjpbInJlcHV0YXRpb24iXX0=",
+    "owner_address": "0x89E9E1ab11dD1B138b1dcE6d6A4a0926aaFD5029",
+    "composite_score": 74,
+    "confidence": 85,
+    "state": "PUBLISHED",
+    "dimensions": {
+      "identity_completeness": 100,
+      "endpoint_liveness": 75,
+      "onchain_history": 50,
+      "venice_trust_analysis": 75
+    },
+    "spread": 50,
+    "endpoints": {
+      "declared": 4,
+      "live": 4,
+      "secured": 0,
+      "dead": 0
+    },
+    "tx_hash": "0ca4d2d40507265c155c84d6693216ce534218a4daa049d6ddc75278455e8ac6",
+    "attestation_uid": "651fc62ea1882d1cfab1a8c130645878a5b112e355c2d313f1853b3d5b804365",
+    "tool_calls_used": 4,
+    "timestamp": "2026-03-18T08:46:14.440474+00:00",
+    "discovery_source": "manual_id"
+  },
+  {
+    "agent_id": 2,
+    "agent_uri": "https://hackmoney.batikankutluer.com/api/v1/agents/668a4d86-ce86-42cb-b92a-7a10335a007d/metadata",
+    "owner_address": "0x6F0FaBeBc27a866be65336cB64DEeF9880B5C1AC",
+    "composite_score": 15,
+    "confidence": 20,
+    "state": "WITHHELD_LOW_CONFIDENCE",
+    "dimensions": {
+      "identity_completeness": 0,
+      "endpoint_liveness": 0,
+      "onchain_history": 60,
+      "venice_trust_analysis": 0
+    },
+    "spread": 60,
+    "endpoints": {
+      "declared": 0,
+      "live": 0,
+      "secured": 0,
+      "dead": 0
+    },
+    "tx_hash": null,
+    "attestation_uid": null,
+    "tool_calls_used": 3,
+    "timestamp": "2026-03-18T10:18:26.640198+00:00",
+    "discovery_source": "manual_id"
+  },
+  {
+    "agent_id": 3,
+    "agent_uri": "https://marketplace.olas.network/erc8004/base/ai-agents/1",
+    "owner_address": "0x67722c823010CEb4BED5325fE109196C0f67D053",
+    "composite_score": 74,
+    "confidence": 85,
+    "state": "PUBLISHED",
+    "dimensions": {
+      "identity_completeness": 100,
+      "endpoint_liveness": 100,
+      "onchain_history": 50,
+      "venice_trust_analysis": 55
+    },
+    "spread": 50,
+    "endpoints": {
+      "declared": 1,
+      "live": 1,
+      "secured": 0,
+      "dead": 0
+    },
+    "tx_hash": "7359cca43439426006913211bdd2508722c53c7a9b94ab5f95a450e9c39ce1bd",
+    "attestation_uid": "65909e4b6ff4eef32cc87f665e7a6d99914eeba1841d6fe96cdd37028aa29204",
+    "tool_calls_used": 4,
+    "timestamp": "2026-03-18T08:46:33.338820+00:00",
+    "discovery_source": "manual_id"
+  },
+  {
+    "agent_id": 5,
+    "agent_uri": "https://marketplace.olas.network/erc8004/base/ai-agents/3",
+    "owner_address": "0x67722c823010CEb4BED5325fE109196C0f67D053",
+    "composite_score": 72,
+    "confidence": 85,
+    "state": "PUBLISHED",
+    "dimensions": {
+      "identity_completeness": 100,
+      "endpoint_liveness": 100,
+      "onchain_history": 50,
+      "venice_trust_analysis": 50
+    },
+    "spread": 50,
+    "endpoints": {
+      "declared": 1,
+      "live": 1,
+      "secured": 0,
+      "dead": 0
+    },
+    "tx_hash": "db331c0d54e54ef20fa9fe768ef5fbc7302ec8db85c72c65d93b0dfab8b1df20",
+    "attestation_uid": "f1131fc0fbd563e2aaa7c025bd0b4f96907e2eb4061c869ae5de3c8d061802a7",
+    "tool_calls_used": 4,
+    "timestamp": "2026-03-18T08:46:49.430891+00:00",
+    "discovery_source": "manual_id"
+  },
+  {
+    "agent_id": 10,
+    "agent_uri": "https://marketplace.olas.network/erc8004/base/ai-agents/8",
+    "owner_address": "0x67722c823010CEb4BED5325fE109196C0f67D053",
+    "composite_score": 72,
+    "confidence": 85,
+    "state": "PUBLISHED",
+    "dimensions": {
+      "identity_completeness": 100,
+      "endpoint_liveness": 100,
+      "onchain_history": 50,
+      "venice_trust_analysis": 50
+    },
+    "spread": 50,
+    "endpoints": {
+      "declared": 1,
+      "live": 1,
+      "secured": 0,
+      "dead": 0
+    },
+    "tx_hash": "61602a7741dd3f217bb50a9f145af1288d857c532f8f27f778415051db65df8b",
+    "attestation_uid": "b4fadb8bfeec9cd393f596fd2aec585d059a8b056bc54f635740fdf8d4287ce4",
+    "tool_calls_used": 4,
+    "timestamp": "2026-03-18T08:47:12.126908+00:00",
+    "discovery_source": "manual_id"
+  },
+  {
+    "agent_id": 50,
+    "agent_uri": "https://marketplace.olas.network/erc8004/base/ai-agents/48",
     "owner_address": "0x67722c823010CEb4BED5325fE109196C0f67D053",
     "composite_score": 70,
     "confidence": 70,
@@ -19,10 +149,114 @@
       "secured": 0,
       "dead": 0
     },
-    "tx_hash": "37541b94797b316989064b51485a34d49c32138c287bb9da1e237482411e69cf",
-    "attestation_uid": "27e1d5d5802013105565ab9a8e45c2cd2c2306714109d9e2a14cbce5740cf94f",
+    "tx_hash": "536de26e28cb49883a7243c2fd8b94a5a77763d6a465926f096b91f83db3f4e3",
+    "attestation_uid": "6ca783c6ad6826561353cc52991aea70d8cc9ac0d8b0ef318af2b5b19bdd56ca",
     "tool_calls_used": 4,
-    "timestamp": "2026-03-17T18:47:42.044800+00:00",
+    "timestamp": "2026-03-18T08:47:27.559387+00:00",
+    "discovery_source": "manual_id"
+  },
+  {
+    "agent_id": 100,
+    "agent_uri": "https://marketplace.olas.network/erc8004/base/ai-agents/98",
+    "owner_address": "0x67722c823010CEb4BED5325fE109196C0f67D053",
+    "composite_score": 71,
+    "confidence": 70,
+    "state": "PUBLISHED",
+    "dimensions": {
+      "identity_completeness": 100,
+      "endpoint_liveness": 100,
+      "onchain_history": 50,
+      "venice_trust_analysis": 45
+    },
+    "spread": 55,
+    "endpoints": {
+      "declared": 1,
+      "live": 1,
+      "secured": 0,
+      "dead": 0
+    },
+    "tx_hash": "90c86523cb2123b8350796b94736791db621f1cdc0ba119d17753fa8a74c489a",
+    "attestation_uid": "1d0fdae4d005594bc8829c3e620ac7dd6732dd19d3f88a17bb2ee19ec4fdb7a4",
+    "tool_calls_used": 4,
+    "timestamp": "2026-03-18T08:47:47.855167+00:00",
+    "discovery_source": "manual_id"
+  },
+  {
+    "agent_id": 500,
+    "agent_uri": "",
+    "owner_address": "0x692d0C8fFb709116D953c0f1403bC83B03C04C30",
+    "composite_score": 19,
+    "confidence": 20,
+    "state": "WITHHELD_LOW_CONFIDENCE",
+    "dimensions": {
+      "identity_completeness": 0,
+      "endpoint_liveness": 0,
+      "onchain_history": 75,
+      "venice_trust_analysis": 0
+    },
+    "spread": 75,
+    "endpoints": {
+      "declared": 0,
+      "live": 0,
+      "secured": 0,
+      "dead": 0
+    },
+    "tx_hash": null,
+    "attestation_uid": null,
+    "tool_calls_used": 3,
+    "timestamp": "2026-03-18T10:19:07.297590+00:00",
+    "discovery_source": "manual_id"
+  },
+  {
+    "agent_id": 1000,
+    "agent_uri": "",
+    "owner_address": "0x7236A6e30B3E9d5A5e0803B0Cfcf5A4e48C0e8C8",
+    "composite_score": 19,
+    "confidence": 20,
+    "state": "WITHHELD_LOW_CONFIDENCE",
+    "dimensions": {
+      "identity_completeness": 0,
+      "endpoint_liveness": 0,
+      "onchain_history": 75,
+      "venice_trust_analysis": 0
+    },
+    "spread": 75,
+    "endpoints": {
+      "declared": 0,
+      "live": 0,
+      "secured": 0,
+      "dead": 0
+    },
+    "tx_hash": null,
+    "attestation_uid": null,
+    "tool_calls_used": 3,
+    "timestamp": "2026-03-18T10:19:26.123230+00:00",
+    "discovery_source": "manual_id"
+  },
+  {
+    "agent_id": 5000,
+    "agent_uri": "",
+    "owner_address": "0x203a9E19e412Cb1DEC2a8Bb70B3e4d44e7F9B5EE",
+    "composite_score": 12,
+    "confidence": 35,
+    "state": "WITHHELD_LOW_CONFIDENCE",
+    "dimensions": {
+      "identity_completeness": 0,
+      "endpoint_liveness": 0,
+      "onchain_history": 50,
+      "venice_trust_analysis": 0
+    },
+    "spread": 50,
+    "endpoints": {
+      "declared": 0,
+      "live": 0,
+      "secured": 0,
+      "dead": 0
+    },
+    "tx_hash": null,
+    "attestation_uid": null,
+    "tool_calls_used": 3,
+    "timestamp": "2026-03-18T10:19:45.710851+00:00",
     "discovery_source": "manual_id"
   }
 ]

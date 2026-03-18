@@ -134,10 +134,29 @@ class BlockchainClient:
         return decoded
 
     def get_reputation_summary(self, agent_id: int) -> tuple[int, int, int]:
-        """Read reputation summary. Returns (count, summaryValue, decimals)."""
-        return self._reputation_registry.functions.getSummary(
-            agent_id, [], "", ""
-        ).call()
+        """Read reputation by counting NewFeedback events for this agent.
+
+        The Reputation Registry is a minimal proxy and does not expose a
+        getSummary() read function. Instead, we scan NewFeedback events
+        emitted by giveFeedback() to derive the count and average value.
+        Returns (count, averageValue, decimals=0).
+        """
+        try:
+            latest = self._w3.eth.block_number
+            from_block = max(0, latest - 50_000)  # scan recent ~2 days
+            event_filter = self._reputation_registry.events.NewFeedback.create_filter(
+                fromBlock=from_block, toBlock="latest",
+                argument_filters={"agentId": agent_id},
+            )
+            logs = event_filter.get_all_entries()
+            if not logs:
+                return (0, 0, 0)
+            count = len(logs)
+            total_value = sum(log["args"]["value"] for log in logs)
+            avg_value = total_value // count if count > 0 else 0
+            return (count, avg_value, 0)
+        except Exception:
+            return (0, 0, 0)
 
     def get_latest_block(self) -> int:
         """Get the latest block number."""

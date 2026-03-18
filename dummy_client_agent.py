@@ -21,6 +21,9 @@ from mcp.client.stdio import stdio_client
 TARGET_AGENT_ID = 1
 _PROJECT_DIR = os.path.dirname(os.path.abspath(__file__))
 
+# Timeout for MCP tool calls (seconds) — Venice can take up to 120s
+TOOL_CALL_TIMEOUT = 180
+
 
 async def main():
     agent_id = TARGET_AGENT_ID
@@ -35,40 +38,70 @@ async def main():
         args=[os.path.join(_PROJECT_DIR, "mcp_server.py")],
     )
 
-    async with stdio_client(server_params) as (read, write):
-        async with ClientSession(read, write) as session:
-            await session.initialize()
+    try:
+        async with stdio_client(server_params) as (read, write):
+            async with ClientSession(read, write) as session:
+                await session.initialize()
 
-            # List available tools
-            tools = await session.list_tools()
-            print(f"[DemoAgent] Available tools: {[t.name for t in tools.tools]}")
+                # List available tools
+                tools = await session.list_tools()
+                print(f"[DemoAgent] Available tools: {[t.name for t in tools.tools]}")
 
-            # First check existing reputation
-            print(f"\n[DemoAgent] Checking existing reputation...")
-            rep_result = await session.call_tool("check_reputation", {"agent_id": agent_id})
-            rep_data = json.loads(rep_result.content[0].text)
-            print(f"[DemoAgent] Reputation: {json.dumps(rep_data, indent=2)}")
+                # First check existing reputation
+                print(f"\n[DemoAgent] Checking existing reputation...")
+                try:
+                    rep_result = await asyncio.wait_for(
+                        session.call_tool("check_reputation", {"agent_id": agent_id}),
+                        timeout=TOOL_CALL_TIMEOUT,
+                    )
+                    rep_data = json.loads(rep_result.content[0].text)
+                    print(f"[DemoAgent] Reputation: {json.dumps(rep_data, indent=2)}")
+                except asyncio.TimeoutError:
+                    print(f"[DemoAgent] Reputation check timed out after {TOOL_CALL_TIMEOUT}s")
+                except Exception as e:
+                    print(f"[DemoAgent] Reputation check failed: {e}")
 
-            # Now verify the agent (full pipeline)
-            print(f"\n[DemoAgent] Running full trust verification...")
-            result = await session.call_tool("verify_agent", {"agent_id": agent_id})
-            verdict = json.loads(result.content[0].text)
+                # Now verify the agent (full pipeline)
+                print(f"\n[DemoAgent] Running full trust verification...")
+                try:
+                    result = await asyncio.wait_for(
+                        session.call_tool("verify_agent", {"agent_id": agent_id}),
+                        timeout=TOOL_CALL_TIMEOUT,
+                    )
+                    if not result.content or not result.content[0].text:
+                        print("[DemoAgent] Empty response from verify_agent")
+                        return
 
-            print(f"\n{'='*50}")
-            print(f"  TRUST VERDICT")
-            print(f"{'='*50}")
-            print(f"  Agent ID:         #{verdict['agent_id']}")
-            print(f"  Verdict:          {verdict['verdict']}")
-            print(f"  Trust Score:      {verdict['trust_score']}/100")
-            print(f"  Confidence:       {verdict['confidence']}%")
-            print(f"  Identity OK:      {verdict['identity_verified']}")
-            print(f"  Endpoints:        {verdict['endpoints_live']}/{verdict['endpoints_declared']} live")
-            print(f"  Anomalies:        {'Yes' if verdict['anomalies_detected'] else 'No'}")
-            if verdict.get('attestation_uid'):
-                print(f"  Attestation:      {verdict['attestation_uid']}")
-            if verdict.get('basescan_url'):
-                print(f"  BaseScan:         {verdict['basescan_url']}")
-            print(f"{'='*50}")
+                    verdict = json.loads(result.content[0].text)
+
+                    if "error" in verdict:
+                        print(f"[DemoAgent] Verification failed: {verdict['error']}")
+                        return
+
+                    print(f"\n{'='*50}")
+                    print(f"  TRUST VERDICT")
+                    print(f"{'='*50}")
+                    print(f"  Agent ID:         #{verdict['agent_id']}")
+                    print(f"  Verdict:          {verdict['verdict']}")
+                    print(f"  Trust Score:      {verdict['trust_score']}/100")
+                    print(f"  Confidence:       {verdict['confidence']}%")
+                    print(f"  Identity OK:      {verdict['identity_verified']}")
+                    print(f"  Endpoints:        {verdict['endpoints_live']}/{verdict['endpoints_declared']} live")
+                    print(f"  Anomalies:        {'Yes' if verdict['anomalies_detected'] else 'No'}")
+                    if verdict.get('attestation_uid'):
+                        print(f"  Attestation:      {verdict['attestation_uid']}")
+                    if verdict.get('basescan_url'):
+                        print(f"  BaseScan:         {verdict['basescan_url']}")
+                    print(f"{'='*50}")
+
+                except asyncio.TimeoutError:
+                    print(f"[DemoAgent] Verification timed out after {TOOL_CALL_TIMEOUT}s")
+                except Exception as e:
+                    print(f"[DemoAgent] Verification failed: {e}")
+
+    except Exception as e:
+        print(f"[DemoAgent] Failed to connect to MCP server: {e}", file=sys.stderr)
+        sys.exit(1)
 
 
 if __name__ == "__main__":
