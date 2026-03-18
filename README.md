@@ -16,6 +16,31 @@ ERC-8004 gave 20,000+ agents on-chain identity. But the Reputation and Validatio
 
 Sentinel fixes this by acting as an autonomous trust oracle — discovering agents, evaluating them across 4 dimensions, and publishing verifiable scores that other agents can query.
 
+## Privacy-First Architecture
+
+Sentinel's trust evaluation is designed for **zero-knowledge trust scoring** — the oracle produces verifiable on-chain scores without exposing any agent metadata to third parties.
+
+| Principle | How |
+|-----------|-----|
+| **Private Inference** | All LLM evaluation runs through [Venice](https://venice.ai)'s no-data-retention inference. Agent manifests, endpoints, and wallet data are never stored by the LLM provider. |
+| **No Data Logging** | Venice operates with zero data retention — prompts and completions are discarded after response generation. Sentinel never sends agent data to any other third-party API. |
+| **On-chain Transparency** | Trust scores are published as EAS attestations on Base — publicly verifiable, but the raw evaluation inputs remain private. Only the final score, confidence, and dimension breakdown are on-chain. |
+| **Local Processing** | Identity verification, liveness checking, and on-chain analysis all run locally. Only the trust synthesis step uses Venice's private LLM. |
+
+This means agents can be evaluated without their owners' data being harvested, stored, or sold — a critical requirement for autonomous agent ecosystems.
+
+### Why Venice Is Essential (Not Optional)
+
+Venice isn't a convenience — it's the only component that can synthesize trust from ambiguous signals. The other three dimensions produce raw metrics (field counts, HTTP codes, tx counts). Venice interprets what those metrics *mean* together.
+
+| Scenario | Without Venice | With Venice |
+|----------|---------------|-------------|
+| Agent has valid manifest + live endpoints but 0 tx history | Score: 45, no context | Score: 62 — Venice recognizes a newly deployed but legitimate agent |
+| Agent has 500 txs + high balance but broken manifest | Score: 44, no context | Score: 35 — Venice flags the inconsistency as suspicious |
+| Agent has secured endpoints (401/403) + partial manifest | Score: 50, ambiguous | Score: 71 — Venice understands that auth-protected APIs are a positive signal |
+
+Removing Venice drops trust scoring to mechanical heuristics that can't distinguish a legitimate new agent from a dormant scam wallet. Venice provides the **interpretive layer** that makes trust scores meaningful — and it does so with zero data retention, ensuring agent privacy is never compromised.
+
 ## How It Works
 
 ```
@@ -72,6 +97,20 @@ pip install -r requirements.txt
 cp .env.example .env
 # Add: OPERATOR_PRIVATE_KEY, EVALUATOR_PRIVATE_KEY, VENICE_API_KEY
 ```
+
+### Environment Variables
+
+| Variable | Required | Default | Description |
+|----------|----------|---------|-------------|
+| `OPERATOR_PRIVATE_KEY` | Yes | — | Private key for ERC-8004 identity owner wallet |
+| `EVALUATOR_PRIVATE_KEY` | Yes | — | Private key for reputation feedback wallet (must differ from operator) |
+| `VENICE_API_KEY` | Yes | — | API key from [venice.ai](https://venice.ai) |
+| `EAS_SCHEMA_UID` | No | `""` | EAS schema UID (run `register-schema` to get one) |
+| `AUDITOR_PRIVATE_KEY` | No | `""` | Optional third wallet for self-reputation |
+| `USE_TESTNET` | No | `true` | `true` for Base Sepolia, `false` for Base Mainnet |
+| `BASE_RPC_URL` | No | `https://mainnet.base.org` | Base Mainnet RPC endpoint |
+| `BASE_SEPOLIA_RPC_URL` | No | `https://sepolia.base.org` | Base Sepolia RPC endpoint |
+| `BASESCAN_API_KEY` | No | `""` | BaseScan API key (optional, for enhanced on-chain analysis) |
 
 ### One-time setup
 
@@ -170,10 +209,6 @@ Terminal: WITHHELD_LOW_CONFIDENCE | PENDING_HUMAN_REVIEW | FAILED
 ```
 
 **Auto-publish** when confidence ≥ 70. **Human review** when confidence < 70 and dimension spread > 50.
-
-### Privacy
-
-All LLM evaluation happens through Venice's no-data-retention inference. The querying agent's intent and the evaluated agent's metadata are never stored by the LLM provider.
 
 ## Contracts
 

@@ -484,6 +484,13 @@ class BlockchainClient:
         if receipt["status"] != 1:
             raise EASError(f"EAS attestation reverted. Tx: {tx_hash.hex()}")
 
+        # Parse real attestation UID from Attested event
+        try:
+            logs = self._eas.events.Attested().process_receipt(receipt)
+            if logs:
+                return "0x" + logs[0]["args"]["uid"].hex()
+        except Exception:
+            _log.warning("Failed to parse Attested event, falling back to tx hash", exc_info=True)
         return tx_hash.hex()
 
     @retry(
@@ -531,6 +538,13 @@ class BlockchainClient:
         if receipt["status"] != 1:
             raise EASError(f"EAS attestation reverted. Tx: {tx_hash.hex()}")
 
+        # Parse real attestation UID from Attested event
+        try:
+            logs = self._eas.events.Attested().process_receipt(receipt)
+            if logs:
+                return "0x" + logs[0]["args"]["uid"].hex()
+        except Exception:
+            _log.warning("Failed to parse Attested event, falling back to tx hash", exc_info=True)
         return tx_hash.hex()
 
     # --- Utilities ---

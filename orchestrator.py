@@ -455,7 +455,7 @@ class Orchestrator:
                 eas_tx = self._blockchain.create_trust_attestation(verdict)
                 verdict.attestation_uid = eas_tx
         except Exception as e:
-            print(f"  [WARNING] EAS attestation failed: {e}", file=sys.stderr)
+            _log.warning("EAS attestation failed: %s", e)
 
         return tx_hash
 

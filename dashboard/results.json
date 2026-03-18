@@ -22,60 +22,9 @@
     "tx_hash": null,
     "attestation_uid": null,
     "tool_calls_used": 4,
-    "timestamp": "2026-03-18T11:21:49.492558+00:00",
-    "discovery_source": "manual_id"
-  },
-  {
-    "agent_id": 2,
-    "agent_uri": "https://hackmoney.batikankutluer.com/api/v1/agents/668a4d86-ce86-42cb-b92a-7a10335a007d/metadata",
-    "owner_address": "0x6F0FaBeBc27a866be65336cB64DEeF9880B5C1AC",
-    "composite_score": 15,
-    "confidence": 20,
-    "state": "WITHHELD_LOW_CONFIDENCE",
-    "dimensions": {
-      "identity_completeness": 0,
-      "endpoint_liveness": 0,
-      "onchain_history": 60,
-      "venice_trust_analysis": 0
-    },
-    "spread": 60,
-    "endpoints": {
-      "declared": 0,
-      "live": 0,
-      "secured": 0,
-      "dead": 0
-    },
-    "tx_hash": null,
-    "attestation_uid": null,
-    "tool_calls_used": 3,
-    "timestamp": "2026-03-18T10:18:26.640198+00:00",
-    "discovery_source": "manual_id"
-  },
-  {
-    "agent_id": 3,
-    "agent_uri": "https://marketplace.olas.network/erc8004/base/ai-agents/1",
-    "owner_address": "0x67722c823010CEb4BED5325fE109196C0f67D053",
-    "composite_score": 74,
-    "confidence": 85,
-    "state": "PUBLISHED",
-    "dimensions": {
-      "identity_completeness": 100,
-      "endpoint_liveness": 100,
-      "onchain_history": 50,
-      "venice_trust_analysis": 55
-    },
-    "spread": 50,
-    "endpoints": {
-      "declared": 1,
-      "live": 1,
-      "secured": 0,
-      "dead": 0
-    },
-    "tx_hash": "7359cca43439426006913211bdd2508722c53c7a9b94ab5f95a450e9c39ce1bd",
-    "attestation_uid": "65909e4b6ff4eef32cc87f665e7a6d99914eeba1841d6fe96cdd37028aa29204",
-    "tool_calls_used": 4,
-    "timestamp": "2026-03-18T08:46:33.338820+00:00",
-    "discovery_source": "manual_id"
+    "timestamp": "2026-03-18T16:02:38.006703+00:00",
+    "discovery_source": "manual_id",
+    "chain_id": 84532
   },
   {
     "agent_id": 5,
@@ -101,7 +50,8 @@
     "attestation_uid": "f1131fc0fbd563e2aaa7c025bd0b4f96907e2eb4061c869ae5de3c8d061802a7",
     "tool_calls_used": 4,
     "timestamp": "2026-03-18T08:46:49.430891+00:00",
-    "discovery_source": "manual_id"
+    "discovery_source": "manual_id",
+    "chain_id": 84532
   },
   {
     "agent_id": 10,
@@ -127,7 +77,8 @@
     "attestation_uid": "b4fadb8bfeec9cd393f596fd2aec585d059a8b056bc54f635740fdf8d4287ce4",
     "tool_calls_used": 4,
     "timestamp": "2026-03-18T08:47:12.126908+00:00",
-    "discovery_source": "manual_id"
+    "discovery_source": "manual_id",
+    "chain_id": 84532
   },
   {
     "agent_id": 50,
@@ -153,7 +104,8 @@
     "attestation_uid": "6ca783c6ad6826561353cc52991aea70d8cc9ac0d8b0ef318af2b5b19bdd56ca",
     "tool_calls_used": 4,
     "timestamp": "2026-03-18T08:47:27.559387+00:00",
-    "discovery_source": "manual_id"
+    "discovery_source": "manual_id",
+    "chain_id": 84532
   },
   {
     "agent_id": 100,
@@ -179,7 +131,8 @@
     "attestation_uid": "1d0fdae4d005594bc8829c3e620ac7dd6732dd19d3f88a17bb2ee19ec4fdb7a4",
     "tool_calls_used": 4,
     "timestamp": "2026-03-18T08:47:47.855167+00:00",
-    "discovery_source": "manual_id"
+    "discovery_source": "manual_id",
+    "chain_id": 84532
   },
   {
     "agent_id": 500,
@@ -205,33 +158,8 @@
     "attestation_uid": null,
     "tool_calls_used": 3,
     "timestamp": "2026-03-18T10:19:07.297590+00:00",
-    "discovery_source": "manual_id"
-  },
-  {
-    "agent_id": 1000,
-    "agent_uri": "",
-    "owner_address": "0x7236A6e30B3E9d5A5e0803B0Cfcf5A4e48C0e8C8",
-    "composite_score": 19,
-    "confidence": 20,
-    "state": "WITHHELD_LOW_CONFIDENCE",
-    "dimensions": {
-      "identity_completeness": 0,
-      "endpoint_liveness": 0,
-      "onchain_history": 75,
-      "venice_trust_analysis": 0
-    },
-    "spread": 75,
-    "endpoints": {
-      "declared": 0,
-      "live": 0,
-      "secured": 0,
-      "dead": 0
-    },
-    "tx_hash": null,
-    "attestation_uid": null,
-    "tool_calls_used": 3,
-    "timestamp": "2026-03-18T10:19:26.123230+00:00",
-    "discovery_source": "manual_id"
+    "discovery_source": "manual_id",
+    "chain_id": 84532
   },
   {
     "agent_id": 2093,
@@ -257,7 +185,8 @@
     "attestation_uid": null,
     "tool_calls_used": 4,
     "timestamp": "2026-03-18T11:22:40.044771+00:00",
-    "discovery_source": "erc8004_events"
+    "discovery_source": "erc8004_events",
+    "chain_id": 84532
   },
   {
     "agent_id": 2094,
@@ -281,34 +210,9 @@
     },
     "tx_hash": null,
     "attestation_uid": null,
-    "tool_calls_used": 8,
-    "timestamp": "2026-03-18T11:23:43.844096+00:00",
-    "discovery_source": "erc8004_events"
-  },
-  {
-    "agent_id": 5000,
-    "agent_uri": "",
-    "owner_address": "0x203a9E19e412Cb1DEC2a8Bb70B3e4d44e7F9B5EE",
-    "composite_score": 12,
-    "confidence": 35,
-    "state": "WITHHELD_LOW_CONFIDENCE",
-    "dimensions": {
-      "identity_completeness": 0,
-      "endpoint_liveness": 0,
-      "onchain_history": 50,
-      "venice_trust_analysis": 0
-    },
-    "spread": 50,
-    "endpoints": {
-      "declared": 0,
-      "live": 0,
-      "secured": 0,
-      "dead": 0
-    },
-    "tx_hash": null,
-    "attestation_uid": null,
-    "tool_calls_used": 3,
-    "timestamp": "2026-03-18T10:19:45.710851+00:00",
-    "discovery_source": "manual_id"
+    "tool_calls_used": 4,
+    "timestamp": "2026-03-18T18:22:51.235791+00:00",
+    "discovery_source": "manual_id",
+    "chain_id": 84532
   }
 ]

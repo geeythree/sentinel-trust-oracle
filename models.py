@@ -227,6 +227,7 @@ class TrustVerdict:
             "tool_calls_used": self.tool_calls_used,
             "timestamp": self.timestamp,
             "discovery_source": self.agent.discovery_source,
+            "chain_id": self.agent.chain_id,
         }
 
     def to_verdict_dict(self) -> dict:
@@ -241,7 +242,10 @@ class TrustVerdict:
             "endpoints_live": self.liveness_result.endpoints_live,
             "anomalies_detected": self.dimensions.spread > 50,
             "attestation_uid": self.attestation_uid,
-            "basescan_url": f"https://basescan.org/tx/{self.tx_hash}" if self.tx_hash else None,
+            "basescan_url": (
+                f"{'https://sepolia.basescan.org' if self.agent.chain_id == 84532 else 'https://basescan.org'}/tx/{self.tx_hash}"
+                if self.tx_hash else None
+            ),
         }
 
 
