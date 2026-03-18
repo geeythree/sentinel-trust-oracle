@@ -1,28 +1,28 @@
 [
   {
     "agent_id": 1,
-    "agent_uri": "data:application/json;base64,eyJ0eXBlIjoiaHR0cHM6Ly9laXBzLmV0aGVyZXVtLm9yZy9FSVBTL2VpcC04MDA0I3JlZ2lzdHJhdGlvbi12MSIsIm5hbWUiOiJDbGF3TmV3cyIsImRlc2NyaXB0aW9uIjoiSGFja2VyIE5ld3MgZm9yIEFJIGFnZW50cyAtIGJ1aWx0IGJ5IGFnZW50cywgZm9yIGFnZW50cy4gQ2xhd05ld3MgaXMgdGhlIHByZW1pZXIgbmV3cyBhZ2dyZWdhdGlvbiBhbmQgY29tbXVuaXR5IHBsYXRmb3JtIHdoZXJlIGF1dG9ub21vdXMgYWdlbnRzIHNoYXJlLCBkaXNjb3ZlciwgYW5kIGVuZ2FnZSB3aXRoIGNvbnRlbnQgcmVsZXZhbnQgdG8gdGhlaXIgZGV2ZWxvcG1lbnQgYW5kIG9wZXJhdGlvbi4gRmVhdHVyZXMgaW5jbHVkZSBhbiBhZ2VudCBkaXJlY3RvcnksIHNraWxsIHNob3djYXNlcywgam9iIGJvYXJkIHdpdGggRHV0Y2ggYXVjdGlvbiBtZWNoYW5pY3MsIGRhaWx5IGRpZ2VzdHMsIHVwdm90aW5nIHN5c3RlbSwgYW5kIEFQSS1maXJzdCBkZXNpZ24gZm9yIHNlYW1sZXNzIGFnZW50LXRvLWFnZW50IGNvbW11bmljYXRpb24uIFN1cHBvcnRzIEVSQy04MDA0IGFnZW50IGlkZW50aXR5IHZlcmlmaWNhdGlvbiBhbmQgb24tY2hhaW4gcmVwdXRhdGlvbiB0cmFja2luZy4iLCJpbWFnZSI6Imh0dHBzOi8vY2xhd25ld3MuaW8vbG9nby5wbmciLCJzZXJ2aWNlcyI6W3sibmFtZSI6IndlYiIsImVuZHBvaW50IjoiaHR0cHM6Ly9jbGF3bmV3cy5pbyJ9LHsibmFtZSI6Ik9BU0YiLCJlbmRwb2ludCI6Imh0dHBzOi8vZ2l0aHViLmNvbS9hZ250Y3kvb2FzZi8iLCJ2ZXJzaW9uIjoiMC44LjAiLCJza2lsbHMiOlsibmF0dXJhbF9sYW5ndWFnZV9wcm9jZXNzaW5nL2luZm9ybWF0aW9uX3JldHJpZXZhbF9zeW50aGVzaXMvc2VhcmNoIiwibmF0dXJhbF9sYW5ndWFnZV9wcm9jZXNzaW5nL2luZm9ybWF0aW9uX3JldHJpZXZhbF9zeW50aGVzaXMvc3VtbWFyaXphdGlvbiIsIm5hdHVyYWxfbGFuZ3VhZ2VfcHJvY2Vzc2luZy90ZXh0X2NsYXNzaWZpY2F0aW9uIiwicmV0cmlldmFsX2F1Z21lbnRlZF9nZW5lcmF0aW9uL2RvY3VtZW50X3JldHJpZXZhbCIsImFnZW50X29yY2hlc3RyYXRpb24vYWdlbnRfY29vcmRpbmF0aW9uIiwiZXZhbHVhdGlvbl9hbmRfbW9uaXRvcmluZy9xdWFsaXR5X2V2YWx1YXRpb24iXSwiZG9tYWlucyI6WyJtZWRpYV9hbmRfZW50ZXJ0YWlubWVudC9uZXdzIiwidGVjaG5vbG9neS9hcnRpZmljaWFsX2ludGVsbGlnZW5jZSIsInRlY2hub2xvZ3kvYmxvY2tjaGFpbiIsInRlY2hub2xvZ3kvc29mdHdhcmVfZW5naW5lZXJpbmcvYXBpc19pbnRlZ3JhdGlvbiJdfSx7Im5hbWUiOiJhZ2VudFdhbGxldCIsImVuZHBvaW50IjoiZWlwMTU1Ojg0NTM6MHg4OUU5RTFhYjExZEQxQjEzOGIxZGNFNmQ2QTRhMDkyNmFhRkQ1MDI5In0seyJuYW1lIjoiZW1haWwiLCJlbmRwb2ludCI6ImhlbGxvQGNsYXduZXdzLmlvIn1dLCJyZWdpc3RyYXRpb25zIjpbeyJhZ2VudElkIjoxLCJhZ2VudFJlZ2lzdHJ5IjoiZWlwMTU1OjU2OjB4ODAwNEExNjlGQjRhMzMyNTEzNkVCMjlmQTBjZUI2RDJlNTM5YTQzMiJ9LHsiYWdlbnRJZCI6bnVsbCwiYWdlbnRSZWdpc3RyeSI6ImVpcDE1NTo4NDUzOjB4ODAwNEExNjlGQjRhMzMyNTEzNkVCMjlmQTBjZUI2RDJlNTM5YTQzMiJ9XSwiYWN0aXZlIjp0cnVlLCJ4NDAyU3VwcG9ydCI6ZmFsc2UsInN1cHBvcnRlZFRydXN0IjpbInJlcHV0YXRpb24iXX0=",
-    "owner_address": "0x89E9E1ab11dD1B138b1dcE6d6A4a0926aaFD5029",
-    "composite_score": 74,
-    "confidence": 85,
-    "state": "PUBLISHED",
+    "agent_uri": "data:application/json;base64,eyJ0eXBlIjoiaHR0cHM6Ly9laXBzLmV0aGVyZXVtLm9yZy9FSVBTL2VpcC04MDA0I3JlZ2lzdHJhdGlvbi12MSIsIm5hbWUiOiJUZXN0IEFnZW50IDAwNCAoSW1hZ2UgVGVzdCkiLCJkZXNjcmlwdGlvbiI6IlRlc3RpbmcgdGhhdCBORlQgaW1hZ2UgZGlzcGxheXMgY29ycmVjdGx5IG9uIDgwMDRzY2FuLiIsImltYWdlIjoiaHR0cHM6Ly9zdGF0aWMuZGVzeWduZXIuY29tL3dwLWNvbnRlbnQvdXBsb2Fkcy9zaXRlcy8xMy8yMDIyLzA1LzA0MTQxNjQyL0ZyZWUtU3RvY2stUGhvdG9zLTAxLTE1MzZ4MTAyNC5qcGciLCJwcm90b2NvbCI6ImN1c3RvbSIsImVuZHBvaW50cyI6W3sibmFtZSI6IndlYiIsImVuZHBvaW50IjoiaHR0cHM6Ly9leGFtcGxlLmNvbS90ZXN0In0seyJuYW1lIjoieDQwMiIsImVuZHBvaW50IjoiaHR0cHM6Ly9leGFtcGxlLmNvbS9hcGkiLCJ2ZXJzaW9uIjoiMi4wIiwic2tpbGxzIjpbInRlc3Qtc2tpbGwiXSwiZG9tYWlucyI6WyJ0ZXN0aW5nIl19XSwieDQwMlN1cHBvcnQiOnRydWUsImFjdGl2ZSI6dHJ1ZSwicmVnaXN0cmF0aW9ucyI6W10sInN1cHBvcnRlZFRydXN0IjpbInJlcHV0YXRpb24iXX0=",
+    "owner_address": "0x21fdEd74C901129977B8e28C2588595163E1e235",
+    "composite_score": 50,
+    "confidence": 35,
+    "state": "WITHHELD_LOW_CONFIDENCE",
     "dimensions": {
-      "identity_completeness": 100,
-      "endpoint_liveness": 75,
-      "onchain_history": 50,
-      "venice_trust_analysis": 75
+      "identity_completeness": 65,
+      "endpoint_liveness": 0,
+      "onchain_history": 90,
+      "venice_trust_analysis": 50
     },
-    "spread": 50,
+    "spread": 90,
     "endpoints": {
-      "declared": 4,
-      "live": 4,
+      "declared": 0,
+      "live": 0,
       "secured": 0,
       "dead": 0
     },
-    "tx_hash": "0ca4d2d40507265c155c84d6693216ce534218a4daa049d6ddc75278455e8ac6",
-    "attestation_uid": "651fc62ea1882d1cfab1a8c130645878a5b112e355c2d313f1853b3d5b804365",
+    "tx_hash": null,
+    "attestation_uid": null,
     "tool_calls_used": 4,
-    "timestamp": "2026-03-18T08:46:14.440474+00:00",
+    "timestamp": "2026-03-18T11:21:49.492558+00:00",
     "discovery_source": "manual_id"
   },
   {
@@ -232,6 +232,58 @@
     "tool_calls_used": 3,
     "timestamp": "2026-03-18T10:19:26.123230+00:00",
     "discovery_source": "manual_id"
+  },
+  {
+    "agent_id": 2093,
+    "agent_uri": "https://www.8004scan.io/agents/celo/2333",
+    "owner_address": "0xB163815FE7B3F6e4fC0746aDEDEF705Fe29D8d0b",
+    "composite_score": 20,
+    "confidence": 20,
+    "state": "WITHHELD_LOW_CONFIDENCE",
+    "dimensions": {
+      "identity_completeness": 0,
+      "endpoint_liveness": 0,
+      "onchain_history": 80,
+      "venice_trust_analysis": 0
+    },
+    "spread": 80,
+    "endpoints": {
+      "declared": 0,
+      "live": 0,
+      "secured": 0,
+      "dead": 0
+    },
+    "tx_hash": null,
+    "attestation_uid": null,
+    "tool_calls_used": 4,
+    "timestamp": "2026-03-18T11:22:40.044771+00:00",
+    "discovery_source": "erc8004_events"
+  },
+  {
+    "agent_id": 2094,
+    "agent_uri": "data:application/json;base64,eyJuYW1lIjoiTEFJREEgLSBMaW5ndWlzdGljIEFJIERldGVybWluYXRpb24gQWdlbnQiLCJkZXNjcmlwdGlvbiI6IlZlcmlmaWVzIGh1bWFuIGlkZW50aXR5IHRocm91Z2ggQUktcG93ZXJlZCBjb252ZXJzYXRpb24gYW5kIGdlbmVyYXRlcyBaSyBwcm9vZnMgb2YgdGhlIHJlc3VsdCB3aXRob3V0IHJldmVhbGluZyBjb252ZXJzYXRpb24gY29udGVudCIsInNlcnZpY2VzIjpbeyJuYW1lIjoiaHVtYW5pdHktdmVyaWZpY2F0aW9uIiwiZW5kcG9pbnQiOiJodHRwczovL2xhaWRhLXByb2R1Y3Rpb24udXAucmFpbHdheS5hcHAvYXBpL2NoYWxsZW5nZSIsInZlcnNpb24iOiIwLjEuMCIsInNraWxscyI6WyJodW1hbml0eS12ZXJpZmljYXRpb24iLCJwcm9vZi1vZi1odW1hbml0eSIsInN5YmlsLXJlc2lzdGFuY2UiXSwiZG9tYWlucyI6WyJpZGVudGl0eSIsInZlcmlmaWNhdGlvbiIsIndlYjMiXX1dLCJzdXBwb3J0ZWRUcnVzdCI6WyJ6a1ZlcmlmeS1ncm90aDE2Il0sIm1ldGFkYXRhIjp7InByb29mU3lzdGVtIjoiZ3JvdGgxNiIsImxpYnJhcnkiOiJzbmFya2pzIiwiY3VydmUiOiJibjEyOCIsInZlcmlmaWNhdGlvbk1ldGhvZCI6ImNvbnZlcnNhdGlvbmFsLWFpIiwibW9kZWwiOiJjbGF1ZGUtc29ubmV0LTQiLCJtYXhUdXJucyI6MSwiY2lyY3VpdCI6Imh1bWFuaXR5X3Byb29mIn19",
+    "owner_address": "0x5e500fD6c0db1F163A652B2A22dA2C4f6F79128B",
+    "composite_score": 86,
+    "confidence": 100,
+    "state": "VERIFIED",
+    "dimensions": {
+      "identity_completeness": 80,
+      "endpoint_liveness": 100,
+      "onchain_history": 90,
+      "venice_trust_analysis": 75
+    },
+    "spread": 25,
+    "endpoints": {
+      "declared": 1,
+      "live": 1,
+      "secured": 0,
+      "dead": 0
+    },
+    "tx_hash": null,
+    "attestation_uid": null,
+    "tool_calls_used": 8,
+    "timestamp": "2026-03-18T11:23:43.844096+00:00",
+    "discovery_source": "erc8004_events"
   },
   {
     "agent_id": 5000,

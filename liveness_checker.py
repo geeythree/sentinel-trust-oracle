@@ -2,6 +2,8 @@
 from __future__ import annotations
 
 import requests
+from requests.adapters import HTTPAdapter
+from urllib3.util.retry import Retry
 
 from config import config
 from logger import AgentLogger
@@ -13,6 +15,15 @@ class LivenessChecker:
 
     def __init__(self, logger: AgentLogger) -> None:
         self._logger = logger
+        # Connection-pooled session for efficient endpoint checks
+        self._session = requests.Session()
+        adapter = HTTPAdapter(
+            pool_connections=10,
+            pool_maxsize=10,
+            max_retries=Retry(total=0),  # We handle retries ourselves
+        )
+        self._session.mount("http://", adapter)
+        self._session.mount("https://", adapter)
 
     def check(self, manifest: dict) -> LivenessResult:
         """Check all declared service endpoints."""
@@ -71,13 +82,13 @@ class LivenessChecker:
         """Check a single endpoint. Interpret status codes correctly."""
         try:
             # Use HEAD request first (lighter), fall back to GET if 405
-            resp = requests.head(
+            resp = self._session.head(
                 endpoint, timeout=config.LIVENESS_TIMEOUT, allow_redirects=False
             )
             status = resp.status_code
             if status == 405:
                 # Method Not Allowed — try GET instead
-                resp = requests.get(
+                resp = self._session.get(
                     endpoint, timeout=config.LIVENESS_TIMEOUT, allow_redirects=False
                 )
                 status = resp.status_code

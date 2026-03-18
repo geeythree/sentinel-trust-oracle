@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import argparse
+import logging
 import os
 import sys
 
@@ -54,8 +55,27 @@ def parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
+def _setup_logging() -> None:
+    """Configure Python logging: INFO to stderr, DEBUG to sentinel.log."""
+    root = logging.getLogger()
+    root.setLevel(logging.DEBUG)
+
+    # Console: INFO-level, concise format
+    console = logging.StreamHandler(sys.stderr)
+    console.setLevel(logging.INFO)
+    console.setFormatter(logging.Formatter("[%(levelname)s] %(name)s: %(message)s"))
+    root.addHandler(console)
+
+    # File: DEBUG-level, full timestamps
+    fh = logging.FileHandler("sentinel.log", mode="a")
+    fh.setLevel(logging.DEBUG)
+    fh.setFormatter(logging.Formatter("%(asctime)s %(levelname)s %(name)s: %(message)s"))
+    root.addHandler(fh)
+
+
 def main() -> int:
     args = parse_args()
+    _setup_logging()
 
     # FIX: Set env vars BEFORE creating config
     # Only override if explicitly passed — otherwise respect .env
@@ -155,12 +175,38 @@ def main() -> int:
 
 
 def _run_watch_mode(orchestrator, blockchain, args) -> None:
-    """Continuous autonomous loop: discover → evaluate → sleep → repeat."""
+    """Continuous autonomous loop: discover → evaluate → sleep → repeat.
+
+    Persists state (last_block, round_num) to .watch_state.json so that
+    the loop can resume from where it left off after a crash.
+    """
+    import json
     import time
+    from pathlib import Path
     from config import config
 
+    state_file = Path(".watch_state.json")
+
+    # Restore state from previous run if available
     round_num = 0
     last_block = blockchain.get_latest_block() - config.DISCOVERY_BLOCK_RANGE
+    if state_file.exists():
+        try:
+            saved = json.loads(state_file.read_text())
+            last_block = saved.get("last_block", last_block)
+            round_num = saved.get("round_num", 0)
+            print(f"Restored watch state: last_block={last_block}, round={round_num}")
+        except (json.JSONDecodeError, KeyError):
+            pass
+
+    def _save_state():
+        try:
+            state_file.write_text(json.dumps({
+                "last_block": last_block,
+                "round_num": round_num,
+            }))
+        except Exception:
+            pass
 
     print(f"\nSentinel WATCH mode — evaluating every {args.interval}s (Ctrl+C to stop)")
     print("=" * 60)
@@ -182,6 +228,7 @@ def _run_watch_mode(orchestrator, blockchain, args) -> None:
 
                 last_block = current_block + 1
                 consecutive_failures = 0  # reset on success
+                _save_state()
 
                 published = sum(1 for r in results if r.tx_hash)
                 print(f"\n[Round {round_num}] {len(results)} evaluated, {published} published. "
@@ -197,12 +244,14 @@ def _run_watch_mode(orchestrator, blockchain, args) -> None:
                     print(f"  Too many failures. Stopping watch mode.")
                     break
                 print(f"  Retrying in {backoff}s...")
+                _save_state()
                 time.sleep(backoff)
                 continue
 
             time.sleep(args.interval)
     except KeyboardInterrupt:
-        print(f"\nWatch mode stopped after {round_num} rounds.")
+        _save_state()
+        print(f"\nWatch mode stopped after {round_num} rounds. State saved.")
 
 
 def _run_self_evaluation(orchestrator, blockchain, args) -> None:

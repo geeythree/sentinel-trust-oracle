@@ -286,7 +286,8 @@ class BlockchainClient:
         # FIX: Use data: URI instead of placeholder ipfs:// URI
         feedback_uri = "data:application/json;base64," + base64.b64encode(report_json.encode()).decode()
 
-        tx = self._reputation_registry.functions.giveFeedback(
+        # Build a preliminary tx dict for gas estimation
+        fn_call = self._reputation_registry.functions.giveFeedback(
             agent_id,
             score,
             0,                # uint8 valueDecimals (integer score)
@@ -295,7 +296,10 @@ class BlockchainClient:
             endpoint,
             feedback_uri,
             feedback_hash,
-        ).build_transaction(self._build_tx_params(self._evaluator_account))
+        )
+        # Use contract call data for gas estimation
+        estimate_tx = {"to": self._reputation_registry.address, "data": fn_call._encode_transaction_data()}
+        tx = fn_call.build_transaction(self._build_tx_params(self._evaluator_account, estimate_tx))
 
         tx_hash = self._sign_and_send(tx, self._evaluator_account)
         receipt = self._w3.eth.wait_for_transaction_receipt(tx_hash, timeout=120)
@@ -328,7 +332,7 @@ class BlockchainClient:
             (reason or "self-assessment").encode()
         ).decode()
 
-        tx = self._reputation_registry.functions.giveFeedback(
+        fn_call = self._reputation_registry.functions.giveFeedback(
             aqe_agent_id,
             value,
             0,
@@ -337,7 +341,9 @@ class BlockchainClient:
             "",
             feedback_uri,
             feedback_hash,
-        ).build_transaction(self._build_tx_params(self._auditor_account))
+        )
+        estimate_tx = {"to": self._reputation_registry.address, "data": fn_call._encode_transaction_data()}
+        tx = fn_call.build_transaction(self._build_tx_params(self._auditor_account, estimate_tx))
 
         tx_hash = self._sign_and_send(tx, self._auditor_account)
         receipt = self._w3.eth.wait_for_transaction_receipt(tx_hash, timeout=120)
@@ -484,20 +490,33 @@ class BlockchainClient:
 
     # --- Utilities ---
 
-    def _build_tx_params(self, account) -> dict:
-        """Build common transaction parameters."""
-        priority_fee = self._w3.to_wei(0.001, "gwei")
-        base_fee = self._w3.eth.gas_price * 2
-        # Ensure maxFeePerGas >= maxPriorityFeePerGas
-        max_fee = max(base_fee, priority_fee + self._w3.eth.gas_price)
-        return {
+    def _build_tx_params(self, account, tx_for_estimate: dict | None = None) -> dict:
+        """Build common transaction parameters with dynamic gas estimation."""
+        priority_fee = self._w3.to_wei(0.1, "gwei")  # Reasonable priority fee for Base
+        base_fee = self._w3.eth.gas_price
+        max_fee = max(base_fee * 2, priority_fee + base_fee)
+
+        params = {
             "from": account.address,
             "nonce": self._w3.eth.get_transaction_count(account.address),
-            "gas": 500_000,
             "maxFeePerGas": max_fee,
             "maxPriorityFeePerGas": priority_fee,
             "chainId": 84532 if config.USE_TESTNET else config.CHAIN_ID,
         }
+
+        # Dynamic gas estimation with safety buffer and cap
+        if tx_for_estimate:
+            try:
+                estimate_tx = {**tx_for_estimate, "from": account.address}
+                estimated = self._w3.eth.estimate_gas(estimate_tx)
+                # 30% buffer, capped at 1M to prevent runaway costs
+                params["gas"] = min(int(estimated * 1.3), 1_000_000)
+            except Exception:
+                params["gas"] = 500_000  # fallback to safe default
+        else:
+            params["gas"] = 500_000
+
+        return params
 
     def _sign_and_send(self, tx: dict, account) -> bytes:
         """Sign and send a transaction."""

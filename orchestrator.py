@@ -2,8 +2,12 @@
 from __future__ import annotations
 
 import json
+import logging
+import os
 import select
+import signal
 import sys
+import tempfile
 import time
 from datetime import datetime, timezone
 from typing import Optional
@@ -32,6 +36,15 @@ from models import (
     VeniceParseMethod,
 )
 from exceptions import BudgetExhaustedError
+
+_log = logging.getLogger(__name__)
+
+# Global evaluation timeout (seconds). Venice can take ~120s, plus chain calls.
+EVALUATION_TIMEOUT = 300
+
+
+class _EvaluationTimeout(Exception):
+    """Raised when a single evaluation exceeds the time limit."""
 
 
 class Orchestrator:
@@ -133,13 +146,16 @@ class Orchestrator:
         for i, agent in enumerate(agents):
             print(f"\n[{i+1}/{len(agents)}] Evaluating Agent #{agent.agent_id} ({agent.owner_address[:10]}...)")
             try:
-                result = self.evaluate_single(agent)
+                result = self._evaluate_with_timeout(agent)
                 results.append(result)
                 self._update_dashboard(results)
                 print(f"  Trust Score: {result.composite_score} | Confidence: {result.evaluation_confidence} | State: {result.state.value}")
             except BudgetExhaustedError:
                 print(f"  Budget exhausted after {self._logger.tool_calls_used} tool calls. Stopping.")
                 break
+            except _EvaluationTimeout:
+                print(f"  TIMEOUT: evaluation exceeded {EVALUATION_TIMEOUT}s limit. Skipping.")
+                continue
             except Exception as e:
                 print(f"  FAILED: {e}")
                 continue
@@ -173,7 +189,7 @@ class Orchestrator:
         for i, agent in enumerate(agents):
             print(f"\n[{i+1}/{len(agents)}] Evaluating Agent #{agent.agent_id}")
             try:
-                result = self.evaluate_single(agent)
+                result = self._evaluate_with_timeout(agent)
                 results.append(result)
                 self._update_dashboard(results)
                 print(f"  Trust Score: {result.composite_score} | Confidence: {result.evaluation_confidence} | State: {result.state.value}")
@@ -182,10 +198,30 @@ class Orchestrator:
             except BudgetExhaustedError:
                 print(f"  Budget exhausted. Stopping.")
                 break
+            except _EvaluationTimeout:
+                print(f"  TIMEOUT: evaluation exceeded {EVALUATION_TIMEOUT}s limit. Skipping.")
+                continue
             except Exception as e:
                 print(f"  FAILED: {e}")
                 continue
         return results
+
+    def _evaluate_with_timeout(self, agent: DiscoveredAgent) -> TrustVerdict:
+        """Run evaluate_single with a global timeout guard (Unix only)."""
+        if not hasattr(signal, "SIGALRM"):
+            # Windows or non-Unix: skip timeout guard
+            return self.evaluate_single(agent)
+
+        def _timeout_handler(signum, frame):
+            raise _EvaluationTimeout(f"Evaluation exceeded {EVALUATION_TIMEOUT}s")
+
+        old_handler = signal.signal(signal.SIGALRM, _timeout_handler)
+        signal.alarm(EVALUATION_TIMEOUT)
+        try:
+            return self.evaluate_single(agent)
+        finally:
+            signal.alarm(0)
+            signal.signal(signal.SIGALRM, old_handler)
 
     def evaluate_single(
         self,
@@ -408,7 +444,11 @@ class Orchestrator:
     # --- Support Methods ---
 
     def _request_human_review(self, verdict: TrustVerdict) -> HumanDecision:
-        """Present evaluation to operator for manual decision."""
+        """Present evaluation to operator for manual decision.
+
+        In headless (non-TTY) environments, defaults to DISCARD immediately
+        instead of blocking on stdin.
+        """
         print("\n" + "=" * 60)
         print("HUMAN REVIEW REQUIRED")
         print("=" * 60)
@@ -421,23 +461,28 @@ class Orchestrator:
               f"V={verdict.dimensions.venice_trust_analysis}")
         print(f"Spread: {verdict.dimensions.spread}")
         print(f"Endpoints: {verdict.liveness_result.endpoints_live}/{verdict.liveness_result.endpoints_declared} live")
-        print("\n[P]ublish / [D]iscard / [R]e-evaluate?")
 
-        try:
-            ready, _, _ = select.select([sys.stdin], [], [], config.HUMAN_REVIEW_TIMEOUT_SECONDS)
-            if ready:
-                choice = sys.stdin.readline().strip().lower()
-                mapping = {
-                    "p": HumanDecision.PUBLISH,
-                    "d": HumanDecision.DISCARD,
-                    "r": HumanDecision.RE_EVALUATE,
-                }
-                decision = mapping.get(choice, HumanDecision.DISCARD)
-            else:
-                print("Timeout -- defaulting to DISCARD")
-                decision = HumanDecision.DISCARD
-        except Exception:
+        # Headless detection: skip stdin prompt in non-TTY environments
+        if not sys.stdin.isatty():
+            print("Non-TTY detected -- defaulting to DISCARD")
             decision = HumanDecision.DISCARD
+        else:
+            print("\n[P]ublish / [D]iscard / [R]e-evaluate?")
+            try:
+                ready, _, _ = select.select([sys.stdin], [], [], config.HUMAN_REVIEW_TIMEOUT_SECONDS)
+                if ready:
+                    choice = sys.stdin.readline().strip().lower()
+                    mapping = {
+                        "p": HumanDecision.PUBLISH,
+                        "d": HumanDecision.DISCARD,
+                        "r": HumanDecision.RE_EVALUATE,
+                    }
+                    decision = mapping.get(choice, HumanDecision.DISCARD)
+                else:
+                    print("Timeout -- defaulting to DISCARD")
+                    decision = HumanDecision.DISCARD
+            except Exception:
+                decision = HumanDecision.DISCARD
 
         # Log human intervention
         self._logger.log_action(
@@ -493,9 +538,21 @@ class Orchestrator:
             for r in results:
                 existing_by_id[r.agent.agent_id] = r.to_dashboard_dict()
 
-            # Write merged results sorted by agent_id
+            # Atomic write: write to temp file then rename
             merged = sorted(existing_by_id.values(), key=lambda x: x.get("agent_id", 0))
-            with open(config.DASHBOARD_RESULTS_PATH, "w") as f:
-                json.dump(merged, f, indent=2)
+            fd, tmp_path = tempfile.mkstemp(
+                dir=config.DASHBOARD_RESULTS_PATH.parent, suffix=".tmp"
+            )
+            try:
+                with os.fdopen(fd, "w") as f:
+                    json.dump(merged, f, indent=2)
+                os.replace(tmp_path, config.DASHBOARD_RESULTS_PATH)
+            except Exception:
+                # Clean up temp file on failure
+                try:
+                    os.unlink(tmp_path)
+                except OSError:
+                    pass
+                raise
         except Exception as e:
             print(f"[WARNING] Failed to update dashboard: {e}", file=sys.stderr)

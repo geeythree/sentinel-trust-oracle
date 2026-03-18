@@ -29,77 +29,66 @@ class TestStatusCodes:
         resp.status_code = status_code
         return resp
 
-    @patch("liveness_checker.requests.head")
-    def test_200_alive_full_score(self, mock_head, checker):
-        mock_head.return_value = self._mock_head(200)
-        result = checker._check_endpoint("https://api.test.com")
+    def test_200_alive_full_score(self, checker):
+        with patch.object(checker._session, "head", return_value=self._mock_head(200)):
+            result = checker._check_endpoint("https://api.test.com")
         assert result.status == "alive"
         assert result.score == 100
 
-    @patch("liveness_checker.requests.head")
-    def test_401_secured_full_score(self, mock_head, checker):
+    def test_401_secured_full_score(self, checker):
         """401 Unauthorized = endpoint exists AND is secured — this is GOOD."""
-        mock_head.return_value = self._mock_head(401)
-        result = checker._check_endpoint("https://api.test.com")
+        with patch.object(checker._session, "head", return_value=self._mock_head(401)):
+            result = checker._check_endpoint("https://api.test.com")
         assert result.status == "secured"
         assert result.score == 100
 
-    @patch("liveness_checker.requests.head")
-    def test_403_secured_full_score(self, mock_head, checker):
-        mock_head.return_value = self._mock_head(403)
-        result = checker._check_endpoint("https://api.test.com")
+    def test_403_secured_full_score(self, checker):
+        with patch.object(checker._session, "head", return_value=self._mock_head(403)):
+            result = checker._check_endpoint("https://api.test.com")
         assert result.status == "secured"
         assert result.score == 100
 
-    @patch("liveness_checker.requests.head")
-    def test_404_not_found_zero_score(self, mock_head, checker):
-        mock_head.return_value = self._mock_head(404)
-        result = checker._check_endpoint("https://api.test.com")
+    def test_404_not_found_zero_score(self, checker):
+        with patch.object(checker._session, "head", return_value=self._mock_head(404)):
+            result = checker._check_endpoint("https://api.test.com")
         assert result.status == "not_found"
         assert result.score == 0
 
-    @patch("liveness_checker.requests.head")
-    def test_500_server_error_low_score(self, mock_head, checker):
-        mock_head.return_value = self._mock_head(500)
-        result = checker._check_endpoint("https://api.test.com")
+    def test_500_server_error_low_score(self, checker):
+        with patch.object(checker._session, "head", return_value=self._mock_head(500)):
+            result = checker._check_endpoint("https://api.test.com")
         assert result.status == "server_error"
         assert result.score == 20
 
-    @patch("liveness_checker.requests.head")
-    def test_301_redirect_partial_score(self, mock_head, checker):
-        mock_head.return_value = self._mock_head(301)
-        result = checker._check_endpoint("https://api.test.com")
+    def test_301_redirect_partial_score(self, checker):
+        with patch.object(checker._session, "head", return_value=self._mock_head(301)):
+            result = checker._check_endpoint("https://api.test.com")
         assert result.status == "redirect"
         assert result.score == 80
 
-    @patch("liveness_checker.requests.head")
-    def test_429_rate_limited(self, mock_head, checker):
-        mock_head.return_value = self._mock_head(429)
-        result = checker._check_endpoint("https://api.test.com")
+    def test_429_rate_limited(self, checker):
+        with patch.object(checker._session, "head", return_value=self._mock_head(429)):
+            result = checker._check_endpoint("https://api.test.com")
         assert result.status == "rate_limited"
         assert result.score == 90
 
-    @patch("liveness_checker.requests.head")
-    def test_timeout_zero_score(self, mock_head, checker):
-        mock_head.side_effect = requests.Timeout()
-        result = checker._check_endpoint("https://api.test.com")
+    def test_timeout_zero_score(self, checker):
+        with patch.object(checker._session, "head", side_effect=requests.Timeout()):
+            result = checker._check_endpoint("https://api.test.com")
         assert result.status == "timeout"
         assert result.score == 0
 
-    @patch("liveness_checker.requests.head")
-    def test_connection_error_zero_score(self, mock_head, checker):
-        mock_head.side_effect = requests.ConnectionError()
-        result = checker._check_endpoint("https://api.test.com")
+    def test_connection_error_zero_score(self, checker):
+        with patch.object(checker._session, "head", side_effect=requests.ConnectionError()):
+            result = checker._check_endpoint("https://api.test.com")
         assert result.status == "unreachable"
         assert result.score == 0
 
-    @patch("liveness_checker.requests.head")
-    @patch("liveness_checker.requests.get")
-    def test_405_falls_back_to_get(self, mock_get, mock_head, checker):
+    def test_405_falls_back_to_get(self, checker):
         """405 Method Not Allowed → fallback to GET."""
-        mock_head.return_value = self._mock_head(405)
-        mock_get.return_value = self._mock_head(200)
-        result = checker._check_endpoint("https://api.test.com")
+        with patch.object(checker._session, "head", return_value=self._mock_head(405)), \
+             patch.object(checker._session, "get", return_value=self._mock_head(200)) as mock_get:
+            result = checker._check_endpoint("https://api.test.com")
         assert result.status == "alive"
         assert result.score == 100
         mock_get.assert_called_once()
@@ -128,23 +117,21 @@ class TestManifestCheck:
         """Manifest with 50 services should only check first 20."""
         services = [{"endpoint": f"https://api{i}.test.com"} for i in range(50)]
         manifest = {"services": services}
-        with patch("liveness_checker.requests.head") as mock_head:
-            mock_head.return_value = MagicMock(status_code=200)
+        with patch.object(checker._session, "head", return_value=MagicMock(status_code=200)):
             result = checker.check(manifest)
         # Should have checked at most 20 endpoints (capped before processing)
         assert len(result.details) == 20
         assert result.endpoints_declared == 20
 
-    @patch("liveness_checker.requests.head")
-    def test_score_averaging_uses_round(self, mock_head, checker):
+    def test_score_averaging_uses_round(self, checker):
         """Verify round() not // is used for score averaging."""
         # 3 endpoints: scores 100, 100, 0 → average should be round(200/3) = 67
         responses = [MagicMock(status_code=200), MagicMock(status_code=200), MagicMock(status_code=404)]
-        mock_head.side_effect = responses
-        manifest = {"services": [
-            {"endpoint": "https://a.com"},
-            {"endpoint": "https://b.com"},
-            {"endpoint": "https://c.com"},
-        ]}
-        result = checker.check(manifest)
+        with patch.object(checker._session, "head", side_effect=responses):
+            manifest = {"services": [
+                {"endpoint": "https://a.com"},
+                {"endpoint": "https://b.com"},
+                {"endpoint": "https://c.com"},
+            ]}
+            result = checker.check(manifest)
         assert result.liveness_score == 67  # round(200/3) = 67, not 200//3 = 66

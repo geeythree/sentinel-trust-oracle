@@ -1,6 +1,8 @@
 """4-dimension trust scoring engine, confidence calculation, and state determination."""
 from __future__ import annotations
 
+import logging
+
 from config import config
 from models import (
     EvaluationState,
@@ -11,6 +13,8 @@ from models import (
     VeniceEvaluation,
     VeniceParseMethod,
 )
+
+logger = logging.getLogger(__name__)
 
 
 class Scorer:
@@ -24,12 +28,18 @@ class Scorer:
         venice: VeniceEvaluation,
     ) -> TrustDimensions:
         """Assemble dimension scores from individual module outputs."""
-        return TrustDimensions(
+        dims = TrustDimensions(
             identity_completeness=identity.identity_score,
             endpoint_liveness=liveness.liveness_score,
             onchain_history=onchain.onchain_score,
             venice_trust_analysis=venice.score,
         )
+        logger.info(
+            "Dimensions: identity=%d liveness=%d onchain=%d venice=%d spread=%d",
+            dims.identity_completeness, dims.endpoint_liveness,
+            dims.onchain_history, dims.venice_trust_analysis, dims.spread,
+        )
+        return dims
 
     def compute_composite(self, dimensions: TrustDimensions) -> int:
         """Weighted composite: 20/25/25/30. Clamped 0-100."""
@@ -39,7 +49,9 @@ class Scorer:
             + dimensions.onchain_history * config.WEIGHT_ONCHAIN            # 0.25
             + dimensions.venice_trust_analysis * config.WEIGHT_VENICE_TRUST # 0.30
         )
-        return max(0, min(100, round(raw)))
+        composite = max(0, min(100, round(raw)))
+        logger.info("Composite: raw=%.2f clamped=%d", raw, composite)
+        return composite
 
     def compute_confidence(
         self,
@@ -78,10 +90,14 @@ class Scorer:
         spread = dimensions.spread
         if spread > config.SPREAD_HUMAN_REVIEW_THRESHOLD:  # > 50
             conf -= 30
+            logger.info("Spread penalty: -30 (spread=%d > %d)", spread, config.SPREAD_HUMAN_REVIEW_THRESHOLD)
         elif spread > config.SPREAD_PENALTY_THRESHOLD:  # > 30
             conf -= 15
+            logger.info("Spread penalty: -15 (spread=%d > %d)", spread, config.SPREAD_PENALTY_THRESHOLD)
 
-        return max(0, min(100, conf))
+        confidence = max(0, min(100, conf))
+        logger.info("Confidence: %d", confidence)
+        return confidence
 
     def _venice_confidence_contribution(self, v: VeniceEvaluation) -> int:
         """Compute confidence contribution from a Venice evaluation."""
@@ -107,7 +123,13 @@ class Scorer:
         - confidence < 70 AND spread > 50 -> PENDING_HUMAN_REVIEW
         """
         if confidence >= config.CONFIDENCE_THRESHOLD:
-            return EvaluationState.VERIFIED
-        if dimensions.spread > config.SPREAD_HUMAN_REVIEW_THRESHOLD:
-            return EvaluationState.PENDING_HUMAN_REVIEW
-        return EvaluationState.WITHHELD_LOW_CONFIDENCE
+            state = EvaluationState.VERIFIED
+        elif dimensions.spread > config.SPREAD_HUMAN_REVIEW_THRESHOLD:
+            state = EvaluationState.PENDING_HUMAN_REVIEW
+        else:
+            state = EvaluationState.WITHHELD_LOW_CONFIDENCE
+        logger.info(
+            "State determination: confidence=%d spread=%d -> %s",
+            confidence, dimensions.spread, state.value,
+        )
+        return state
