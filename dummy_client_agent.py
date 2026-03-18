@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import asyncio
 import json
+import os
 import sys
 
 from mcp import ClientSession, StdioServerParameters
@@ -18,6 +19,7 @@ from mcp.client.stdio import stdio_client
 
 # Default agent to verify (override with --agent-id)
 TARGET_AGENT_ID = 1
+_PROJECT_DIR = os.path.dirname(os.path.abspath(__file__))
 
 
 async def main():
@@ -30,7 +32,7 @@ async def main():
 
     server_params = StdioServerParameters(
         command="python3",
-        args=["mcp_server.py"],
+        args=[os.path.join(_PROJECT_DIR, "mcp_server.py")],
     )
 
     async with stdio_client(server_params) as (read, write):

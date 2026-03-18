@@ -1,1 +1,28 @@
-[]
+[
+  {
+    "agent_id": 100,
+    "agent_uri": "https://marketplace.olas.network/erc8004/base/ai-agents/98",
+    "owner_address": "0x67722c823010CEb4BED5325fE109196C0f67D053",
+    "composite_score": 70,
+    "confidence": 70,
+    "state": "PUBLISHED",
+    "dimensions": {
+      "identity_completeness": 100,
+      "endpoint_liveness": 100,
+      "onchain_history": 50,
+      "venice_trust_analysis": 40
+    },
+    "spread": 60,
+    "endpoints": {
+      "declared": 1,
+      "live": 1,
+      "secured": 0,
+      "dead": 0
+    },
+    "tx_hash": "37541b94797b316989064b51485a34d49c32138c287bb9da1e237482411e69cf",
+    "attestation_uid": "27e1d5d5802013105565ab9a8e45c2cd2c2306714109d9e2a14cbce5740cf94f",
+    "tool_calls_used": 4,
+    "timestamp": "2026-03-17T18:47:42.044800+00:00",
+    "discovery_source": "manual_id"
+  }
+]

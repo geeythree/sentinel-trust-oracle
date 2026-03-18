@@ -66,6 +66,10 @@ class Config:
 
     # --- Liveness Check ---
     LIVENESS_TIMEOUT: int = 10
+    MAX_SERVICES_PER_MANIFEST: int = 20  # cap to prevent DoS via 1000-endpoint manifests
+
+    # --- Manifest Guardrails ---
+    MAX_MANIFEST_BYTES: int = 102_400  # 100 KB — rejects oversized manifests before parsing
 
     # --- Pipeline ---
     TOOL_CALL_BUDGET: int = 15
@@ -120,9 +124,23 @@ class Config:
 
 
 def create_config() -> Config:
-    """Create config AFTER env vars are set (including CLI overrides)."""
+    """Create config AFTER env vars are set (including CLI overrides).
+
+    Reads os.getenv() HERE (at call time, after load_dotenv) rather than
+    relying on dataclass defaults which are evaluated at import time.
+    """
     load_dotenv()
-    return Config()
+    return Config(
+        BASE_RPC_URL=os.getenv("BASE_RPC_URL", "https://mainnet.base.org"),
+        BASE_SEPOLIA_RPC_URL=os.getenv("BASE_SEPOLIA_RPC_URL", "https://sepolia.base.org"),
+        USE_TESTNET=os.getenv("USE_TESTNET", "true").lower() == "true",
+        OPERATOR_PRIVATE_KEY=os.getenv("OPERATOR_PRIVATE_KEY", ""),
+        EVALUATOR_PRIVATE_KEY=os.getenv("EVALUATOR_PRIVATE_KEY", ""),
+        AUDITOR_PRIVATE_KEY=os.getenv("AUDITOR_PRIVATE_KEY", ""),
+        BASESCAN_API_KEY=os.getenv("BASESCAN_API_KEY", ""),
+        VENICE_API_KEY=os.getenv("VENICE_API_KEY", ""),
+        EAS_SCHEMA_UID=os.getenv("EAS_SCHEMA_UID", ""),
+    )
 
 
 # Module-level placeholder — set by main.py after arg parsing

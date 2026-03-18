@@ -2,8 +2,11 @@
 from __future__ import annotations
 
 import base64
+import ipaddress
 import json
+import socket
 from typing import Optional
+from urllib.parse import urlparse
 
 import requests
 from tenacity import retry, stop_after_attempt, wait_exponential
@@ -96,27 +99,69 @@ class AgentVerifier:
         # Regular HTTPS fetch
         return self._http_fetch(url)
 
+    @staticmethod
+    def _is_private_ip(hostname: str) -> bool:
+        """Return True if hostname resolves to a private/loopback/link-local IP (SSRF guard)."""
+        try:
+            ip = ipaddress.ip_address(socket.gethostbyname(hostname))
+            return (
+                ip.is_private
+                or ip.is_loopback
+                or ip.is_link_local
+                or ip.is_multicast
+                or ip.is_reserved
+            )
+        except Exception:
+            return False  # DNS failure — let requests handle it
+
     @retry(
         stop=stop_after_attempt(3),
         wait=wait_exponential(multiplier=1, max=10),
     )
     def _http_fetch(self, url: str) -> dict:
-        """Fetch JSON from URL with retry."""
+        """Fetch JSON from URL with retry. Blocks SSRF to private networks."""
+        # Fix #2: block SSRF — reject URIs that resolve to private/internal IPs
+        parsed = urlparse(url)
+        hostname = parsed.hostname or ""
+        if self._is_private_ip(hostname):
+            raise IdentityVerificationError(
+                f"Refused to fetch from private/internal address: {hostname}"
+            )
+
         resp = requests.get(url, timeout=30)
         resp.raise_for_status()
+
+        # Fix #3: manifest size cap — prevent memory DoS via huge JSON
+        content = resp.content
+        if len(content) > config.MAX_MANIFEST_BYTES:
+            raise IdentityVerificationError(
+                f"Manifest too large: {len(content)} bytes (max {config.MAX_MANIFEST_BYTES})"
+            )
         return resp.json()
 
     def _decode_data_uri(self, data_uri: str) -> dict:
-        """Decode data:application/json;base64,<data> URI."""
+        """Decode data:application/json;base64,<data> or URL-encoded data URI."""
+        from urllib.parse import unquote
+        # Fix #3: cap data URI size before decoding to prevent memory DoS
+        if len(data_uri) > config.MAX_MANIFEST_BYTES * 2:  # base64 ≈ 4/3× raw size
+            raise IdentityVerificationError(
+                f"data URI too large: {len(data_uri)} chars"
+            )
         try:
             # data:application/json;base64,<base64data>
             if ";base64," in data_uri:
                 encoded = data_uri.split(";base64,", 1)[1]
                 decoded = base64.b64decode(encoded).decode("utf-8")
+                if len(decoded) > config.MAX_MANIFEST_BYTES:
+                    raise IdentityVerificationError(
+                        f"Decoded manifest too large: {len(decoded)} bytes"
+                    )
                 return json.loads(decoded)
-            # data:application/json,<json>
+            # data:application/json,<json> (may be URL-encoded)
             elif "," in data_uri:
                 json_str = data_uri.split(",", 1)[1]
+                # URL-decode percent-encoded characters (%7B -> {, etc.)
+                json_str = unquote(json_str)
                 return json.loads(json_str)
             else:
                 raise IdentityVerificationError(f"Unsupported data URI format")
@@ -157,8 +202,13 @@ class AgentVerifier:
         score += min(25, len([f for f in OPTIONAL_FIELDS if f in manifest]) * 5)
 
         # Services have endpoints: 15 points
+        # Fix #6: require ALL items to be dicts with endpoints — no free pass for non-dicts
         services = manifest.get("services", [])
-        if services and all("endpoint" in s for s in services if isinstance(s, dict)):
+        if (
+            services
+            and isinstance(services, list)
+            and all(isinstance(s, dict) and "endpoint" in s for s in services)
+        ):
             score += 15
 
         return min(100, score)

@@ -6,6 +6,8 @@ import json
 from pathlib import Path
 from typing import Optional
 
+from eth_abi import decode as abi_decode
+from eth_abi import encode as abi_encode
 from eth_account import Account
 from tenacity import retry, stop_after_attempt, wait_exponential
 from web3 import Web3
@@ -62,38 +64,28 @@ class BlockchainClient:
     # --- Identity Registry READ Functions ---
 
     def get_agent_by_id(self, agent_id: int) -> tuple[str, str]:
-        """Read agent URI and owner from Identity Registry.
-
-        Uses ownerOf() for the owner address. For the URI, scans Registered
-        events since tokenURI() is not in the ABI. Scans recent blocks first
-        (most agents are registered recently), then expands the range.
-        """
+        """Read agent URI and owner from Identity Registry via tokenURI() and ownerOf()."""
         owner = self._identity_registry.functions.ownerOf(agent_id).call()
 
-        # Get URI from Registered event
-        event_sig = self._w3.keccak(text="Registered(uint256,string,address)")
-        agent_id_topic = "0x" + hex(agent_id)[2:].zfill(64)
-        latest = self._w3.eth.block_number
-        uri = ""
+        # Try tokenURI() directly — fast, no event scanning needed
+        try:
+            token_uri_abi = [{
+                "inputs": [{"name": "tokenId", "type": "uint256"}],
+                "name": "tokenURI",
+                "outputs": [{"name": "", "type": "string"}],
+                "stateMutability": "view",
+                "type": "function",
+            }]
+            contract = self._w3.eth.contract(
+                address=Web3.to_checksum_address(config.identity_registry),
+                abi=token_uri_abi,
+            )
+            uri = contract.functions.tokenURI(agent_id).call()
+            return uri, owner
+        except Exception:
+            pass
 
-        # Try progressively larger ranges: 10k, 100k, 500k, 2M blocks back
-        for lookback in [10_000, 100_000, 500_000, 2_000_000]:
-            start_block = max(0, latest - lookback)
-            try:
-                logs = self._w3.eth.get_logs({
-                    "fromBlock": start_block,
-                    "toBlock": latest,
-                    "address": Web3.to_checksum_address(config.identity_registry),
-                    "topics": [event_sig, agent_id_topic],
-                })
-                if logs:
-                    event = self._identity_registry.events.Registered().process_log(logs[0])
-                    uri = event["args"].get("agentURI", "")
-                    break
-            except Exception:
-                continue
-
-        return uri, owner
+        return "", owner
 
     def get_agent_wallet(self, agent_id: int) -> Optional[str]:
         """Read agentWallet from Identity Registry (may be zero address)."""
@@ -106,18 +98,34 @@ class BlockchainClient:
             return None
 
     def get_registered_events(self, from_block: int, to_block: int) -> list[dict]:
-        """Get Registered events from Identity Registry using eth_getLogs."""
-        # Use get_logs directly (public RPC nodes don't support eth_newFilter)
+        """Get Registered events from Identity Registry using eth_getLogs.
+
+        Automatically chunks large ranges (>10k blocks) to avoid 413 errors
+        from public RPC nodes.
+        """
         event_sig = self._w3.keccak(text="Registered(uint256,string,address)")
-        logs = self._w3.eth.get_logs({
-            "fromBlock": from_block,
-            "toBlock": to_block,
-            "address": Web3.to_checksum_address(config.identity_registry),
-            "topics": [event_sig],
-        })
+        address = Web3.to_checksum_address(config.identity_registry)
+        chunk_size = 10000
+
+        all_logs = []
+        start = from_block
+        while start <= to_block:
+            end = min(start + chunk_size - 1, to_block)
+            try:
+                logs = self._w3.eth.get_logs({
+                    "fromBlock": start,
+                    "toBlock": end,
+                    "address": address,
+                    "topics": [event_sig],
+                })
+                all_logs.extend(logs)
+            except Exception:
+                pass  # Skip failed chunks
+            start = end + 1
+
         # Decode logs using the contract event ABI
         decoded = []
-        for log in logs:
+        for log in all_logs:
             try:
                 event = self._identity_registry.events.Registered().process_log(log)
                 decoded.append(event)
@@ -134,6 +142,79 @@ class BlockchainClient:
     def get_latest_block(self) -> int:
         """Get the latest block number."""
         return self._w3.eth.block_number
+
+    def get_agents_batch(self, agent_ids: list[int]) -> list[tuple[str, str]]:
+        """Batch-read tokenURI + ownerOf for multiple agents using Multicall3.
+
+        Multicall3 is deployed at the same address on all EVM chains:
+        0xcA11bde05977b3631167028862bE2a173976CA11
+
+        Returns list of (uri, owner) tuples in the same order as agent_ids.
+        Falls back to sequential reads if Multicall3 call fails.
+
+        TODO (production): Replace get_registered_events() eth_getLogs scanning
+        with The Graph subgraph queries for scalable historical agent discovery:
+          https://thegraph.com/docs/en/querying/querying-from-an-application/
+        """
+        if not agent_ids:
+            return []
+
+        MULTICALL3 = "0xcA11bde05977b3631167028862bE2a173976CA11"
+        # aggregate3 ABI — accepts (target, allowFailure, callData)[] tuples
+        multicall3_abi = [{
+            "inputs": [{"components": [
+                {"name": "target", "type": "address"},
+                {"name": "allowFailure", "type": "bool"},
+                {"name": "callData", "type": "bytes"},
+            ], "name": "calls", "type": "tuple[]"}],
+            "name": "aggregate3",
+            "outputs": [{"components": [
+                {"name": "success", "type": "bool"},
+                {"name": "returnData", "type": "bytes"},
+            ], "name": "returnData", "type": "tuple[]"}],
+            "stateMutability": "view",
+            "type": "function",
+        }]
+
+        identity_addr = Web3.to_checksum_address(config.identity_registry)
+        owner_of_sig = self._w3.keccak(text="ownerOf(uint256)")[:4]
+        token_uri_sig = self._w3.keccak(text="tokenURI(uint256)")[:4]
+
+        calls = []
+        for agent_id in agent_ids:
+            id_encoded = abi_encode(["uint256"], [agent_id])
+            calls.append((identity_addr, True, owner_of_sig + id_encoded))
+            calls.append((identity_addr, True, token_uri_sig + id_encoded))
+
+        try:
+            mc = self._w3.eth.contract(
+                address=Web3.to_checksum_address(MULTICALL3),
+                abi=multicall3_abi,
+            )
+            results = mc.functions.aggregate3(calls).call()
+
+            output = []
+            for i, agent_id in enumerate(agent_ids):
+                owner_result = results[i * 2]
+                uri_result = results[i * 2 + 1]
+
+                owner = ""
+                if owner_result[0] and len(owner_result[1]) >= 32:
+                    owner = abi_decode(["address"], owner_result[1])[0]
+
+                uri = ""
+                if uri_result[0] and len(uri_result[1]) > 32:
+                    try:
+                        uri = abi_decode(["string"], uri_result[1])[0]
+                    except Exception:
+                        pass
+
+                output.append((uri, owner))
+            return output
+
+        except Exception:
+            # Fallback: sequential reads
+            return [self.get_agent_by_id(aid) for aid in agent_ids]
 
     # --- Identity Registry WRITE (Operator Wallet) ---
 
@@ -296,7 +377,7 @@ class BlockchainClient:
             raise EASError("EAS_SCHEMA_UID not configured. Run register-schema first.")
 
         # Encode attestation data matching the trust verdict schema
-        data = self._w3.codec.encode(
+        data = abi_encode(
             ["uint256", "address", "uint8", "uint8", "bool", "uint8", "uint8", "string"],
             [
                 verdict.agent.agent_id,
@@ -353,7 +434,7 @@ class BlockchainClient:
         eval_id_bytes = Web3.keccak(text=evaluation_id)
         challenger = Web3.to_checksum_address(challenger_address)
 
-        data = self._w3.codec.encode(
+        data = abi_encode(
             ["bytes32", "address", "string", "bool"],
             [eval_id_bytes, challenger, reason, re_evaluation_required],
         )
@@ -386,13 +467,17 @@ class BlockchainClient:
 
     def _build_tx_params(self, account) -> dict:
         """Build common transaction parameters."""
+        priority_fee = self._w3.to_wei(0.001, "gwei")
+        base_fee = self._w3.eth.gas_price * 2
+        # Ensure maxFeePerGas >= maxPriorityFeePerGas
+        max_fee = max(base_fee, priority_fee + self._w3.eth.gas_price)
         return {
             "from": account.address,
             "nonce": self._w3.eth.get_transaction_count(account.address),
-            "gas": 300_000,
-            "maxFeePerGas": self._w3.eth.gas_price * 2,
-            "maxPriorityFeePerGas": self._w3.to_wei(0.001, "gwei"),
-            "chainId": config.CHAIN_ID if not config.USE_TESTNET else 84532,
+            "gas": 500_000,
+            "maxFeePerGas": max_fee,
+            "maxPriorityFeePerGas": priority_fee,
+            "chainId": 84532 if config.USE_TESTNET else config.CHAIN_ID,
         }
 
     def _sign_and_send(self, tx: dict, account) -> bytes:
@@ -404,6 +489,11 @@ class BlockchainClient:
         """Return BaseScan URL for a transaction."""
         base = "https://sepolia.basescan.org" if config.USE_TESTNET else "https://basescan.org"
         return f"{base}/tx/{tx_hash}"
+
+    @property
+    def w3(self) -> Web3:
+        """Public access to web3 instance."""
+        return self._w3
 
     @property
     def operator_address(self) -> str:

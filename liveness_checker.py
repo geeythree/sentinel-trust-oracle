@@ -28,6 +28,9 @@ class LivenessChecker:
                 details=[],
             )
 
+        # Fix #5: cap services to prevent DoS (1000 endpoints × 10s = hours blocked)
+        services = services[:config.MAX_SERVICES_PER_MANIFEST]
+
         details = []
         for service in services:
             if not isinstance(service, dict):
@@ -50,8 +53,9 @@ class LivenessChecker:
         dead = sum(1 for d in details if d.score == 0)
 
         # Aggregate score: average of individual endpoint scores
+        # Fix #4: use round() not // to avoid systematic underscoring
         total_score = sum(d.score for d in details)
-        avg_score = total_score // len(details) if details else 0
+        avg_score = round(total_score / len(details)) if details else 0
 
         return LivenessResult(
             success=True,
@@ -66,11 +70,17 @@ class LivenessChecker:
     def _check_endpoint(self, endpoint: str) -> EndpointCheck:
         """Check a single endpoint. Interpret status codes correctly."""
         try:
-            # Use HEAD request first (lighter), fall back to GET
+            # Use HEAD request first (lighter), fall back to GET if 405
             resp = requests.head(
                 endpoint, timeout=config.LIVENESS_TIMEOUT, allow_redirects=False
             )
             status = resp.status_code
+            if status == 405:
+                # Method Not Allowed — try GET instead
+                resp = requests.get(
+                    endpoint, timeout=config.LIVENESS_TIMEOUT, allow_redirects=False
+                )
+                status = resp.status_code
         except requests.Timeout:
             return EndpointCheck(endpoint=endpoint, status="timeout", http_code=0, score=0)
         except requests.ConnectionError:
@@ -88,7 +98,7 @@ class LivenessChecker:
             return EndpointCheck(endpoint=endpoint, status="redirect", http_code=status, score=80)
         if status == 404:
             return EndpointCheck(endpoint=endpoint, status="not_found", http_code=status, score=0)
-        if status in (500, 502, 503):
+        if status in (500, 502, 503, 504):
             return EndpointCheck(endpoint=endpoint, status="server_error", http_code=status, score=20)
         if status == 429:
             # Rate limited -- endpoint exists and is active

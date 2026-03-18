@@ -42,9 +42,9 @@ EVALUATION_SCHEMA = {
 }
 
 TRUST_ANALYSIS_SYSTEM_PROMPT = """You are an AI agent trust evaluator.
-Analyze the provided agent metadata, endpoint status, and on-chain history to assess trustworthiness.
+Analyze the provided agent metadata, endpoint status, and onchain history to assess trustworthiness.
 Consider: Is the agent manifest complete and professional? Are services functioning?
-Does the on-chain history suggest legitimacy? Are there any red flags?
+Does the onchain history suggest legitimacy? Are there any red flags?
 
 You MUST respond with ONLY a JSON object in this exact format:
 {"score": <integer 0-100>, "reasoning": "<explanation>"}
@@ -147,7 +147,7 @@ class VeniceClient:
                 tokens_sent=tokens_sent, tokens_received=tokens_received,
                 latency_ms=latency,
             )
-        except (json.JSONDecodeError, KeyError, ValueError, TypeError):
+        except (json.JSONDecodeError, KeyError, ValueError, TypeError, IndexError):
             pass  # Fall through to Layer 2
         except requests.RequestException as e:
             # API call itself failed after retries

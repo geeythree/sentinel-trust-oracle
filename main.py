@@ -39,7 +39,7 @@ def parse_args() -> argparse.Namespace:
     subparsers.add_parser("mcp-server", help="Start MCP server (stdio transport)")
 
     # Common arguments
-    parser.add_argument("--testnet", action="store_true", default=True, help="Use Base Sepolia (default)")
+    parser.add_argument("--testnet", action="store_true", default=False, help="Use Base Sepolia")
     parser.add_argument("--mainnet", action="store_true", help="Use Base Mainnet")
 
     return parser.parse_args()
@@ -49,8 +49,11 @@ def main() -> int:
     args = parse_args()
 
     # FIX: Set env vars BEFORE creating config
+    # Only override if explicitly passed — otherwise respect .env
     if args.mainnet:
         os.environ["USE_TESTNET"] = "false"
+    elif args.testnet:
+        os.environ["USE_TESTNET"] = "true"
 
     # Deferred config creation (after env vars are set)
     import config as config_module

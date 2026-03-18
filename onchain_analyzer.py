@@ -1,4 +1,4 @@
-"""On-chain wallet analysis for agent trust evaluation."""
+"""Onchain wallet analysis for agent trust evaluation."""
 from __future__ import annotations
 
 from web3 import Web3
@@ -8,7 +8,7 @@ from models import ExistingReputation, OnchainAnalysis
 
 
 class OnchainAnalyzer:
-    """Analyze the agent's wallet on-chain history. No penalty for new wallets."""
+    """Analyze the agent's wallet onchain history. No penalty for new wallets."""
 
     def __init__(self, logger: AgentLogger, blockchain) -> None:
         self._logger = logger
@@ -16,7 +16,7 @@ class OnchainAnalyzer:
 
     def analyze(self, agent_wallet: str, agent_id: int) -> OnchainAnalysis:
         """Analyze wallet history and existing reputation."""
-        w3 = self._blockchain._w3
+        w3 = self._blockchain.w3
 
         try:
             # 1. Transaction count

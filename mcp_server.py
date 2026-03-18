@@ -53,7 +53,7 @@ async def list_tools():
             name="verify_agent",
             description=(
                 "Verify an ERC-8004 registered agent's identity, liveness, and "
-                "trustworthiness. Returns a trust verdict with on-chain proof."
+                "trustworthiness. Returns a trust verdict with onchain proof."
             ),
             inputSchema={
                 "type": "object",
@@ -91,13 +91,23 @@ async def call_tool(name: str, arguments: dict) -> list[TextContent]:
     orchestrator, discovery, blockchain = _get_pipeline()
 
     if name == "verify_agent":
-        agent_id = arguments["agent_id"]
-        agent = discovery.discover_agent_by_id(agent_id)
-        result = orchestrator.evaluate_single(agent)
-        return [TextContent(type="text", text=json.dumps(result.to_verdict_dict()))]
+        agent_id = arguments.get("agent_id")
+        if agent_id is None:
+            return [TextContent(type="text", text=json.dumps({"error": "agent_id is required"}))]
+        try:
+            agent = discovery.discover_agent_by_id(agent_id)
+            result = orchestrator.evaluate_single(agent)
+            return [TextContent(type="text", text=json.dumps(result.to_verdict_dict()))]
+        except Exception as e:
+            return [TextContent(type="text", text=json.dumps({
+                "agent_id": agent_id,
+                "error": str(e),
+            }))]
 
     elif name == "check_reputation":
-        agent_id = arguments["agent_id"]
+        agent_id = arguments.get("agent_id")
+        if agent_id is None:
+            return [TextContent(type="text", text=json.dumps({"error": "agent_id is required"}))]
         try:
             count, value, decimals = blockchain.get_reputation_summary(agent_id)
             return [TextContent(type="text", text=json.dumps({
@@ -119,3 +129,8 @@ async def run_mcp_server():
     """Entry point for MCP server."""
     async with stdio_server() as (read_stream, write_stream):
         await app.run(read_stream, write_stream, app.create_initialization_options())
+
+
+if __name__ == "__main__":
+    import asyncio
+    asyncio.run(run_mcp_server())

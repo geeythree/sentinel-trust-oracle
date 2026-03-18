@@ -24,7 +24,14 @@ class AgentDiscovery:
         to_block: int,
         max_agents: int = 10,
     ) -> list[DiscoveredAgent]:
-        """Query ERC-8004 Identity Registry for Registered events."""
+        """Query ERC-8004 Identity Registry for Registered events.
+
+        NOTE (production): eth_getLogs is O(n blocks) and times out on long ranges.
+        For scalable historical discovery, use The Graph subgraph instead:
+          https://thegraph.com/docs/en/querying/querying-from-an-application/
+        Once a subgraph is deployed for ERC-8004, replace get_registered_events()
+        with a GraphQL query to instantly retrieve all Registered events.
+        """
         try:
             entries = self._blockchain.get_registered_events(from_block, to_block)
         except Exception as e:
@@ -83,6 +90,8 @@ class AgentDiscovery:
         for entry in entries:
             args = entry.get("args", {})
             owner = args.get("owner", "")
+            if not owner:
+                continue
             if Web3.to_checksum_address(owner) == checksum_addr:
                 return DiscoveredAgent(
                     agent_id=args.get("agentId", 0),

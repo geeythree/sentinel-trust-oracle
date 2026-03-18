@@ -2,7 +2,7 @@
   "type": "https://eips.ethereum.org/EIPS/eip-8004#registration-v1",
   "name": "Sentinel — Agent Trust Oracle",
   "version": "1.0.0",
-  "description": "Autonomous agent that verifies ERC-8004 agent identities, checks endpoint liveness, analyzes on-chain history, and writes verifiable trust scores to the Reputation Registry via EAS attestations on Base.",
+  "description": "Autonomous agent that verifies ERC-8004 agent identities, checks endpoint liveness, analyzes onchain history, and writes verifiable trust scores to the Reputation Registry via EAS attestations on Base.",
   "image": "",
   "services": [
     {
@@ -14,6 +14,7 @@
     }
   ],
   "active": true,
+  "x402Support": false,
   "operator": {
     "wallet": "",
     "erc8004_agent_id": null
