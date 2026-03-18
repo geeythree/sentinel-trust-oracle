@@ -45,7 +45,7 @@ class Config:
     VENICE_BASE_URL: str = "https://api.venice.ai/api/v1"
     VENICE_MODEL: str = "qwen3-235b-a22b-instruct-2507"
     VENICE_MAX_TOKENS: int = 2048
-    VENICE_TEMPERATURE: float = 0.1
+    VENICE_TEMPERATURE: float = 0.0
 
     # --- Trust Scoring Weights (Sentinel) ---
     WEIGHT_IDENTITY: float = 0.20
@@ -102,7 +102,7 @@ class Config:
         return self.REPUTATION_REGISTRY_SEPOLIA if self.USE_TESTNET else self.REPUTATION_REGISTRY_MAINNET
 
     def validate(self) -> list[str]:
-        """Return list of missing required configuration keys."""
+        """Return list of missing or invalid configuration keys."""
         errors = []
         if not self.OPERATOR_PRIVATE_KEY:
             errors.append("OPERATOR_PRIVATE_KEY is required")
@@ -110,6 +110,21 @@ class Config:
             errors.append("EVALUATOR_PRIVATE_KEY is required")
         if not self.VENICE_API_KEY:
             errors.append("VENICE_API_KEY is required")
+
+        # RPC URL format check
+        for label, url in [("BASE_RPC_URL", self.BASE_RPC_URL),
+                           ("BASE_SEPOLIA_RPC_URL", self.BASE_SEPOLIA_RPC_URL)]:
+            if not url.startswith(("http://", "https://")):
+                errors.append(f"{label} must start with http:// or https://")
+
+        # Weight sum validation
+        weight_sum = (self.WEIGHT_IDENTITY + self.WEIGHT_LIVENESS
+                      + self.WEIGHT_ONCHAIN + self.WEIGHT_VENICE_TRUST)
+        if abs(weight_sum - 1.0) > 0.001:
+            errors.append(
+                f"Trust weights must sum to 1.0 (got {weight_sum:.4f})"
+            )
+
         return errors
 
     def print_status(self) -> None:

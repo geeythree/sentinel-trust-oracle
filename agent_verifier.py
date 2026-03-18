@@ -4,9 +4,10 @@ from __future__ import annotations
 import base64
 import ipaddress
 import json
+import logging
 import socket
 from typing import Optional
-from urllib.parse import urlparse
+from urllib.parse import urlparse, urlunparse
 
 import requests
 from tenacity import retry, stop_after_attempt, wait_exponential
@@ -15,6 +16,8 @@ from config import config
 from exceptions import IdentityVerificationError
 from logger import AgentLogger
 from models import IdentityVerification, ManifestValidation
+
+_log = logging.getLogger(__name__)
 
 REQUIRED_FIELDS = ["name", "description", "services"]
 OPTIONAL_FIELDS = ["image", "x402Support", "active", "registrations", "supportedTrust"]
@@ -25,6 +28,11 @@ class AgentVerifier:
 
     def __init__(self, logger: AgentLogger) -> None:
         self._logger = logger
+        self._session = requests.Session()
+
+    def close(self) -> None:
+        """Close the HTTP session."""
+        self._session.close()
 
     def verify(self, agent_uri: str) -> IdentityVerification:
         """Fetch and validate agent manifest from URI."""
@@ -100,44 +108,73 @@ class AgentVerifier:
         return self._http_fetch(url)
 
     @staticmethod
-    def _is_private_ip(hostname: str) -> bool:
-        """Return True if hostname resolves to a private/loopback/link-local IP (SSRF guard)."""
+    def _resolve_and_check(hostname: str) -> tuple[bool, Optional[str]]:
+        """Resolve hostname and check if IP is private (SSRF guard).
+
+        Returns (is_private, resolved_ip). DNS failure → (True, None) (conservative).
+        """
         try:
-            ip = ipaddress.ip_address(socket.gethostbyname(hostname))
-            return (
+            resolved = socket.gethostbyname(hostname)
+            ip = ipaddress.ip_address(resolved)
+            is_private = (
                 ip.is_private
                 or ip.is_loopback
                 or ip.is_link_local
                 or ip.is_multicast
                 or ip.is_reserved
             )
+            return (is_private, resolved)
         except Exception:
-            return False  # DNS failure — let requests handle it
+            _log.warning("DNS resolution failed for %s — treating as private", hostname)
+            return (True, None)  # Conservative: DNS failure = block
+
+    @staticmethod
+    def _is_private_ip(hostname: str) -> bool:
+        """Legacy compatibility wrapper around _resolve_and_check."""
+        is_private, _ = AgentVerifier._resolve_and_check(hostname)
+        return is_private
 
     @retry(
         stop=stop_after_attempt(3),
         wait=wait_exponential(multiplier=1, max=10),
     )
     def _http_fetch(self, url: str) -> dict:
-        """Fetch JSON from URL with retry. Blocks SSRF to private networks."""
-        # Fix #2: block SSRF — reject URIs that resolve to private/internal IPs
+        """Fetch JSON from URL with retry. Blocks SSRF via resolved IP pinning."""
         parsed = urlparse(url)
         hostname = parsed.hostname or ""
-        if self._is_private_ip(hostname):
+
+        is_private, resolved_ip = self._resolve_and_check(hostname)
+        if is_private:
             raise IdentityVerificationError(
                 f"Refused to fetch from private/internal address: {hostname}"
             )
 
-        resp = requests.get(url, timeout=30)
+        # Pin resolved IP in URL to prevent TOCTOU DNS rebinding
+        if resolved_ip:
+            pinned = parsed._replace(netloc=f"{resolved_ip}:{parsed.port}" if parsed.port else resolved_ip)
+            pinned_url = urlunparse(pinned)
+            headers = {"Host": hostname}
+        else:
+            pinned_url = url
+            headers = {}
+
+        resp = self._session.get(pinned_url, timeout=30, headers=headers, stream=True)
         resp.raise_for_status()
 
-        # Fix #3: manifest size cap — prevent memory DoS via huge JSON
-        content = resp.content
-        if len(content) > config.MAX_MANIFEST_BYTES:
-            raise IdentityVerificationError(
-                f"Manifest too large: {len(content)} bytes (max {config.MAX_MANIFEST_BYTES})"
-            )
-        return resp.json()
+        # Stream with size cap to prevent memory DoS
+        chunks = []
+        total = 0
+        for chunk in resp.iter_content(chunk_size=8192):
+            total += len(chunk)
+            if total > config.MAX_MANIFEST_BYTES:
+                resp.close()
+                raise IdentityVerificationError(
+                    f"Manifest too large: >{config.MAX_MANIFEST_BYTES} bytes"
+                )
+            chunks.append(chunk)
+
+        content = b"".join(chunks)
+        return json.loads(content)
 
     def _decode_data_uri(self, data_uri: str) -> dict:
         """Decode data:application/json;base64,<data> or URL-encoded data URI."""
@@ -165,7 +202,7 @@ class AgentVerifier:
                 return json.loads(json_str)
             else:
                 raise IdentityVerificationError(f"Unsupported data URI format")
-        except (json.JSONDecodeError, Exception) as e:
+        except (json.JSONDecodeError, ValueError, UnicodeDecodeError) as e:
             raise IdentityVerificationError(f"Failed to decode data URI: {e}") from e
 
     def _validate_manifest(self, manifest: dict) -> ManifestValidation:

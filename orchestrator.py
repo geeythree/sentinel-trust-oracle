@@ -5,9 +5,9 @@ import json
 import logging
 import os
 import select
-import signal
 import sys
 import tempfile
+import threading
 import time
 from datetime import datetime, timezone
 from typing import Optional
@@ -81,6 +81,15 @@ class Orchestrator:
         self._venice = venice
         self._scorer = scorer
         self._blockchain = blockchain
+
+    def close(self) -> None:
+        """Close all resource-holding modules."""
+        if hasattr(self._agent_verifier, 'close'):
+            self._agent_verifier.close()
+        if hasattr(self._liveness_checker, 'close'):
+            self._liveness_checker.close()
+        if hasattr(self._venice, 'close'):
+            self._venice.close()
 
     def run_discovery_mode(
         self,
@@ -157,7 +166,7 @@ class Orchestrator:
                 print(f"  TIMEOUT: evaluation exceeded {EVALUATION_TIMEOUT}s limit. Skipping.")
                 continue
             except Exception as e:
-                print(f"  FAILED: {e}")
+                _log.exception("Evaluation failed for agent #%d: %s", agent.agent_id, e)
                 continue
 
         return results
@@ -202,26 +211,32 @@ class Orchestrator:
                 print(f"  TIMEOUT: evaluation exceeded {EVALUATION_TIMEOUT}s limit. Skipping.")
                 continue
             except Exception as e:
-                print(f"  FAILED: {e}")
+                _log.exception("Evaluation failed for agent #%d: %s", agent.agent_id, e)
                 continue
         return results
 
     def _evaluate_with_timeout(self, agent: DiscoveredAgent) -> TrustVerdict:
-        """Run evaluate_single with a global timeout guard (Unix only)."""
-        if not hasattr(signal, "SIGALRM"):
-            # Windows or non-Unix: skip timeout guard
-            return self.evaluate_single(agent)
+        """Run evaluate_single with a global timeout guard using threads (safe with I/O)."""
+        result_holder: list[TrustVerdict] = []
+        error_holder: list[Exception] = []
 
-        def _timeout_handler(signum, frame):
+        def _run():
+            try:
+                result_holder.append(self.evaluate_single(agent))
+            except Exception as e:
+                error_holder.append(e)
+
+        thread = threading.Thread(target=_run, daemon=True)
+        thread.start()
+        thread.join(timeout=EVALUATION_TIMEOUT)
+
+        if thread.is_alive():
             raise _EvaluationTimeout(f"Evaluation exceeded {EVALUATION_TIMEOUT}s")
-
-        old_handler = signal.signal(signal.SIGALRM, _timeout_handler)
-        signal.alarm(EVALUATION_TIMEOUT)
-        try:
-            return self.evaluate_single(agent)
-        finally:
-            signal.alarm(0)
-            signal.signal(signal.SIGALRM, old_handler)
+        if error_holder:
+            raise error_holder[0]
+        if result_holder:
+            return result_holder[0]
+        raise _EvaluationTimeout("Evaluation thread returned no result")
 
     def evaluate_single(
         self,
@@ -399,12 +414,15 @@ class Orchestrator:
                 f"Secured: {liveness.endpoints_secured}, "
                 f"Dead: {liveness.endpoints_dead}"
             )
-            onchain_summary = (
-                f"Wallet: {onchain.wallet_address}, "
-                f"TX count: {onchain.transaction_count}, "
-                f"Balance: {onchain.balance_eth:.4f} ETH, "
-                f"Existing reputation entries: {onchain.existing_reputation.feedback_count}"
-            )
+            if onchain.success:
+                onchain_summary = (
+                    f"Wallet: {onchain.wallet_address}, "
+                    f"TX count: {onchain.transaction_count}, "
+                    f"Balance: {onchain.balance_eth:.4f} ETH, "
+                    f"Existing reputation entries: {onchain.existing_reputation.feedback_count}"
+                )
+            else:
+                onchain_summary = "On-chain analysis failed — no wallet data available"
 
             evaluation = self._venice.evaluate_trust(manifest_json, liveness_summary, onchain_summary)
             result["status"] = "success" if not evaluation.venice_parse_failed else "partial"

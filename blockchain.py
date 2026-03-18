@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import base64
 import json
+import logging
 from pathlib import Path
 from typing import Optional
 
@@ -17,6 +18,8 @@ from config import config
 from exceptions import BlockchainError, EASError
 from logger import AgentLogger
 from models import ActionType, AgentRole, TrustVerdict
+
+_log = logging.getLogger(__name__)
 
 
 class BlockchainClient:
@@ -83,7 +86,7 @@ class BlockchainClient:
             uri = contract.functions.tokenURI(agent_id).call()
             return uri, owner
         except Exception:
-            pass
+            _log.warning("tokenURI(%d) call failed", agent_id, exc_info=True)
 
         return "", owner
 
@@ -95,6 +98,7 @@ class BlockchainClient:
                 return None
             return wallet
         except Exception:
+            _log.warning("getAgentWallet(%d) call failed", agent_id, exc_info=True)
             return None
 
     def get_registered_events(self, from_block: int, to_block: int) -> list[dict]:
@@ -120,7 +124,7 @@ class BlockchainClient:
                 })
                 all_logs.extend(logs)
             except Exception:
-                pass  # Skip failed chunks
+                _log.warning("get_logs chunk %d-%d failed", start, end, exc_info=True)
             start = end + 1
 
         # Decode logs using the contract event ABI
@@ -130,6 +134,7 @@ class BlockchainClient:
                 event = self._identity_registry.events.Registered().process_log(log)
                 decoded.append(event)
             except Exception:
+                _log.warning("Failed to decode Registered event log", exc_info=True)
                 continue
         return decoded
 
@@ -140,22 +145,58 @@ class BlockchainClient:
         getSummary() read function. Instead, we scan NewFeedback events
         emitted by giveFeedback() to derive the count and average value.
         Returns (count, averageValue, decimals=0).
+
+        Uses eth_getLogs (not eth_newFilter) for public RPC compatibility.
         """
         try:
             latest = self._w3.eth.block_number
             from_block = max(0, latest - 50_000)  # scan recent ~2 days
-            event_filter = self._reputation_registry.events.NewFeedback.create_filter(
-                fromBlock=from_block, toBlock="latest",
-                argument_filters={"agentId": agent_id},
-            )
-            logs = event_filter.get_all_entries()
+            address = Web3.to_checksum_address(config.reputation_registry)
+
+            # Use eth_getLogs directly (public RPCs often reject eth_newFilter)
+            event_sig = self._w3.keccak(text="NewFeedback(uint256,address,int128,string,string)")
+            # agentId is indexed topic[1]
+            agent_id_topic = "0x" + abi_encode(["uint256"], [agent_id]).hex()
+
+            # Chunk to avoid 413 from public RPCs (same pattern as get_registered_events)
+            chunk_size = 10_000
+            logs = []
+            start = from_block
+            while start <= latest:
+                end = min(start + chunk_size - 1, latest)
+                try:
+                    chunk_logs = self._w3.eth.get_logs({
+                        "fromBlock": start,
+                        "toBlock": end,
+                        "address": address,
+                        "topics": [event_sig, agent_id_topic],
+                    })
+                    logs.extend(chunk_logs)
+                except Exception:
+                    _log.warning("get_reputation_summary chunk %d-%d failed", start, end, exc_info=True)
+                start = end + 1
+
             if not logs:
                 return (0, 0, 0)
-            count = len(logs)
-            total_value = sum(log["args"]["value"] for log in logs)
+
+            decoded = []
+            for log in logs:
+                try:
+                    event = self._reputation_registry.events.NewFeedback().process_log(log)
+                    decoded.append(event)
+                except Exception:
+                    _log.warning("Failed to decode NewFeedback event", exc_info=True)
+                    continue
+
+            if not decoded:
+                return (0, 0, 0)
+
+            count = len(decoded)
+            total_value = sum(e["args"]["value"] for e in decoded)
             avg_value = total_value // count if count > 0 else 0
             return (count, avg_value, 0)
         except Exception:
+            _log.warning("get_reputation_summary(%d) failed", agent_id, exc_info=True)
             return (0, 0, 0)
 
     def get_latest_block(self) -> int:
@@ -226,13 +267,13 @@ class BlockchainClient:
                     try:
                         uri = abi_decode(["string"], uri_result[1])[0]
                     except Exception:
-                        pass
+                        _log.warning("Failed to decode tokenURI for agent %d", agent_id, exc_info=True)
 
                 output.append((uri, owner))
             return output
 
         except Exception:
-            # Fallback: sequential reads
+            _log.warning("Multicall3 batch read failed, falling back to sequential", exc_info=True)
             return [self.get_agent_by_id(aid) for aid in agent_ids]
 
     # --- Identity Registry WRITE (Operator Wallet) ---
@@ -258,7 +299,11 @@ class BlockchainClient:
 
         # Parse agent_id from Registered event
         logs = self._identity_registry.events.Registered().process_receipt(receipt)
-        agent_id = logs[0]["args"]["agentId"] if logs else 0
+        if not logs:
+            raise BlockchainError(
+                f"register() succeeded but no Registered event emitted. Tx: {tx_hash.hex()}"
+            )
+        agent_id = logs[0]["args"]["agentId"]
 
         return agent_id, tx_hash.hex()
 
@@ -493,12 +538,12 @@ class BlockchainClient:
     def _build_tx_params(self, account, tx_for_estimate: dict | None = None) -> dict:
         """Build common transaction parameters with dynamic gas estimation."""
         priority_fee = self._w3.to_wei(0.1, "gwei")  # Reasonable priority fee for Base
-        base_fee = self._w3.eth.gas_price
+        base_fee = max(self._w3.eth.gas_price, self._w3.to_wei(1, "gwei"))  # Floor: 1 gwei
         max_fee = max(base_fee * 2, priority_fee + base_fee)
 
         params = {
             "from": account.address,
-            "nonce": self._w3.eth.get_transaction_count(account.address),
+            "nonce": self._w3.eth.get_transaction_count(account.address, "pending"),
             "maxFeePerGas": max_fee,
             "maxPriorityFeePerGas": priority_fee,
             "chainId": 84532 if config.USE_TESTNET else config.CHAIN_ID,
@@ -512,6 +557,7 @@ class BlockchainClient:
                 # 30% buffer, capped at 1M to prevent runaway costs
                 params["gas"] = min(int(estimated * 1.3), 1_000_000)
             except Exception:
+                _log.warning("Gas estimation failed, using 500k fallback", exc_info=True)
                 params["gas"] = 500_000  # fallback to safe default
         else:
             params["gas"] = 500_000

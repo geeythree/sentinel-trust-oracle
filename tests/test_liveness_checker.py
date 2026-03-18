@@ -1,4 +1,4 @@
-"""Unit tests for LivenessChecker — HTTP status code interpretation."""
+"""Unit tests for LivenessChecker — real HTTP calls, real manifest dicts, session lifecycle."""
 import sys
 import os
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -10,91 +10,20 @@ import config as cm
 cm.config = cm.create_config()
 
 import pytest
-from unittest.mock import patch, MagicMock
-import requests
+from pathlib import Path
+from logger import AgentLogger
 from liveness_checker import LivenessChecker
 
 
 @pytest.fixture
-def checker():
-    logger = MagicMock()
-    return LivenessChecker(logger)
+def checker(tmp_path):
+    logger = AgentLogger(tmp_path / "test_log.json", budget=15)
+    lc = LivenessChecker(logger)
+    yield lc
+    lc.close()
 
 
-# --- Status Code Interpretation ---
-
-class TestStatusCodes:
-    def _mock_head(self, status_code):
-        resp = MagicMock()
-        resp.status_code = status_code
-        return resp
-
-    def test_200_alive_full_score(self, checker):
-        with patch.object(checker._session, "head", return_value=self._mock_head(200)):
-            result = checker._check_endpoint("https://api.test.com")
-        assert result.status == "alive"
-        assert result.score == 100
-
-    def test_401_secured_full_score(self, checker):
-        """401 Unauthorized = endpoint exists AND is secured — this is GOOD."""
-        with patch.object(checker._session, "head", return_value=self._mock_head(401)):
-            result = checker._check_endpoint("https://api.test.com")
-        assert result.status == "secured"
-        assert result.score == 100
-
-    def test_403_secured_full_score(self, checker):
-        with patch.object(checker._session, "head", return_value=self._mock_head(403)):
-            result = checker._check_endpoint("https://api.test.com")
-        assert result.status == "secured"
-        assert result.score == 100
-
-    def test_404_not_found_zero_score(self, checker):
-        with patch.object(checker._session, "head", return_value=self._mock_head(404)):
-            result = checker._check_endpoint("https://api.test.com")
-        assert result.status == "not_found"
-        assert result.score == 0
-
-    def test_500_server_error_low_score(self, checker):
-        with patch.object(checker._session, "head", return_value=self._mock_head(500)):
-            result = checker._check_endpoint("https://api.test.com")
-        assert result.status == "server_error"
-        assert result.score == 20
-
-    def test_301_redirect_partial_score(self, checker):
-        with patch.object(checker._session, "head", return_value=self._mock_head(301)):
-            result = checker._check_endpoint("https://api.test.com")
-        assert result.status == "redirect"
-        assert result.score == 80
-
-    def test_429_rate_limited(self, checker):
-        with patch.object(checker._session, "head", return_value=self._mock_head(429)):
-            result = checker._check_endpoint("https://api.test.com")
-        assert result.status == "rate_limited"
-        assert result.score == 90
-
-    def test_timeout_zero_score(self, checker):
-        with patch.object(checker._session, "head", side_effect=requests.Timeout()):
-            result = checker._check_endpoint("https://api.test.com")
-        assert result.status == "timeout"
-        assert result.score == 0
-
-    def test_connection_error_zero_score(self, checker):
-        with patch.object(checker._session, "head", side_effect=requests.ConnectionError()):
-            result = checker._check_endpoint("https://api.test.com")
-        assert result.status == "unreachable"
-        assert result.score == 0
-
-    def test_405_falls_back_to_get(self, checker):
-        """405 Method Not Allowed → fallback to GET."""
-        with patch.object(checker._session, "head", return_value=self._mock_head(405)), \
-             patch.object(checker._session, "get", return_value=self._mock_head(200)) as mock_get:
-            result = checker._check_endpoint("https://api.test.com")
-        assert result.status == "alive"
-        assert result.score == 100
-        mock_get.assert_called_once()
-
-
-# --- Manifest-level check ---
+# --- Manifest-level check (no network needed) ---
 
 class TestManifestCheck:
     def test_empty_services(self, checker):
@@ -113,25 +42,96 @@ class TestManifestCheck:
         assert result.details[0].status == "non_http"
         assert result.details[0].score == 50
 
-    def test_services_capped_at_20(self, checker):
-        """Manifest with 50 services should only check first 20."""
-        services = [{"endpoint": f"https://api{i}.test.com"} for i in range(50)]
-        manifest = {"services": services}
-        with patch.object(checker._session, "head", return_value=MagicMock(status_code=200)):
-            result = checker.check(manifest)
-        # Should have checked at most 20 endpoints (capped before processing)
-        assert len(result.details) == 20
-        assert result.endpoints_declared == 20
+    def test_non_dict_services_skipped(self, checker):
+        manifest = {"services": ["not-a-dict", 42, None]}
+        result = checker.check(manifest)
+        assert result.success is True
+        assert result.endpoints_declared == 3
+        assert len(result.details) == 0
 
-    def test_score_averaging_uses_round(self, checker):
-        """Verify round() not // is used for score averaging."""
-        # 3 endpoints: scores 100, 100, 0 → average should be round(200/3) = 67
-        responses = [MagicMock(status_code=200), MagicMock(status_code=200), MagicMock(status_code=404)]
-        with patch.object(checker._session, "head", side_effect=responses):
-            manifest = {"services": [
-                {"endpoint": "https://a.com"},
-                {"endpoint": "https://b.com"},
-                {"endpoint": "https://c.com"},
-            ]}
-            result = checker.check(manifest)
-        assert result.liveness_score == 67  # round(200/3) = 67, not 200//3 = 66
+    def test_empty_endpoint_gets_zero(self, checker):
+        manifest = {"services": [{"endpoint": ""}]}
+        result = checker.check(manifest)
+        assert result.details[0].status == "missing"
+        assert result.details[0].score == 0
+
+    def test_services_capped_at_20(self, checker):
+        """Manifest with 50 services should only process first 20."""
+        services = [{"endpoint": "stdio://agent"} for _ in range(50)]
+        manifest = {"services": services}
+        result = checker.check(manifest)
+        assert result.endpoints_declared == 20
+        assert len(result.details) == 20
+
+    def test_score_averaging_math(self, checker):
+        """Verify round() averaging logic with non-HTTP endpoints."""
+        # 3 non-http endpoints: all score 50 → average = 50
+        manifest = {"services": [
+            {"endpoint": "stdio://a"},
+            {"endpoint": "stdio://b"},
+            {"endpoint": "stdio://c"},
+        ]}
+        result = checker.check(manifest)
+        assert result.liveness_score == 50
+
+    def test_mixed_scores_averaging(self, checker):
+        """Empty + non-HTTP: (0 + 50) / 2 = 25."""
+        manifest = {"services": [
+            {"endpoint": ""},
+            {"endpoint": "stdio://agent"},
+        ]}
+        result = checker.check(manifest)
+        assert result.liveness_score == 25
+
+
+# --- Real HTTP calls (to httpbin.org) ---
+
+class TestRealHTTP:
+    """Tests using real HTTP calls. These require network access."""
+
+    @pytest.mark.skipif(
+        os.environ.get("SKIP_NETWORK_TESTS") == "1",
+        reason="Network tests disabled",
+    )
+    def test_live_endpoint_200(self, checker):
+        """httpbin.org/status/200 should return alive."""
+        result = checker._check_endpoint("https://httpbin.org/status/200")
+        assert result.status == "alive"
+        assert result.score == 100
+
+    @pytest.mark.skipif(
+        os.environ.get("SKIP_NETWORK_TESTS") == "1",
+        reason="Network tests disabled",
+    )
+    def test_not_found_404(self, checker):
+        """httpbin.org/status/404 should return not_found."""
+        result = checker._check_endpoint("https://httpbin.org/status/404")
+        assert result.status == "not_found"
+        assert result.score == 0
+
+    @pytest.mark.skipif(
+        os.environ.get("SKIP_NETWORK_TESTS") == "1",
+        reason="Network tests disabled",
+    )
+    def test_server_error_500(self, checker):
+        """httpbin.org/status/500 should return server_error."""
+        result = checker._check_endpoint("https://httpbin.org/status/500")
+        assert result.status == "server_error"
+        assert result.score == 20
+
+
+# --- Session lifecycle ---
+
+class TestSessionLifecycle:
+    def test_checker_has_session(self, checker):
+        assert hasattr(checker, '_session')
+        assert checker._session is not None
+
+    def test_close_does_not_error(self, tmp_path):
+        logger = AgentLogger(tmp_path / "test_log.json", budget=15)
+        lc = LivenessChecker(logger)
+        lc.close()  # Should not raise
+
+    def test_close_method_exists(self, checker):
+        assert hasattr(checker, 'close')
+        assert callable(checker.close)

@@ -124,7 +124,7 @@ class OnchainAnalysis:
     transaction_count: int = 0
     balance_eth: float = 0.0
     existing_reputation: ExistingReputation = field(default_factory=ExistingReputation)
-    onchain_score: int = 50  # neutral default
+    onchain_score: int = 0  # default 0; neutral baseline (50) set explicitly by analyzer on success
 
 
 @dataclass
@@ -196,7 +196,6 @@ class TrustVerdict:
                 "venice_trust_analysis": self.dimensions.venice_trust_analysis,
             },
             "evaluation_confidence": self.evaluation_confidence,
-            "state": self.state.value,
             "timestamp": self.timestamp,
         }
         return json.dumps(data, sort_keys=True)

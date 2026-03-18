@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import json
+import logging
 import re
 import time
 from typing import Optional
@@ -18,6 +19,8 @@ from config import config
 from exceptions import VeniceError
 from logger import AgentLogger
 from models import VeniceEvaluation, VeniceParseMethod
+
+_log = logging.getLogger(__name__)
 
 # Regex: matches {"score": N, "reasoning": "..."} even inside markdown fences
 JSON_EXTRACT_PATTERN = re.compile(
@@ -69,6 +72,12 @@ class VeniceClient:
             "Authorization": f"Bearer {self._api_key}",
             "Content-Type": "application/json",
         }
+        self._session = requests.Session()
+        self._session.headers.update(self._headers)
+
+    def close(self) -> None:
+        """Close the HTTP session."""
+        self._session.close()
 
     @retry(
         stop=stop_after_attempt(3),
@@ -86,11 +95,10 @@ class VeniceClient:
         if use_schema:
             body["response_format"] = EVALUATION_SCHEMA
 
-        resp = requests.post(
+        resp = self._session.post(
             f"{self._base_url}/chat/completions",
-            headers=self._headers,
             json=body,
-            timeout=120,
+            timeout=(10, 120),  # (connect, read)
         )
         resp.raise_for_status()
         return resp.json()
@@ -132,6 +140,9 @@ class VeniceClient:
         # Layer 1: Try with json_schema
         try:
             raw_response = self._api_call(messages, use_schema=True)
+            if "error" in raw_response:
+                _log.warning("Venice API returned error: %s", raw_response["error"])
+                raise ValueError(f"Venice API error: {raw_response['error']}")
             content = raw_response["choices"][0]["message"]["content"]
             tokens_sent = raw_response.get("usage", {}).get("prompt_tokens", 0)
             tokens_received = raw_response.get("usage", {}).get("completion_tokens", 0)
@@ -147,8 +158,8 @@ class VeniceClient:
                 tokens_sent=tokens_sent, tokens_received=tokens_received,
                 latency_ms=latency,
             )
-        except (json.JSONDecodeError, KeyError, ValueError, TypeError, IndexError):
-            pass  # Fall through to Layer 2
+        except (json.JSONDecodeError, KeyError, ValueError, TypeError, IndexError) as e:
+            _log.info("Layer 1 (json_schema) failed: %s — trying regex", e)
         except requests.RequestException as e:
             # API call itself failed after retries
             latency = int((time.monotonic() - start_ms) * 1000)
@@ -172,8 +183,8 @@ class VeniceClient:
                     tokens_sent=tokens_sent, tokens_received=tokens_received,
                     latency_ms=latency,
                 )
-        except Exception:
-            pass  # Fall through to Layer 3
+        except Exception as e:
+            _log.info("Layer 2 (regex) failed: %s — trying correction prompt", e)
 
         # Layer 3: Retry with correction prompt
         try:
@@ -193,8 +204,8 @@ class VeniceClient:
                 tokens_sent=tokens_sent, tokens_received=tokens_received,
                 latency_ms=latency,
             )
-        except Exception:
-            pass  # Fall through to Layer 4
+        except Exception as e:
+            _log.warning("Layer 3 (correction prompt) failed: %s — falling back to neutral", e)
 
         # Layer 4: Neutral fallback
         latency = int((time.monotonic() - start_ms) * 1000)

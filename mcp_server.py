@@ -1,6 +1,7 @@
 """MCP server exposing Sentinel as verify_agent and check_reputation tools."""
 from __future__ import annotations
 
+import asyncio
 import json
 from typing import Any
 
@@ -11,9 +12,16 @@ from mcp.types import Tool, TextContent
 
 app = Server("sentinel-trust-oracle")
 
+# Module-level singleton cache for the pipeline
+_pipeline_cache: tuple | None = None
+
 
 def _get_pipeline():
-    """Lazy-initialize the full Sentinel pipeline."""
+    """Lazy-initialize the full Sentinel pipeline (cached after first call)."""
+    global _pipeline_cache
+    if _pipeline_cache is not None:
+        return _pipeline_cache
+
     import config as config_module
     if config_module.config is None:
         config_module.config = config_module.create_config()
@@ -43,7 +51,8 @@ def _get_pipeline():
         onchain_analyzer, venice, scorer, blockchain,
     )
 
-    return orchestrator, discovery, blockchain
+    _pipeline_cache = (orchestrator, discovery, blockchain)
+    return _pipeline_cache
 
 
 @app.list_tools()
@@ -89,14 +98,15 @@ async def list_tools():
 @app.call_tool()
 async def call_tool(name: str, arguments: dict) -> list[TextContent]:
     orchestrator, discovery, blockchain = _get_pipeline()
+    loop = asyncio.get_running_loop()
 
     if name == "verify_agent":
         agent_id = arguments.get("agent_id")
         if agent_id is None:
             return [TextContent(type="text", text=json.dumps({"error": "agent_id is required"}))]
         try:
-            agent = discovery.discover_agent_by_id(agent_id)
-            result = orchestrator.evaluate_single(agent)
+            agent = await loop.run_in_executor(None, discovery.discover_agent_by_id, agent_id)
+            result = await loop.run_in_executor(None, orchestrator.evaluate_single, agent)
             return [TextContent(type="text", text=json.dumps(result.to_verdict_dict()))]
         except Exception as e:
             return [TextContent(type="text", text=json.dumps({
@@ -109,7 +119,9 @@ async def call_tool(name: str, arguments: dict) -> list[TextContent]:
         if agent_id is None:
             return [TextContent(type="text", text=json.dumps({"error": "agent_id is required"}))]
         try:
-            count, value, decimals = blockchain.get_reputation_summary(agent_id)
+            count, value, decimals = await loop.run_in_executor(
+                None, blockchain.get_reputation_summary, agent_id
+            )
             return [TextContent(type="text", text=json.dumps({
                 "agent_id": agent_id,
                 "feedback_count": count,

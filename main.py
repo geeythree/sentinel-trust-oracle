@@ -48,9 +48,10 @@ def parse_args() -> argparse.Namespace:
     # MCP server mode
     subparsers.add_parser("mcp-server", help="Start MCP server (stdio transport)")
 
-    # Common arguments
-    parser.add_argument("--testnet", action="store_true", default=False, help="Use Base Sepolia")
-    parser.add_argument("--mainnet", action="store_true", help="Use Base Mainnet")
+    # Common arguments — mutually exclusive network selection
+    net_group = parser.add_mutually_exclusive_group()
+    net_group.add_argument("--testnet", action="store_true", default=False, help="Use Base Sepolia")
+    net_group.add_argument("--mainnet", action="store_true", help="Use Base Mainnet")
 
     return parser.parse_args()
 
@@ -67,10 +68,15 @@ def _setup_logging() -> None:
     root.addHandler(console)
 
     # File: DEBUG-level, full timestamps
-    fh = logging.FileHandler("sentinel.log", mode="a")
+    from pathlib import Path as _LogPath
+    fh = logging.FileHandler(_LogPath(__file__).parent / "sentinel.log", mode="a")
     fh.setLevel(logging.DEBUG)
     fh.setFormatter(logging.Formatter("%(asctime)s %(levelname)s %(name)s: %(message)s"))
     root.addHandler(fh)
+
+    # Silence noisy third-party loggers
+    logging.getLogger("web3").setLevel(logging.WARNING)
+    logging.getLogger("urllib3").setLevel(logging.WARNING)
 
 
 def main() -> int:
@@ -131,45 +137,48 @@ def main() -> int:
         onchain_analyzer, venice, scorer, blockchain,
     )
 
-    if args.mode == "discover":
-        results = orchestrator.run_discovery_mode(
-            args.start_block, args.end_block, args.max_agents
-        )
-        _print_summary(results)
+    try:
+        if args.mode == "discover":
+            results = orchestrator.run_discovery_mode(
+                args.start_block, args.end_block, args.max_agents
+            )
+            _print_summary(results)
 
-    elif args.mode == "manual":
-        agents = _load_manual_agents(args, discovery)
-        if not agents:
-            print("No agents to evaluate. Provide --agent-id or --address.", file=sys.stderr)
-            return 1
-        results = orchestrator.run_manual_mode(agents)
-        _print_summary(results)
+        elif args.mode == "manual":
+            agents = _load_manual_agents(args, discovery)
+            if not agents:
+                print("No agents to evaluate. Provide --agent-id or --address.", file=sys.stderr)
+                return 1
+            results = orchestrator.run_manual_mode(agents)
+            _print_summary(results)
 
-    elif args.mode == "register":
-        agent_id, tx_hash = blockchain.register_agent(args.agent_uri)
-        print(f"Registered! Agent ID: {agent_id}")
-        print(f"TX: {blockchain.get_explorer_url(tx_hash)}")
+        elif args.mode == "register":
+            agent_id, tx_hash = blockchain.register_agent(args.agent_uri)
+            print(f"Registered! Agent ID: {agent_id}")
+            print(f"TX: {blockchain.get_explorer_url(tx_hash)}")
 
-    elif args.mode == "register-schema":
-        schema_uid = blockchain.register_eas_schema()
-        print(f"Schema registered! UID: {schema_uid}")
-        print(f"Add to .env: EAS_SCHEMA_UID={schema_uid}")
+        elif args.mode == "register-schema":
+            schema_uid = blockchain.register_eas_schema()
+            print(f"Schema registered! UID: {schema_uid}")
+            print(f"Add to .env: EAS_SCHEMA_UID={schema_uid}")
 
-    elif args.mode == "watch":
-        _run_watch_mode(orchestrator, blockchain, args)
+        elif args.mode == "watch":
+            _run_watch_mode(orchestrator, blockchain, args)
 
-    elif args.mode == "self-eval":
-        _run_self_evaluation(orchestrator, blockchain, args)
+        elif args.mode == "self-eval":
+            _run_self_evaluation(orchestrator, blockchain, args)
 
-    elif args.mode == "challenge":
-        tx_hash = blockchain.create_validation_attestation(
-            evaluation_id=args.evaluation_id,
-            challenger_address=blockchain.evaluator_address,
-            reason=args.reason,
-            re_evaluation_required=True,
-        )
-        print(f"Challenge attestation created.")
-        print(f"TX: {blockchain.get_explorer_url(tx_hash)}")
+        elif args.mode == "challenge":
+            tx_hash = blockchain.create_validation_attestation(
+                evaluation_id=args.evaluation_id,
+                challenger_address=blockchain.evaluator_address,
+                reason=args.reason,
+                re_evaluation_required=True,
+            )
+            print(f"Challenge attestation created.")
+            print(f"TX: {blockchain.get_explorer_url(tx_hash)}")
+    finally:
+        orchestrator.close()
 
     return 0
 
@@ -185,7 +194,7 @@ def _run_watch_mode(orchestrator, blockchain, args) -> None:
     from pathlib import Path
     from config import config
 
-    state_file = Path(".watch_state.json")
+    state_file = Path(__file__).parent / ".watch_state.json"
 
     # Restore state from previous run if available
     round_num = 0
@@ -199,6 +208,8 @@ def _run_watch_mode(orchestrator, blockchain, args) -> None:
         except (json.JSONDecodeError, KeyError):
             pass
 
+    _watch_log = logging.getLogger("sentinel.watch")
+
     def _save_state():
         try:
             state_file.write_text(json.dumps({
@@ -206,7 +217,7 @@ def _run_watch_mode(orchestrator, blockchain, args) -> None:
                 "round_num": round_num,
             }))
         except Exception:
-            pass
+            _watch_log.warning("Failed to save watch state", exc_info=True)
 
     print(f"\nSentinel WATCH mode — evaluating every {args.interval}s (Ctrl+C to stop)")
     print("=" * 60)

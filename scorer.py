@@ -85,6 +85,8 @@ class Scorer:
             conf += 25
         elif onchain.success:
             conf += 15  # wallet exists but no history
+        else:
+            logger.info("On-chain analysis failed — 0 confidence contribution")
 
         # Spread penalties
         spread = dimensions.spread

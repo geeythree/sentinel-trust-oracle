@@ -25,6 +25,10 @@ class LivenessChecker:
         self._session.mount("http://", adapter)
         self._session.mount("https://", adapter)
 
+    def close(self) -> None:
+        """Close the HTTP session."""
+        self._session.close()
+
     def check(self, manifest: dict) -> LivenessResult:
         """Check all declared service endpoints."""
         services = manifest.get("services", [])

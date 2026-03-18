@@ -48,7 +48,7 @@ class OnchainAnalyzer:
             return OnchainAnalysis(
                 success=False,
                 wallet_address=agent_wallet,
-                onchain_score=50,  # neutral on failure
+                onchain_score=0,  # failure = no data = 0 score
             )
 
     def _check_existing_reputation(self, agent_id: int) -> ExistingReputation:
