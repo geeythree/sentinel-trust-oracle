@@ -565,6 +565,13 @@ class Orchestrator:
                 with os.fdopen(fd, "w") as f:
                     json.dump(merged, f, indent=2)
                 os.replace(tmp_path, config.DASHBOARD_RESULTS_PATH)
+                # Also write to repo root for GitHub Pages (serves from /)
+                root_results = config.DASHBOARD_RESULTS_PATH.parent.parent / "results.json"
+                try:
+                    import shutil
+                    shutil.copy2(config.DASHBOARD_RESULTS_PATH, root_results)
+                except Exception:
+                    pass
             except Exception:
                 # Clean up temp file on failure
                 try:
