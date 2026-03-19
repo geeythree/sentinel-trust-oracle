@@ -14,6 +14,11 @@
         .score-high { color: #10b981; }
         .score-mid { color: #f59e0b; }
         .score-low { color: #ef4444; }
+        .line-clamp-2 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+        .budget-bar { height: 6px; border-radius: 3px; background: #e5e7eb; overflow: hidden; }
+        .budget-fill { height: 100%; border-radius: 3px; background: #6366f1; transition: width 0.3s; }
+        details summary { cursor: pointer; list-style: none; }
+        details summary::-webkit-details-marker { display: none; }
     </style>
 </head>
 <body class="bg-gray-50 min-h-screen">
@@ -43,6 +48,98 @@
                     <div class="text-gray-500">Agents Evaluated</div>
                     <div id="total-count" class="text-2xl font-bold text-indigo-600">0</div>
                 </div>
+            </div>
+        </div>
+
+        <!-- ERC-8004 Multi-Registry Banner -->
+        <div id="erc8004-banner" class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6" style="display:none">
+            <div class="flex items-center gap-3">
+                <div class="text-blue-700 font-semibold text-sm">ERC-8004 Multi-Registry Integration</div>
+                <span class="px-2 py-0.5 rounded bg-blue-100 text-blue-600 text-xs font-mono">3-wallet isolation</span>
+            </div>
+            <div class="mt-2 grid grid-cols-2 md:grid-cols-4 gap-3 text-xs">
+                <div>
+                    <div class="text-blue-500">Identity Registry</div>
+                    <a id="identity-registry" href="#" target="_blank" class="text-blue-700 font-mono hover:underline break-all"></a>
+                </div>
+                <div>
+                    <div class="text-blue-500">Reputation Registry</div>
+                    <a id="reputation-registry" href="#" target="_blank" class="text-blue-700 font-mono hover:underline break-all"></a>
+                </div>
+                <div>
+                    <div class="text-blue-500">EAS Attestations</div>
+                    <a id="eas-contract" href="#" target="_blank" class="text-blue-700 font-mono hover:underline break-all"></a>
+                </div>
+                <div>
+                    <div class="text-blue-500">Sentinel Agent ID</div>
+                    <div id="sentinel-agent-id" class="text-blue-700 font-mono font-bold"></div>
+                </div>
+            </div>
+            <div class="mt-2 text-[10px] text-blue-400">
+                Operator wallet registers identity. Evaluator wallet writes reputation feedback. Separate wallets enforce trust isolation.
+            </div>
+        </div>
+
+        <!-- Venice Stats Banner -->
+        <div id="venice-banner" class="bg-violet-50 border border-violet-200 rounded-lg p-4 mb-6" style="display:none">
+            <div class="flex items-center gap-3">
+                <div class="text-violet-700 font-semibold text-sm">Venice Private Inference</div>
+                <span class="px-2 py-0.5 rounded bg-violet-100 text-violet-600 text-xs font-mono">zero data retention</span>
+            </div>
+            <div class="mt-2 grid grid-cols-5 gap-4 text-sm">
+                <div>
+                    <div class="text-violet-500 text-xs">API Calls</div>
+                    <div id="venice-calls" class="text-lg font-bold text-violet-700">0</div>
+                </div>
+                <div>
+                    <div class="text-violet-500 text-xs">Total Tokens</div>
+                    <div id="venice-tokens" class="text-lg font-bold text-violet-700">0</div>
+                </div>
+                <div>
+                    <div class="text-violet-500 text-xs">Model</div>
+                    <div id="venice-model" class="text-lg font-bold text-violet-700">—</div>
+                </div>
+                <div>
+                    <div class="text-violet-500 text-xs">Parse Success</div>
+                    <div id="venice-parse" class="text-lg font-bold text-violet-700">—</div>
+                </div>
+                <div>
+                    <div class="text-violet-500 text-xs">Parse Strategy</div>
+                    <div class="text-xs text-violet-600 mt-1">4-layer fallback: json_schema → regex → retry → neutral</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Autonomy Stats Banner -->
+        <div id="autonomy-banner" class="bg-emerald-50 border border-emerald-200 rounded-lg p-4 mb-6" style="display:none">
+            <div class="flex items-center gap-3">
+                <div class="text-emerald-700 font-semibold text-sm">Autonomous Pipeline</div>
+                <span class="px-2 py-0.5 rounded bg-emerald-100 text-emerald-600 text-xs font-mono">fully autonomous</span>
+            </div>
+            <div class="mt-2 grid grid-cols-5 gap-4 text-sm">
+                <div>
+                    <div class="text-emerald-500 text-xs">Pipeline Stages</div>
+                    <div class="text-lg font-bold text-emerald-700">9</div>
+                </div>
+                <div>
+                    <div class="text-emerald-500 text-xs">State Machine</div>
+                    <div class="text-lg font-bold text-emerald-700">13 states</div>
+                </div>
+                <div>
+                    <div class="text-emerald-500 text-xs">Tool Budget</div>
+                    <div class="text-lg font-bold text-emerald-700">15/eval</div>
+                </div>
+                <div>
+                    <div class="text-emerald-500 text-xs">Published</div>
+                    <div id="autonomy-published" class="text-lg font-bold text-emerald-700">0</div>
+                </div>
+                <div>
+                    <div class="text-emerald-500 text-xs">Auto-Withheld</div>
+                    <div id="autonomy-withheld" class="text-lg font-bold text-emerald-700">0</div>
+                </div>
+            </div>
+            <div class="mt-2 text-[10px] text-emerald-400">
+                discover → verify identity → check liveness → on-chain analysis → Venice trust → score → verify → publish. Confidence ≥70 auto-publishes. &lt;70 auto-withholds or flags for human review.
             </div>
         </div>
 
@@ -160,6 +257,53 @@
         const ownerLink = `<a href="${explorerBase}/address/${eval.owner_address}" target="_blank" class="text-indigo-600 hover:underline font-mono text-xs">${eval.owner_address.slice(0, 14)}...</a>`;
 
         const ep = eval.endpoints || {};
+        const oc = eval.onchain || {};
+        const id = eval.identity || {};
+        const budgetPct = Math.round((eval.tool_calls_used / 15) * 100);
+
+        // On-chain details row
+        const onchainRow = oc.tx_count !== undefined ? `
+            <div class="mt-2 bg-sky-50 rounded p-2 border border-sky-100">
+                <div class="text-xs font-semibold text-sky-700">On-chain Analysis</div>
+                <div class="mt-1 flex gap-4 text-[10px] text-sky-600 font-mono">
+                    ${oc.wallet_address ? `<span title="${oc.wallet_address}">Wallet: ${oc.wallet_address.slice(0, 10)}...</span>` : ''}
+                    <span>${oc.tx_count} transactions</span>
+                    <span>${(oc.balance_eth || 0).toFixed(4)} ETH</span>
+                    <span>${oc.reputation_entries || 0} existing reputation entries</span>
+                </div>
+            </div>` : '';
+
+        // Identity details row
+        const identityRow = id.fields_present ? `
+            <div class="mt-2 bg-amber-50 rounded p-2 border border-amber-100">
+                <div class="flex items-center gap-2 text-xs">
+                    <span class="font-semibold text-amber-700">Identity Verification</span>
+                    <span class="px-1.5 py-0.5 rounded bg-amber-100 text-amber-600 font-mono text-[10px]">${id.services_declared || 0} services</span>
+                </div>
+                <div class="mt-1 flex gap-1 flex-wrap">
+                    ${(id.fields_present || []).map(f => `<span class="px-1 py-0.5 rounded bg-green-100 text-green-700 text-[10px]">${f}</span>`).join('')}
+                    ${(id.fields_missing || []).map(f => `<span class="px-1 py-0.5 rounded bg-red-100 text-red-500 text-[10px] line-through">${f}</span>`).join('')}
+                </div>
+            </div>` : '';
+
+        // Venice details (expandable reasoning)
+        const veniceRow = eval.venice && eval.venice.tokens_sent > 0 ? `
+            <div class="mt-2 bg-violet-50 rounded p-2 border border-violet-100">
+                <div class="flex items-center gap-2 text-xs">
+                    <span class="font-semibold text-violet-700">Venice Private Inference</span>
+                    <span class="px-1.5 py-0.5 rounded bg-violet-100 text-violet-600 font-mono text-[10px]">${eval.venice.model || 'qwen3-235b'}</span>
+                    <span class="px-1.5 py-0.5 rounded bg-violet-100 text-violet-600 font-mono text-[10px]">${eval.venice.parse_method || 'json_schema'}</span>
+                </div>
+                <details class="mt-1">
+                    <summary class="text-xs text-violet-600 italic cursor-pointer hover:text-violet-800">"${(eval.venice.reasoning || '').slice(0, 120)}..." <span class="text-violet-400 underline">expand</span></summary>
+                    <div class="mt-1 text-xs text-violet-600 italic">"${eval.venice.reasoning || ''}"</div>
+                </details>
+                <div class="mt-1 flex gap-3 text-[10px] text-violet-500 font-mono">
+                    <span>${eval.venice.tokens_sent + eval.venice.tokens_received} tokens</span>
+                    <span>${(eval.venice.latency_ms / 1000).toFixed(1)}s latency</span>
+                    <span>zero data retention</span>
+                </div>
+            </div>` : '';
 
         return `
         <div class="bg-white rounded-lg shadow-sm p-6">
@@ -177,9 +321,18 @@
                     <div class="text-3xl font-bold ${scoreClass(eval.composite_score)}">${eval.composite_score}</div>
                     <div class="text-sm text-gray-500">Trust Score</div>
                     <div class="mt-1 text-sm">Confidence: <span class="${scoreClass(eval.confidence)} font-semibold">${eval.confidence}%</span></div>
+                    <div class="mt-2 w-32 ml-auto">
+                        <div class="flex justify-between text-[10px] text-gray-400 mb-0.5">
+                            <span>Tool Budget</span>
+                            <span>${eval.tool_calls_used}/15</span>
+                        </div>
+                        <div class="budget-bar">
+                            <div class="budget-fill" style="width: ${budgetPct}%"></div>
+                        </div>
+                    </div>
                 </div>
             </div>
-            <div class="mt-4 flex items-center gap-8">
+            <div class="mt-4 flex items-start gap-8">
                 <div>${createRadarChart(eval.dimensions, 220)}</div>
                 <div class="flex-1">
                     <table class="w-full text-sm">
@@ -195,10 +348,13 @@
                             <span class="font-medium">${ep.secured || 0} secured</span>,
                             <span class="font-medium ${(ep.dead || 0) > 0 ? 'text-red-500' : ''}">${ep.dead || 0} dead</span>
                         </div>
-                        <div class="text-xs text-gray-400">
-                            <div>Source: ${eval.discovery_source} | Tools: ${eval.tool_calls_used}</div>
-                            <div>TX: ${txLink}</div>
-                            <div>EAS: ${attestLink}</div>
+                        ${identityRow}
+                        ${onchainRow}
+                        ${veniceRow}
+                        <div class="text-xs text-gray-400 mt-2">
+                            <div>Source: ${eval.discovery_source} | Tools: ${eval.tool_calls_used}/15</div>
+                            <div>Reputation TX: ${txLink}</div>
+                            <div>EAS Attestation: ${attestLink}</div>
                             <div>${eval.timestamp}</div>
                         </div>
                     </div>
@@ -260,12 +416,32 @@
             });
 
             renderAll();
+
+            // Populate Venice stats banner
+            const veniceEvals = data.filter(e => e.venice && e.venice.tokens_sent > 0);
+            if (veniceEvals.length > 0) {
+                document.getElementById('venice-banner').style.display = 'block';
+                document.getElementById('venice-calls').textContent = veniceEvals.length;
+                const totalTokens = veniceEvals.reduce((sum, e) => sum + (e.venice.tokens_sent || 0) + (e.venice.tokens_received || 0), 0);
+                document.getElementById('venice-tokens').textContent = totalTokens.toLocaleString();
+                document.getElementById('venice-model').textContent = (veniceEvals[0].venice.model || 'qwen3-235b').replace('-instruct-2507', '');
+                const jsonSchema = veniceEvals.filter(e => e.venice.parse_method === 'json_schema').length;
+                document.getElementById('venice-parse').textContent = `${jsonSchema}/${veniceEvals.length} json_schema`;
+            }
+
+            // Populate Autonomy stats banner
+            document.getElementById('autonomy-banner').style.display = 'block';
+            const published = data.filter(e => e.state === 'PUBLISHED' || e.state === 'VERIFIED').length;
+            const withheld = data.filter(e => e.state === 'WITHHELD_LOW_CONFIDENCE').length;
+            document.getElementById('autonomy-published').textContent = published;
+            document.getElementById('autonomy-withheld').textContent = withheld;
+
         } catch (e) {
             // No data yet -- show empty state
         }
     }
 
-    // Load agent.json for wallet info
+    // Load agent.json for wallet info + ERC-8004 banner
     async function loadAgent() {
         try {
             // Try relative path first (local dev), then root path (GitHub Pages)
@@ -277,6 +453,34 @@
             document.getElementById('evaluator-wallet').textContent = agent.evaluator?.wallet || 'Not set';
             if (agent.operator?.erc8004_agent_id) {
                 document.getElementById('agent-id').textContent = `Agent #${agent.operator.erc8004_agent_id}`;
+            }
+
+            // Populate ERC-8004 banner
+            const regs = agent.chain?.registries;
+            if (regs) {
+                document.getElementById('erc8004-banner').style.display = 'block';
+                const isTestnet = agent.chain?.testnet?.chain_id === 84532;
+                const explorer = 'https://sepolia.basescan.org';
+
+                const idAddr = regs.identity_sepolia || regs.identity_mainnet;
+                const repAddr = regs.reputation_sepolia || regs.reputation_mainnet;
+                const easAddr = regs.eas;
+
+                const idEl = document.getElementById('identity-registry');
+                idEl.textContent = idAddr?.slice(0, 12) + '...';
+                idEl.href = `${explorer}/address/${idAddr}`;
+
+                const repEl = document.getElementById('reputation-registry');
+                repEl.textContent = repAddr?.slice(0, 12) + '...';
+                repEl.href = `${explorer}/address/${repAddr}`;
+
+                const easEl = document.getElementById('eas-contract');
+                easEl.textContent = easAddr?.slice(0, 12) + '...';
+                easEl.href = `${explorer}/address/${easAddr}`;
+
+                if (agent.operator?.erc8004_agent_id) {
+                    document.getElementById('sentinel-agent-id').textContent = `#${agent.operator.erc8004_agent_id}`;
+                }
             }
         } catch (e) {}
     }

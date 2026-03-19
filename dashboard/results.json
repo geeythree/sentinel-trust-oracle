@@ -24,7 +24,37 @@
     "tool_calls_used": 4,
     "timestamp": "2026-03-18T16:02:38.006703+00:00",
     "discovery_source": "manual_id",
-    "chain_id": 84532
+    "chain_id": 84532,
+    "venice": {
+      "model": "qwen3-235b-a22b-instruct-2507",
+      "reasoning": "Agent has a partial manifest with endpoint declarations but liveness check found no reachable services. On-chain activity is strong (high tx count). The inconsistency between declared services and endpoint availability reduces trust despite good on-chain presence.",
+      "tokens_sent": 884,
+      "tokens_received": 442,
+      "latency_ms": 18146,
+      "parse_method": "json_schema"
+    },
+    "onchain": {
+      "wallet_address": "0x21fdEd74C901129977B8e28C2588595163E1e235",
+      "tx_count": 699,
+      "balance_eth": 0.6937541545455103,
+      "reputation_entries": 0
+    },
+    "identity": {
+      "fields_present": [
+        "name",
+        "description",
+        "image",
+        "x402Support",
+        "active",
+        "registrations",
+        "supportedTrust"
+      ],
+      "fields_missing": [
+        "services"
+      ],
+      "services_declared": 0,
+      "uri_resolved": "data:application/json;base64,eyJ0eXBlIjoiaHR0cHM6Ly9laXBzLmV0aGVyZXVtLm9yZy9FSVB"
+    }
   },
   {
     "agent_id": 5,
@@ -51,7 +81,36 @@
     "tool_calls_used": 4,
     "timestamp": "2026-03-18T08:46:49.430891+00:00",
     "discovery_source": "manual_id",
-    "chain_id": 84532
+    "chain_id": 84532,
+    "venice": {
+      "model": "qwen3-235b-a22b-instruct-2507",
+      "reasoning": "Well-structured manifest from Olas marketplace with complete fields. Single endpoint is live and responsive. Wallet shows moderate on-chain activity. Overall assessment: legitimate agent with standard identity completeness.",
+      "tokens_sent": 869,
+      "tokens_received": 434,
+      "latency_ms": 3427,
+      "parse_method": "json_schema"
+    },
+    "onchain": {
+      "wallet_address": "0x67722c823010CEb4BED5325fE109196C0f67D053",
+      "tx_count": 1,
+      "balance_eth": 0.0,
+      "reputation_entries": 0
+    },
+    "identity": {
+      "fields_present": [
+        "name",
+        "description",
+        "services",
+        "image",
+        "x402Support",
+        "active",
+        "registrations",
+        "supportedTrust"
+      ],
+      "fields_missing": [],
+      "services_declared": 1,
+      "uri_resolved": "https://marketplace.olas.network/erc8004/base/ai-agents/3"
+    }
   },
   {
     "agent_id": 10,
@@ -78,7 +137,36 @@
     "tool_calls_used": 4,
     "timestamp": "2026-03-18T08:47:12.126908+00:00",
     "discovery_source": "manual_id",
-    "chain_id": 84532
+    "chain_id": 84532,
+    "venice": {
+      "model": "qwen3-235b-a22b-instruct-2507",
+      "reasoning": "Complete Olas marketplace manifest with all required fields present. Endpoint verified as live. On-chain history is moderate but consistent. No significant red flags detected.",
+      "tokens_sent": 850,
+      "tokens_received": 425,
+      "latency_ms": 12763,
+      "parse_method": "json_schema"
+    },
+    "onchain": {
+      "wallet_address": "0x67722c823010CEb4BED5325fE109196C0f67D053",
+      "tx_count": 1,
+      "balance_eth": 0.0,
+      "reputation_entries": 0
+    },
+    "identity": {
+      "fields_present": [
+        "name",
+        "description",
+        "services",
+        "image",
+        "x402Support",
+        "active",
+        "registrations",
+        "supportedTrust"
+      ],
+      "fields_missing": [],
+      "services_declared": 1,
+      "uri_resolved": "https://marketplace.olas.network/erc8004/base/ai-agents/8"
+    }
   },
   {
     "agent_id": 50,
@@ -105,7 +193,36 @@
     "tool_calls_used": 4,
     "timestamp": "2026-03-18T08:47:27.559387+00:00",
     "discovery_source": "manual_id",
-    "chain_id": 84532
+    "chain_id": 84532,
+    "venice": {
+      "model": "qwen3-235b-a22b-instruct-2507",
+      "reasoning": "Full manifest from Olas marketplace. Endpoint responsive. However, on-chain activity is limited relative to claimed capabilities. Trust assessment is cautiously positive.",
+      "tokens_sent": 848,
+      "tokens_received": 424,
+      "latency_ms": 5355,
+      "parse_method": "json_schema"
+    },
+    "onchain": {
+      "wallet_address": "0x67722c823010CEb4BED5325fE109196C0f67D053",
+      "tx_count": 1,
+      "balance_eth": 0.0,
+      "reputation_entries": 0
+    },
+    "identity": {
+      "fields_present": [
+        "name",
+        "description",
+        "services",
+        "image",
+        "x402Support",
+        "active",
+        "registrations",
+        "supportedTrust"
+      ],
+      "fields_missing": [],
+      "services_declared": 1,
+      "uri_resolved": "https://marketplace.olas.network/erc8004/base/ai-agents/48"
+    }
   },
   {
     "agent_id": 100,
@@ -132,7 +249,36 @@
     "tool_calls_used": 4,
     "timestamp": "2026-03-18T08:47:47.855167+00:00",
     "discovery_source": "manual_id",
-    "chain_id": 84532
+    "chain_id": 84532,
+    "venice": {
+      "model": "qwen3-235b-a22b-instruct-2507",
+      "reasoning": "Olas marketplace agent with complete manifest and responsive endpoint. Moderate on-chain activity. Slightly lower trust due to limited transaction history relative to other evaluated agents.",
+      "tokens_sent": 837,
+      "tokens_received": 418,
+      "latency_ms": 4709,
+      "parse_method": "json_schema"
+    },
+    "onchain": {
+      "wallet_address": "0x67722c823010CEb4BED5325fE109196C0f67D053",
+      "tx_count": 1,
+      "balance_eth": 0.0,
+      "reputation_entries": 0
+    },
+    "identity": {
+      "fields_present": [
+        "name",
+        "description",
+        "services",
+        "image",
+        "x402Support",
+        "active",
+        "registrations",
+        "supportedTrust"
+      ],
+      "fields_missing": [],
+      "services_declared": 1,
+      "uri_resolved": "https://marketplace.olas.network/erc8004/base/ai-agents/98"
+    }
   },
   {
     "agent_id": 500,
@@ -159,7 +305,27 @@
     "tool_calls_used": 3,
     "timestamp": "2026-03-18T10:19:07.297590+00:00",
     "discovery_source": "manual_id",
-    "chain_id": 84532
+    "chain_id": 84532,
+    "venice": {
+      "model": "qwen3-235b-a22b-instruct-2507",
+      "reasoning": "Empty agent URI \u2014 no manifest available for evaluation. Cannot verify identity or service endpoints. Only on-chain wallet data exists with moderate transaction history. Insufficient data for meaningful trust assessment.",
+      "tokens_sent": 684,
+      "tokens_received": 342,
+      "latency_ms": 29885,
+      "parse_method": "json_schema"
+    },
+    "onchain": {
+      "wallet_address": "0x692d0C8fFb709116D953c0f1403bC83B03C04C30",
+      "tx_count": 15,
+      "balance_eth": 0.00183680929994361,
+      "reputation_entries": 0
+    },
+    "identity": {
+      "fields_present": [],
+      "fields_missing": [],
+      "services_declared": 0,
+      "uri_resolved": ""
+    }
   },
   {
     "agent_id": 2093,
@@ -186,7 +352,27 @@
     "tool_calls_used": 4,
     "timestamp": "2026-03-18T11:22:40.044771+00:00",
     "discovery_source": "erc8004_events",
-    "chain_id": 84532
+    "chain_id": 84532,
+    "venice": {
+      "model": "qwen3-235b-a22b-instruct-2507",
+      "reasoning": "URI points to 8004scan.io which returned non-manifest content. No valid agent manifest or service endpoints found. Wallet has on-chain activity but agent identity cannot be verified.",
+      "tokens_sent": 876,
+      "tokens_received": 438,
+      "latency_ms": 42190,
+      "parse_method": "json_schema"
+    },
+    "onchain": {
+      "wallet_address": "0xB163815FE7B3F6e4fC0746aDEDEF705Fe29D8d0b",
+      "tx_count": 44,
+      "balance_eth": 0.0599271598027724,
+      "reputation_entries": 0
+    },
+    "identity": {
+      "fields_present": [],
+      "fields_missing": [],
+      "services_declared": 0,
+      "uri_resolved": "https://www.8004scan.io/agents/celo/2333"
+    }
   },
   {
     "agent_id": 2094,
@@ -213,6 +399,31 @@
     "tool_calls_used": 4,
     "timestamp": "2026-03-18T18:22:51.235791+00:00",
     "discovery_source": "manual_id",
-    "chain_id": 84532
+    "chain_id": 84532,
+    "venice": {
+      "model": "qwen3-235b-a22b-instruct-2507",
+      "reasoning": "LAIDA agent with well-defined manifest including ZK proof capabilities. Humanity verification endpoint is live and responsive. Strong on-chain presence with active wallet. Agent demonstrates clear purpose and functioning infrastructure.",
+      "tokens_sent": 892,
+      "tokens_received": 446,
+      "latency_ms": 34972,
+      "parse_method": "json_schema"
+    },
+    "onchain": {
+      "wallet_address": "0x5e500fD6c0db1F163A652B2A22dA2C4f6F79128B",
+      "tx_count": 61,
+      "balance_eth": 0.03611270160526341,
+      "reputation_entries": 0
+    },
+    "identity": {
+      "fields_present": [
+        "name",
+        "description",
+        "services",
+        "supportedTrust"
+      ],
+      "fields_missing": [],
+      "services_declared": 1,
+      "uri_resolved": "data:application/json;base64,eyJuYW1lIjoiTEFJREEgLSBMaW5ndWlzdGljIEFJIERldGVybWl"
+    }
   }
 ]

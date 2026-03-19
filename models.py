@@ -228,6 +228,26 @@ class TrustVerdict:
             "timestamp": self.timestamp,
             "discovery_source": self.agent.discovery_source,
             "chain_id": self.agent.chain_id,
+            "venice": {
+                "model": self.venice_evaluation.model,
+                "reasoning": self.venice_evaluation.reasoning,
+                "tokens_sent": self.venice_evaluation.tokens_sent,
+                "tokens_received": self.venice_evaluation.tokens_received,
+                "latency_ms": self.venice_evaluation.latency_ms,
+                "parse_method": self.venice_evaluation.parse_method.value,
+            },
+            "onchain": {
+                "wallet_address": self.onchain_analysis.wallet_address,
+                "tx_count": self.onchain_analysis.transaction_count,
+                "balance_eth": self.onchain_analysis.balance_eth,
+                "reputation_entries": self.onchain_analysis.existing_reputation.feedback_count,
+            },
+            "identity": {
+                "fields_present": self.identity_verification.fields_present,
+                "fields_missing": self.identity_verification.fields_missing,
+                "services_declared": self.identity_verification.services_declared,
+                "uri_resolved": self.identity_verification.uri_resolved,
+            },
         }
 
     def to_verdict_dict(self) -> dict:
