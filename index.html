@@ -1057,8 +1057,8 @@
         const btn = document.getElementById('eval-btn');
 
         try {
-            const url = API_BASE ? `${API_BASE}/api/results` : '/api/results';
-            const resp = await fetch(url, { method: 'HEAD' }).catch(() => null);
+            const url = API_BASE ? `${API_BASE}/api/health` : '/api/health';
+            const resp = await fetch(url).catch(() => null);
             if (resp && resp.ok) {
                 dot.className = 'inline-block w-2 h-2 rounded-full bg-emerald-400 pulse-glow-green';
                 label.textContent = 'API Connected';
