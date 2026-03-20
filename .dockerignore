@@ -1,0 +1,17 @@
+.env
+env/
+venv/
+__pycache__/
+*.pyc
+.git/
+.github/
+.builder-team/
+.DS_Store
+agent_log.json
+sentinel.log
+CLAUDE.md
+PLAN.md
+CONVERSATION_LOG.md
+hackathon_context.md
+tests/
+*.session

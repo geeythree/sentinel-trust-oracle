@@ -4,180 +4,535 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sentinel — Agent Trust Oracle</title>
+    <meta name="description" content="Autonomous agent trust verification with on-chain reputation. ERC-8004 identity, endpoint liveness, on-chain history, and Venice private AI trust analysis.">
+    <meta property="og:title" content="Sentinel — Agent Trust Oracle">
+    <meta property="og:description" content="Autonomous agent that verifies ERC-8004 agent identities and writes verifiable trust scores to the Reputation Registry via EAS attestations on Base.">
+    <meta property="og:type" content="website">
+    <meta name="theme-color" content="#0a0e1a">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🛡️</text></svg>">
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>tailwind.config = { theme: { extend: {} } }</script>
     <style>
-        .radar-label { font: 12px sans-serif; fill: #6b7280; }
-        .radar-grid { stroke: #e5e7eb; stroke-width: 1; fill: none; }
-        .radar-axis { stroke: #d1d5db; stroke-width: 1; }
-        .radar-fill { fill: rgba(99, 102, 241, 0.2); stroke: #6366f1; stroke-width: 2; }
-        .radar-point { fill: #6366f1; }
+        /* === Base Dark Theme === */
+        body {
+            background: #0a0e1a;
+            color: #d1d5db;
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+        }
+
+        /* === Animated Grid Background === */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            z-index: -1;
+            background-image:
+                linear-gradient(rgba(6, 182, 212, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(6, 182, 212, 0.03) 1px, transparent 1px);
+            background-size: 60px 60px;
+            animation: gridMove 20s linear infinite;
+        }
+        @keyframes gridMove {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(60px, 60px); }
+        }
+
+        /* === Glassmorphism Card === */
+        .glass-card {
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(6, 182, 212, 0.15);
+            border-radius: 12px;
+            transition: border-color 0.3s, box-shadow 0.3s, transform 0.3s;
+        }
+        .glass-card:hover {
+            border-color: rgba(6, 182, 212, 0.4);
+            box-shadow: 0 0 20px rgba(6, 182, 212, 0.08);
+            transform: translateY(-1px);
+        }
+
+        /* === Gradient Text === */
+        .gradient-text {
+            background: linear-gradient(135deg, #06b6d4, #22d3ee, #a78bfa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* === Score Colors === */
         .score-high { color: #10b981; }
         .score-mid { color: #f59e0b; }
-        .score-low { color: #ef4444; }
+        .score-low { color: #f43f5e; }
+
+        /* === Radar Chart === */
+        .radar-label { font: 12px 'Inter', sans-serif; fill: #9ca3af; }
+        .radar-grid { stroke: rgba(6, 182, 212, 0.12); stroke-width: 1; fill: none; }
+        .radar-axis { stroke: rgba(6, 182, 212, 0.2); stroke-width: 1; }
+        .radar-fill {
+            fill: rgba(6, 182, 212, 0.15);
+            stroke: #22d3ee;
+            stroke-width: 2;
+            filter: drop-shadow(0 0 6px rgba(6, 182, 212, 0.4));
+            transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .radar-point {
+            fill: #22d3ee;
+            filter: drop-shadow(0 0 4px rgba(6, 182, 212, 0.6));
+        }
+
+        /* === Animations === */
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(24px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade-in-up {
+            animation: fadeInUp 0.5s ease-out forwards;
+            opacity: 0;
+        }
+
+        @keyframes pulseGlow {
+            0%, 100% { box-shadow: 0 0 4px rgba(16, 185, 129, 0.3); }
+            50% { box-shadow: 0 0 12px rgba(16, 185, 129, 0.6); }
+        }
+        .pulse-glow-green {
+            animation: pulseGlow 2s ease-in-out infinite;
+        }
+        @keyframes pulseGlowCyan {
+            0%, 100% { box-shadow: 0 0 4px rgba(6, 182, 212, 0.3); }
+            50% { box-shadow: 0 0 12px rgba(6, 182, 212, 0.6); }
+        }
+        .pulse-glow-cyan {
+            animation: pulseGlowCyan 2s ease-in-out infinite;
+        }
+
+        @keyframes scoreReveal {
+            0% { transform: scale(0.5); opacity: 0; }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        .score-reveal {
+            animation: scoreReveal 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+        }
+
+        @keyframes shimmer {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+        }
+        .shimmer {
+            background: linear-gradient(90deg, transparent, rgba(6, 182, 212, 0.08), transparent);
+            background-size: 200% 100%;
+            animation: shimmer 2s infinite;
+        }
+
+        /* === Pipeline Stages === */
+        .pipeline-stage {
+            padding: 6px 14px;
+            border-radius: 8px;
+            font-size: 11px;
+            font-weight: 600;
+            font-family: 'SF Mono', 'Fira Code', monospace;
+            border: 1px solid rgba(100, 116, 139, 0.3);
+            color: #64748b;
+            background: rgba(15, 23, 42, 0.6);
+            transition: all 0.4s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        .pipeline-stage.active {
+            border-color: #22d3ee;
+            color: #22d3ee;
+            background: rgba(6, 182, 212, 0.1);
+            box-shadow: 0 0 12px rgba(6, 182, 212, 0.3);
+        }
+        .pipeline-stage.active::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(90deg, transparent, rgba(6, 182, 212, 0.1), transparent);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite;
+        }
+        .pipeline-stage.done {
+            border-color: #10b981;
+            color: #10b981;
+            background: rgba(16, 185, 129, 0.1);
+            box-shadow: 0 0 8px rgba(16, 185, 129, 0.2);
+        }
+        .pipeline-arrow {
+            color: #334155;
+            font-size: 14px;
+            transition: color 0.3s;
+        }
+        .pipeline-arrow.lit {
+            color: #22d3ee;
+            filter: drop-shadow(0 0 4px rgba(6, 182, 212, 0.5));
+        }
+
+        /* === Neon Button === */
+        .neon-btn {
+            background: linear-gradient(135deg, #06b6d4, #0891b2);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 8px 24px;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 0 12px rgba(6, 182, 212, 0.3);
+        }
+        .neon-btn:hover:not(:disabled) {
+            box-shadow: 0 0 24px rgba(6, 182, 212, 0.5);
+            transform: translateY(-1px);
+        }
+        .neon-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* === Filter Buttons === */
+        .filter-btn {
+            padding: 6px 14px;
+            font-size: 13px;
+            font-weight: 500;
+            border-radius: 8px;
+            border: 1px solid rgba(100, 116, 139, 0.3);
+            background: rgba(15, 23, 42, 0.6);
+            color: #94a3b8;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .filter-btn:hover {
+            border-color: rgba(6, 182, 212, 0.4);
+            color: #cbd5e1;
+        }
+        .filter-btn.active {
+            background: linear-gradient(135deg, rgba(6, 182, 212, 0.2), rgba(139, 92, 246, 0.2));
+            border-color: #22d3ee;
+            color: #22d3ee;
+            box-shadow: 0 0 8px rgba(6, 182, 212, 0.2);
+        }
+
+        /* === Misc === */
         .line-clamp-2 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-        .budget-bar { height: 6px; border-radius: 3px; background: #e5e7eb; overflow: hidden; }
-        .budget-fill { height: 100%; border-radius: 3px; background: #6366f1; transition: width 0.3s; }
+        .budget-bar { height: 6px; border-radius: 3px; background: rgba(100, 116, 139, 0.2); overflow: hidden; }
+        .budget-fill { height: 100%; border-radius: 3px; background: linear-gradient(90deg, #06b6d4, #22d3ee); transition: width 0.3s; }
         details summary { cursor: pointer; list-style: none; }
         details summary::-webkit-details-marker { display: none; }
+
+        /* === Neon Input === */
+        .neon-input {
+            background: rgba(15, 23, 42, 0.8);
+            border: 1px solid rgba(100, 116, 139, 0.3);
+            border-radius: 8px;
+            color: #e2e8f0;
+            padding: 8px 16px;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+        .neon-input:focus {
+            outline: none;
+            border-color: #22d3ee;
+            box-shadow: 0 0 12px rgba(6, 182, 212, 0.2);
+        }
+        .neon-input::placeholder { color: #4b5563; }
+
+        /* === Scrollbar === */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #0a0e1a; }
+        ::-webkit-scrollbar-thumb { background: rgba(6, 182, 212, 0.3); border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(6, 182, 212, 0.5); }
+
+        /* === Sub-detail Panels === */
+        .detail-panel {
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid rgba(100, 116, 139, 0.15);
+            border-radius: 8px;
+            padding: 8px 12px;
+            margin-top: 8px;
+        }
+        .detail-panel-sky { border-color: rgba(14, 165, 233, 0.2); }
+        .detail-panel-amber { border-color: rgba(245, 158, 11, 0.2); }
+        .detail-panel-violet { border-color: rgba(139, 92, 246, 0.2); }
+
+        /* === State Badges === */
+        .badge-published {
+            background: rgba(16, 185, 129, 0.15);
+            color: #34d399;
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            animation: pulseGlow 3s ease-in-out infinite;
+        }
+        .badge-verified {
+            background: rgba(6, 182, 212, 0.15);
+            color: #22d3ee;
+            border: 1px solid rgba(6, 182, 212, 0.3);
+            animation: pulseGlowCyan 3s ease-in-out infinite;
+        }
+        .badge-withheld {
+            background: rgba(245, 158, 11, 0.15);
+            color: #fbbf24;
+            border: 1px solid rgba(245, 158, 11, 0.3);
+        }
+        .badge-pending {
+            background: rgba(251, 146, 60, 0.15);
+            color: #fb923c;
+            border: 1px solid rgba(251, 146, 60, 0.3);
+        }
+        .badge-failed {
+            background: rgba(244, 63, 94, 0.15);
+            color: #fb7185;
+            border: 1px solid rgba(244, 63, 94, 0.3);
+        }
+
+        /* === Banner variants === */
+        .banner-blue {
+            background: rgba(6, 182, 212, 0.06);
+            border: 1px solid rgba(6, 182, 212, 0.2);
+        }
+        .banner-violet {
+            background: rgba(139, 92, 246, 0.06);
+            border: 1px solid rgba(139, 92, 246, 0.2);
+        }
+        .banner-emerald {
+            background: rgba(16, 185, 129, 0.06);
+            border: 1px solid rgba(16, 185, 129, 0.2);
+        }
     </style>
 </head>
-<body class="bg-gray-50 min-h-screen">
+<body class="min-h-screen">
     <div class="max-w-6xl mx-auto px-4 py-8">
         <!-- Header -->
-        <div class="bg-white rounded-lg shadow-sm p-6 mb-6">
+        <div class="glass-card p-6 mb-6 animate-fade-in-up">
             <div class="flex items-center justify-between">
                 <div>
-                    <h1 class="text-2xl font-bold text-gray-900">Sentinel — Agent Trust Oracle</h1>
-                    <p class="text-gray-500 mt-1">Autonomous agent trust verification with on-chain reputation</p>
+                    <h1 class="text-2xl font-bold gradient-text">Sentinel — Agent Trust Oracle</h1>
+                    <p class="text-gray-500 mt-1 text-sm">Autonomous agent trust verification with on-chain reputation</p>
                 </div>
                 <div class="text-right text-sm text-gray-500">
-                    <div>ERC-8004 on Base</div>
-                    <div id="agent-id" class="font-mono"></div>
+                    <div class="text-cyan-400 font-semibold">ERC-8004 on Base</div>
+                    <div id="agent-id" class="font-mono text-gray-400"></div>
                 </div>
             </div>
-            <div class="mt-4 grid grid-cols-3 gap-4 text-sm">
-                <div class="bg-gray-50 rounded p-3">
-                    <div class="text-gray-500">Operator</div>
-                    <div id="operator-wallet" class="font-mono text-xs truncate"></div>
+            <div class="mt-4 grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm">
+                <div class="bg-slate-800/50 rounded-lg p-3 border border-slate-700/50">
+                    <div class="text-gray-500 text-xs">Operator</div>
+                    <div id="operator-wallet" class="font-mono text-xs text-gray-300 truncate"></div>
                 </div>
-                <div class="bg-gray-50 rounded p-3">
-                    <div class="text-gray-500">Evaluator</div>
-                    <div id="evaluator-wallet" class="font-mono text-xs truncate"></div>
+                <div class="bg-slate-800/50 rounded-lg p-3 border border-slate-700/50">
+                    <div class="text-gray-500 text-xs">Evaluator</div>
+                    <div id="evaluator-wallet" class="font-mono text-xs text-gray-300 truncate"></div>
                 </div>
-                <div class="bg-gray-50 rounded p-3">
-                    <div class="text-gray-500">Agents Evaluated</div>
-                    <div id="total-count" class="text-2xl font-bold text-indigo-600">0</div>
+                <div class="bg-slate-800/50 rounded-lg p-3 border border-slate-700/50">
+                    <div class="text-gray-500 text-xs">Agents Evaluated</div>
+                    <div id="total-count" class="text-2xl font-bold text-cyan-400">0</div>
                 </div>
             </div>
         </div>
 
         <!-- ERC-8004 Multi-Registry Banner -->
-        <div id="erc8004-banner" class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6" style="display:none">
+        <div id="erc8004-banner" class="glass-card banner-blue rounded-lg p-4 mb-6" style="display:none">
             <div class="flex items-center gap-3">
-                <div class="text-blue-700 font-semibold text-sm">ERC-8004 Multi-Registry Integration</div>
-                <span class="px-2 py-0.5 rounded bg-blue-100 text-blue-600 text-xs font-mono">3-wallet isolation</span>
+                <div class="text-cyan-400 font-semibold text-sm">ERC-8004 Multi-Registry Integration</div>
+                <span class="px-2 py-0.5 rounded bg-cyan-900/40 text-cyan-300 text-xs font-mono border border-cyan-700/30">3-wallet isolation</span>
             </div>
             <div class="mt-2 grid grid-cols-2 md:grid-cols-4 gap-3 text-xs">
                 <div>
-                    <div class="text-blue-500">Identity Registry</div>
-                    <a id="identity-registry" href="#" target="_blank" class="text-blue-700 font-mono hover:underline break-all"></a>
+                    <div class="text-cyan-600">Identity Registry</div>
+                    <a id="identity-registry" href="#" target="_blank" rel="noopener noreferrer" class="text-cyan-400 font-mono hover:text-cyan-300 break-all"></a>
                 </div>
                 <div>
-                    <div class="text-blue-500">Reputation Registry</div>
-                    <a id="reputation-registry" href="#" target="_blank" class="text-blue-700 font-mono hover:underline break-all"></a>
+                    <div class="text-cyan-600">Reputation Registry</div>
+                    <a id="reputation-registry" href="#" target="_blank" rel="noopener noreferrer" class="text-cyan-400 font-mono hover:text-cyan-300 break-all"></a>
                 </div>
                 <div>
-                    <div class="text-blue-500">EAS Attestations</div>
-                    <a id="eas-contract" href="#" target="_blank" class="text-blue-700 font-mono hover:underline break-all"></a>
+                    <div class="text-cyan-600">EAS Attestations</div>
+                    <a id="eas-contract" href="#" target="_blank" rel="noopener noreferrer" class="text-cyan-400 font-mono hover:text-cyan-300 break-all"></a>
                 </div>
                 <div>
-                    <div class="text-blue-500">Sentinel Agent ID</div>
-                    <div id="sentinel-agent-id" class="text-blue-700 font-mono font-bold"></div>
+                    <div class="text-cyan-600">Sentinel Agent ID</div>
+                    <div id="sentinel-agent-id" class="text-cyan-300 font-mono font-bold"></div>
                 </div>
             </div>
-            <div class="mt-2 text-[10px] text-blue-400">
+            <div class="mt-2 text-[10px] text-cyan-700">
                 Operator wallet registers identity. Evaluator wallet writes reputation feedback. Separate wallets enforce trust isolation.
             </div>
         </div>
 
         <!-- Venice Stats Banner -->
-        <div id="venice-banner" class="bg-violet-50 border border-violet-200 rounded-lg p-4 mb-6" style="display:none">
+        <div id="venice-banner" class="glass-card banner-violet rounded-lg p-4 mb-6" style="display:none">
             <div class="flex items-center gap-3">
-                <div class="text-violet-700 font-semibold text-sm">Venice Private Inference</div>
-                <span class="px-2 py-0.5 rounded bg-violet-100 text-violet-600 text-xs font-mono">zero data retention</span>
+                <div class="text-violet-400 font-semibold text-sm">Venice Private Inference</div>
+                <span class="px-2 py-0.5 rounded bg-violet-900/40 text-violet-300 text-xs font-mono border border-violet-700/30">zero data retention</span>
             </div>
-            <div class="mt-2 grid grid-cols-5 gap-4 text-sm">
+            <div class="mt-2 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4 text-sm">
                 <div>
                     <div class="text-violet-500 text-xs">API Calls</div>
-                    <div id="venice-calls" class="text-lg font-bold text-violet-700">0</div>
+                    <div id="venice-calls" class="text-lg font-bold text-violet-400">0</div>
                 </div>
                 <div>
                     <div class="text-violet-500 text-xs">Total Tokens</div>
-                    <div id="venice-tokens" class="text-lg font-bold text-violet-700">0</div>
+                    <div id="venice-tokens" class="text-lg font-bold text-violet-400">0</div>
                 </div>
                 <div>
                     <div class="text-violet-500 text-xs">Model</div>
-                    <div id="venice-model" class="text-lg font-bold text-violet-700">—</div>
+                    <div id="venice-model" class="text-lg font-bold text-violet-400">—</div>
                 </div>
                 <div>
                     <div class="text-violet-500 text-xs">Parse Success</div>
-                    <div id="venice-parse" class="text-lg font-bold text-violet-700">—</div>
+                    <div id="venice-parse" class="text-lg font-bold text-violet-400">—</div>
                 </div>
                 <div>
                     <div class="text-violet-500 text-xs">Parse Strategy</div>
-                    <div class="text-xs text-violet-600 mt-1">4-layer fallback: json_schema → regex → retry → neutral</div>
+                    <div class="text-xs text-violet-500 mt-1">4-layer fallback: json_schema → regex → retry → neutral</div>
                 </div>
             </div>
         </div>
 
         <!-- Autonomy Stats Banner -->
-        <div id="autonomy-banner" class="bg-emerald-50 border border-emerald-200 rounded-lg p-4 mb-6" style="display:none">
+        <div id="autonomy-banner" class="glass-card banner-emerald rounded-lg p-4 mb-6" style="display:none">
             <div class="flex items-center gap-3">
-                <div class="text-emerald-700 font-semibold text-sm">Autonomous Pipeline</div>
-                <span class="px-2 py-0.5 rounded bg-emerald-100 text-emerald-600 text-xs font-mono">fully autonomous</span>
+                <div class="text-emerald-400 font-semibold text-sm">Autonomous Pipeline</div>
+                <span class="px-2 py-0.5 rounded bg-emerald-900/40 text-emerald-300 text-xs font-mono border border-emerald-700/30">fully autonomous</span>
             </div>
-            <div class="mt-2 grid grid-cols-5 gap-4 text-sm">
+            <div class="mt-2 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4 text-sm">
                 <div>
                     <div class="text-emerald-500 text-xs">Pipeline Stages</div>
-                    <div class="text-lg font-bold text-emerald-700">9</div>
+                    <div class="text-lg font-bold text-emerald-400">9</div>
                 </div>
                 <div>
                     <div class="text-emerald-500 text-xs">State Machine</div>
-                    <div class="text-lg font-bold text-emerald-700">13 states</div>
+                    <div class="text-lg font-bold text-emerald-400">13 states</div>
                 </div>
                 <div>
                     <div class="text-emerald-500 text-xs">Tool Budget</div>
-                    <div class="text-lg font-bold text-emerald-700">15/eval</div>
+                    <div class="text-lg font-bold text-emerald-400">15/eval</div>
                 </div>
                 <div>
                     <div class="text-emerald-500 text-xs">Published</div>
-                    <div id="autonomy-published" class="text-lg font-bold text-emerald-700">0</div>
+                    <div id="autonomy-published" class="text-lg font-bold text-emerald-400">0</div>
                 </div>
                 <div>
                     <div class="text-emerald-500 text-xs">Auto-Withheld</div>
-                    <div id="autonomy-withheld" class="text-lg font-bold text-emerald-700">0</div>
+                    <div id="autonomy-withheld" class="text-lg font-bold text-emerald-400">0</div>
                 </div>
             </div>
-            <div class="mt-2 text-[10px] text-emerald-400">
+            <div class="mt-2 text-[10px] text-emerald-700">
                 discover → verify identity → check liveness → on-chain analysis → Venice trust → score → verify → publish. Confidence ≥70 auto-publishes. &lt;70 auto-withholds or flags for human review.
             </div>
         </div>
 
+        <!-- Try It Live -->
+        <div id="live-eval" class="glass-card p-6 mb-6">
+            <div class="flex items-center justify-between mb-3">
+                <h2 class="text-lg font-semibold gradient-text">Try It Live</h2>
+                <div id="api-status" class="flex items-center gap-2 text-xs">
+                    <span id="api-dot" class="inline-block w-2 h-2 rounded-full bg-gray-600"></span>
+                    <span id="api-label" class="text-gray-500">Checking API...</span>
+                </div>
+            </div>
+            <p class="text-sm text-gray-500 mb-2">Enter any ERC-8004 Agent ID to run a full autonomous trust evaluation. Sentinel will:</p>
+            <div class="text-xs text-gray-500 mb-4 grid grid-cols-1 sm:grid-cols-3 gap-2">
+                <div class="flex items-center gap-1.5"><span class="text-cyan-500">1.</span> Fetch agent identity from the registry</div>
+                <div class="flex items-center gap-1.5"><span class="text-cyan-500">2.</span> Check endpoint liveness + on-chain history</div>
+                <div class="flex items-center gap-1.5"><span class="text-cyan-500">3.</span> Run Venice private AI trust analysis + publish score</div>
+            </div>
+            <div class="flex items-center gap-3">
+                <input id="eval-input" type="number" min="0" placeholder="Agent ID (e.g. 5, 100, 2094)"
+                    class="neon-input flex-1 max-w-xs" />
+                <button id="eval-btn" onclick="runLiveEval()" class="neon-btn">
+                    Evaluate
+                </button>
+            </div>
+            <div id="api-hint" class="mt-2 text-[11px] text-amber-500/80" style="display:none">
+                API server not connected. To enable live evaluations, start the server:<br>
+                <code class="bg-slate-800 text-amber-400 px-1.5 py-0.5 rounded font-mono text-[10px]">cd aqe && python3 main.py serve</code>
+                &nbsp;or open with&nbsp;
+                <code class="bg-slate-800 text-amber-400 px-1.5 py-0.5 rounded font-mono text-[10px]">?api=http://localhost:8080</code>
+            </div>
+
+            <!-- Pipeline Visualization -->
+            <div id="eval-pipeline" class="mt-4 flex items-center gap-2 flex-wrap" style="display:none">
+                <div class="pipeline-stage" data-stage="0">Discovering</div>
+                <span class="pipeline-arrow">→</span>
+                <div class="pipeline-stage" data-stage="1">Identity</div>
+                <span class="pipeline-arrow">→</span>
+                <div class="pipeline-stage" data-stage="2">Liveness</div>
+                <span class="pipeline-arrow">→</span>
+                <div class="pipeline-stage" data-stage="3">On-chain</div>
+                <span class="pipeline-arrow">→</span>
+                <div class="pipeline-stage" data-stage="4">Venice</div>
+                <span class="pipeline-arrow">→</span>
+                <div class="pipeline-stage" data-stage="5">Scoring</div>
+            </div>
+
+            <div id="eval-status" class="mt-3" style="display:none">
+                <div class="flex items-center gap-2">
+                    <svg class="animate-spin h-4 w-4 text-cyan-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                    </svg>
+                    <span id="eval-status-text" class="text-sm text-cyan-400">Evaluating agent... this takes ~30-60s (Venice inference is thorough)</span>
+                </div>
+            </div>
+            <div id="eval-error" class="mt-3 text-sm text-rose-400" style="display:none"></div>
+            <div id="eval-success" class="mt-3 text-sm text-emerald-400" style="display:none"></div>
+        </div>
+
         <!-- Filter Controls -->
-        <div class="flex items-center gap-4 mb-4">
-            <button id="filter-all" onclick="setFilter('all')" class="px-3 py-1.5 text-sm font-medium rounded-lg bg-indigo-600 text-white">All</button>
-            <button id="filter-published" onclick="setFilter('published')" class="px-3 py-1.5 text-sm font-medium rounded-lg bg-gray-200 text-gray-700 hover:bg-gray-300">Published / Verified</button>
-            <button id="filter-withheld" onclick="setFilter('withheld')" class="px-3 py-1.5 text-sm font-medium rounded-lg bg-gray-200 text-gray-700 hover:bg-gray-300">Withheld</button>
-            <span id="filter-count" class="text-sm text-gray-400 ml-auto"></span>
+        <div class="flex items-center gap-3 mb-4">
+            <button id="filter-all" onclick="setFilter('all')" class="filter-btn active">All</button>
+            <button id="filter-published" onclick="setFilter('published')" class="filter-btn">Published / Verified</button>
+            <button id="filter-withheld" onclick="setFilter('withheld')" class="filter-btn">Withheld</button>
+            <span id="filter-count" class="text-sm text-gray-600 ml-auto font-mono"></span>
         </div>
 
         <!-- Evaluation Cards -->
         <div id="evaluations" class="space-y-6"></div>
 
         <!-- Empty State -->
-        <div id="empty-state" class="bg-white rounded-lg shadow-sm p-12 text-center text-gray-400">
+        <div id="empty-state" class="glass-card p-12 text-center text-gray-600">
             <p class="text-lg">No evaluations yet</p>
-            <p class="mt-2 text-sm">Run: <code class="bg-gray-100 px-2 py-1 rounded">python3 main.py discover --testnet</code></p>
+            <p class="mt-2 text-sm">Run: <code class="bg-slate-800 text-cyan-400 px-2 py-1 rounded font-mono text-xs">python3 main.py discover --testnet</code></p>
         </div>
     </div>
 
     <script>
-    // SVG Radar Chart Generator
+    // ========== HTML Escaping (XSS prevention) ==========
+    const _escapeEl = document.createElement('div');
+    function esc(str) {
+        if (str == null) return '';
+        _escapeEl.textContent = String(str);
+        return _escapeEl.innerHTML;
+    }
+
+    // ========== SVG Radar Chart Generator ==========
+    let _radarId = 0;
     function createRadarChart(dimensions, size = 200) {
+        if (!dimensions) return '<div class="text-gray-600 text-xs p-4">No dimension data</div>';
         const labels = ['Identity', 'Liveness', 'On-chain', 'Venice'];
         const values = [
-            dimensions.identity_completeness,
-            dimensions.endpoint_liveness,
-            dimensions.onchain_history,
-            dimensions.venice_trust_analysis
+            dimensions.identity_completeness ?? 0,
+            dimensions.endpoint_liveness ?? 0,
+            dimensions.onchain_history ?? 0,
+            dimensions.venice_trust_analysis ?? 0
         ];
         const cx = size / 2, cy = size / 2;
         const maxR = size / 2 - 30;
         const levels = 4;
+        const filterId = 'glow-' + (++_radarId);
 
         let svg = `<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}">`;
 
-        // Grid circles
+        // Glow filter (unique ID per chart)
+        svg += `<defs>
+            <filter id="${filterId}">
+                <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+                <feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge>
+            </filter>
+        </defs>`;
+
+        // Grid polygons
         for (let i = 1; i <= levels; i++) {
             const r = (maxR / levels) * i;
             const points = [];
@@ -202,7 +557,7 @@
             svg += `<text x="${lx}" y="${ly}" text-anchor="${anchor}" dominant-baseline="middle" class="radar-label">${labels[j]}</text>`;
         }
 
-        // Data polygon
+        // Data polygon with glow
         const dataPoints = [];
         for (let j = 0; j < 4; j++) {
             const angle = (Math.PI * 2 * j) / 4 - Math.PI / 2;
@@ -211,7 +566,7 @@
             const y = cy + r * Math.sin(angle);
             dataPoints.push(`${x},${y}`);
         }
-        svg += `<polygon points="${dataPoints.join(' ')}" class="radar-fill"/>`;
+        svg += `<polygon points="${dataPoints.join(' ')}" class="radar-fill" filter="url(#${filterId})"/>`;
 
         // Data points
         for (let j = 0; j < 4; j++) {
@@ -220,7 +575,7 @@
             const x = cx + r * Math.cos(angle);
             const y = cy + r * Math.sin(angle);
             svg += `<circle cx="${x}" cy="${y}" r="4" class="radar-point"/>`;
-            svg += `<text x="${x}" y="${y - 10}" text-anchor="middle" class="radar-label" style="font-weight:bold;fill:#6366f1">${values[j]}</text>`;
+            svg += `<text x="${x}" y="${y - 10}" text-anchor="middle" class="radar-label" style="font-weight:bold;fill:#22d3ee">${values[j]}</text>`;
         }
 
         svg += '</svg>';
@@ -235,96 +590,110 @@
 
     function stateLabel(state) {
         const map = {
-            'PUBLISHED': ['Published', 'bg-green-100 text-green-800'],
-            'VERIFIED': ['Verified', 'bg-blue-100 text-blue-800'],
-            'WITHHELD_LOW_CONFIDENCE': ['Withheld', 'bg-yellow-100 text-yellow-800'],
-            'PENDING_HUMAN_REVIEW': ['Pending Review', 'bg-orange-100 text-orange-800'],
-            'FAILED': ['Failed', 'bg-red-100 text-red-800'],
+            'PUBLISHED': ['Published', 'badge-published'],
+            'VERIFIED': ['Verified', 'badge-verified'],
+            'WITHHELD_LOW_CONFIDENCE': ['Withheld', 'badge-withheld'],
+            'PENDING_HUMAN_REVIEW': ['Pending Review', 'badge-pending'],
+            'FAILED': ['Failed', 'badge-failed'],
         };
-        const [label, cls] = map[state] || [state, 'bg-gray-100 text-gray-800'];
+        const [label, cls] = map[state] || [state, 'bg-slate-700 text-gray-300'];
         return `<span class="px-2 py-1 rounded-full text-xs font-medium ${cls}">${label}</span>`;
     }
 
-    function renderEvaluation(eval) {
-        const explorerBase = eval.chain_id === 84532 ? 'https://sepolia.basescan.org' : 'https://basescan.org';
-        const easBase = eval.chain_id === 84532 ? 'https://base-sepolia.easscan.org' : 'https://base.easscan.org';
-        const txLink = eval.tx_hash
-            ? `<a href="${explorerBase}/tx/${eval.tx_hash}" target="_blank" class="text-indigo-600 hover:underline font-mono text-xs">${eval.tx_hash.slice(0, 14)}...</a>`
-            : '<span class="text-gray-400 text-xs">N/A</span>';
-        const attestLink = eval.attestation_uid
-            ? `<a href="${easBase}/attestation/view/0x${eval.attestation_uid}" target="_blank" class="text-emerald-600 hover:underline font-mono text-xs">0x${eval.attestation_uid.slice(0, 12)}...</a>`
-            : '<span class="text-gray-400 text-xs">N/A</span>';
-        const ownerLink = `<a href="${explorerBase}/address/${eval.owner_address}" target="_blank" class="text-indigo-600 hover:underline font-mono text-xs">${eval.owner_address.slice(0, 14)}...</a>`;
+    // ========== Render Single Evaluation Card ==========
+    function renderEvaluation(eval_data) {
+        if (!eval_data) return '';
+        const explorerBase = eval_data.chain_id === 84532 ? 'https://sepolia.basescan.org' : 'https://basescan.org';
+        const easBase = eval_data.chain_id === 84532 ? 'https://base-sepolia.easscan.org' : 'https://base.easscan.org';
 
-        const ep = eval.endpoints || {};
-        const oc = eval.onchain || {};
-        const id = eval.identity || {};
-        const budgetPct = Math.round((eval.tool_calls_used / 15) * 100);
+        // Sanitize hex strings (only allow 0x + hex chars)
+        const safeHex = (h) => typeof h === 'string' ? h.replace(/[^0-9a-fA-Fx]/g, '') : '';
+        const safeTxHash = safeHex(eval_data.tx_hash);
+        const safeAttUid = safeHex(eval_data.attestation_uid);
+        const safeOwner = safeHex(eval_data.owner_address);
+
+        const txLink = safeTxHash
+            ? `<a href="${explorerBase}/tx/${safeTxHash}" target="_blank" rel="noopener noreferrer" class="text-cyan-400 hover:text-cyan-300 font-mono text-xs">${safeTxHash.slice(0, 14)}...</a>`
+            : '<span class="text-gray-600 text-xs">N/A</span>';
+        const attestLink = safeAttUid
+            ? `<a href="${easBase}/attestation/view/0x${safeAttUid}" target="_blank" rel="noopener noreferrer" class="text-emerald-400 hover:text-emerald-300 font-mono text-xs">0x${safeAttUid.slice(0, 12)}...</a>`
+            : '<span class="text-gray-600 text-xs">N/A</span>';
+        const ownerLink = safeOwner
+            ? `<a href="${explorerBase}/address/${safeOwner}" target="_blank" rel="noopener noreferrer" class="text-cyan-400 hover:text-cyan-300 font-mono text-xs">${safeOwner.slice(0, 14)}...</a>`
+            : '<span class="text-gray-600 text-xs">N/A</span>';
+
+        const d = eval_data.dimensions || {};
+        const ep = eval_data.endpoints || {};
+        const oc = eval_data.onchain || {};
+        const id = eval_data.identity || {};
+        const budgetPct = Math.min(100, Math.round(((eval_data.tool_calls_used || 0) / 15) * 100));
 
         // On-chain details row
+        const safeOcWallet = safeHex(oc.wallet_address);
         const onchainRow = oc.tx_count !== undefined ? `
-            <div class="mt-2 bg-sky-50 rounded p-2 border border-sky-100">
-                <div class="text-xs font-semibold text-sky-700">On-chain Analysis</div>
-                <div class="mt-1 flex gap-4 text-[10px] text-sky-600 font-mono">
-                    ${oc.wallet_address ? `<span title="${oc.wallet_address}">Wallet: ${oc.wallet_address.slice(0, 10)}...</span>` : ''}
-                    <span>${oc.tx_count} transactions</span>
-                    <span>${(oc.balance_eth || 0).toFixed(4)} ETH</span>
-                    <span>${oc.reputation_entries || 0} existing reputation entries</span>
+            <div class="detail-panel detail-panel-sky">
+                <div class="text-xs font-semibold text-sky-400">On-chain Analysis</div>
+                <div class="mt-1 flex gap-4 text-[10px] text-sky-500 font-mono">
+                    ${safeOcWallet ? `<span title="${safeOcWallet}">Wallet: ${safeOcWallet.slice(0, 10)}...</span>` : ''}
+                    <span>${parseInt(oc.tx_count, 10) || 0} transactions</span>
+                    <span>${(Number(oc.balance_eth) || 0).toFixed(4)} ETH</span>
+                    <span>${parseInt(oc.reputation_entries, 10) || 0} existing reputation entries</span>
                 </div>
             </div>` : '';
 
         // Identity details row
         const identityRow = id.fields_present ? `
-            <div class="mt-2 bg-amber-50 rounded p-2 border border-amber-100">
+            <div class="detail-panel detail-panel-amber">
                 <div class="flex items-center gap-2 text-xs">
-                    <span class="font-semibold text-amber-700">Identity Verification</span>
-                    <span class="px-1.5 py-0.5 rounded bg-amber-100 text-amber-600 font-mono text-[10px]">${id.services_declared || 0} services</span>
+                    <span class="font-semibold text-amber-400">Identity Verification</span>
+                    <span class="px-1.5 py-0.5 rounded bg-amber-900/30 text-amber-400 font-mono text-[10px] border border-amber-700/30">${parseInt(id.services_declared, 10) || 0} services</span>
                 </div>
                 <div class="mt-1 flex gap-1 flex-wrap">
-                    ${(id.fields_present || []).map(f => `<span class="px-1 py-0.5 rounded bg-green-100 text-green-700 text-[10px]">${f}</span>`).join('')}
-                    ${(id.fields_missing || []).map(f => `<span class="px-1 py-0.5 rounded bg-red-100 text-red-500 text-[10px] line-through">${f}</span>`).join('')}
+                    ${(id.fields_present || []).map(f => `<span class="px-1 py-0.5 rounded bg-emerald-900/30 text-emerald-400 text-[10px] border border-emerald-700/20">${esc(f)}</span>`).join('')}
+                    ${(id.fields_missing || []).map(f => `<span class="px-1 py-0.5 rounded bg-rose-900/30 text-rose-400 text-[10px] line-through border border-rose-700/20">${esc(f)}</span>`).join('')}
                 </div>
             </div>` : '';
 
         // Venice details (expandable reasoning)
-        const veniceRow = eval.venice && eval.venice.tokens_sent > 0 ? `
-            <div class="mt-2 bg-violet-50 rounded p-2 border border-violet-100">
+        const v = eval_data.venice || {};
+        const veniceRow = v.tokens_sent > 0 ? `
+            <div class="detail-panel detail-panel-violet">
                 <div class="flex items-center gap-2 text-xs">
-                    <span class="font-semibold text-violet-700">Venice Private Inference</span>
-                    <span class="px-1.5 py-0.5 rounded bg-violet-100 text-violet-600 font-mono text-[10px]">${eval.venice.model || 'qwen3-235b'}</span>
-                    <span class="px-1.5 py-0.5 rounded bg-violet-100 text-violet-600 font-mono text-[10px]">${eval.venice.parse_method || 'json_schema'}</span>
+                    <span class="font-semibold text-violet-400">Venice Private Inference</span>
+                    <span class="px-1.5 py-0.5 rounded bg-violet-900/30 text-violet-400 font-mono text-[10px] border border-violet-700/30">${esc(v.model || 'qwen3-235b')}</span>
+                    <span class="px-1.5 py-0.5 rounded bg-violet-900/30 text-violet-400 font-mono text-[10px] border border-violet-700/30">${esc(v.parse_method || 'json_schema')}</span>
                 </div>
                 <details class="mt-1">
-                    <summary class="text-xs text-violet-600 italic cursor-pointer hover:text-violet-800">"${(eval.venice.reasoning || '').slice(0, 120)}..." <span class="text-violet-400 underline">expand</span></summary>
-                    <div class="mt-1 text-xs text-violet-600 italic">"${eval.venice.reasoning || ''}"</div>
+                    <summary class="text-xs text-violet-400 italic cursor-pointer hover:text-violet-300">"${esc((v.reasoning || '').slice(0, 120))}..." <span class="text-violet-500 underline">expand</span></summary>
+                    <div class="mt-1 text-xs text-violet-400 italic">"${esc(v.reasoning || '')}"</div>
                 </details>
                 <div class="mt-1 flex gap-3 text-[10px] text-violet-500 font-mono">
-                    <span>${eval.venice.tokens_sent + eval.venice.tokens_received} tokens</span>
-                    <span>${(eval.venice.latency_ms / 1000).toFixed(1)}s latency</span>
+                    <span>${(Number(v.tokens_sent) || 0) + (Number(v.tokens_received) || 0)} tokens</span>
+                    <span>${((Number(v.latency_ms) || 0) / 1000).toFixed(1)}s latency</span>
                     <span>zero data retention</span>
                 </div>
             </div>` : '';
 
         return `
-        <div class="bg-white rounded-lg shadow-sm p-6">
-            <div class="flex justify-between items-start">
-                <div>
-                    <h3 class="text-lg font-semibold text-gray-900">Agent #${eval.agent_id}</h3>
-                    <div class="mt-1 text-xs text-gray-500 truncate max-w-md" title="${eval.agent_uri}">${eval.agent_uri}</div>
-                    <div class="mt-1">Owner: ${ownerLink}</div>
+        <div class="glass-card p-6 eval-card">
+            <div class="flex flex-col sm:flex-row justify-between items-start gap-4">
+                <div class="min-w-0">
+                    <h3 class="text-lg font-semibold text-gray-100">Agent <span class="text-cyan-400">#${parseInt(eval_data.agent_id, 10) || 0}</span></h3>
+                    <div class="mt-1 text-xs text-gray-500 truncate max-w-md font-mono" title="${esc(eval_data.agent_uri)}">${esc(eval_data.agent_uri)}</div>
+                    <div class="mt-1 text-xs text-gray-400">Owner: ${ownerLink}</div>
                     <div class="mt-2 flex items-center gap-2">
-                        ${stateLabel(eval.state)}
-                        <span class="px-2 py-0.5 rounded text-xs font-mono ${eval.chain_id === 84532 ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700'}">${eval.chain_id === 84532 ? 'Sepolia' : 'Mainnet'}</span>
+                        ${stateLabel(eval_data.state)}
+                        <span class="px-2 py-0.5 rounded text-xs font-mono ${eval_data.chain_id === 84532 ? 'bg-violet-900/30 text-violet-400 border border-violet-700/30' : 'bg-cyan-900/30 text-cyan-400 border border-cyan-700/30'}">${eval_data.chain_id === 84532 ? 'Sepolia' : 'Mainnet'}</span>
                     </div>
                 </div>
-                <div class="text-right">
-                    <div class="text-3xl font-bold ${scoreClass(eval.composite_score)}">${eval.composite_score}</div>
+                <div class="text-right flex-shrink-0">
+                    <div class="text-3xl font-bold ${scoreClass(eval_data.composite_score ?? 0)} score-value" data-target="${eval_data.composite_score ?? 0}">${eval_data.composite_score ?? 0}</div>
                     <div class="text-sm text-gray-500">Trust Score</div>
-                    <div class="mt-1 text-sm">Confidence: <span class="${scoreClass(eval.confidence)} font-semibold">${eval.confidence}%</span></div>
+                    <div class="mt-1 text-sm text-gray-400">Confidence: <span class="${scoreClass(eval_data.confidence ?? 0)} font-semibold confidence-value" data-target="${eval_data.confidence ?? 0}">${eval_data.confidence ?? 0}%</span></div>
                     <div class="mt-2 w-32 ml-auto">
-                        <div class="flex justify-between text-[10px] text-gray-400 mb-0.5">
+                        <div class="flex justify-between text-[10px] text-gray-500 mb-0.5">
                             <span>Tool Budget</span>
-                            <span>${eval.tool_calls_used}/15</span>
+                            <span>${eval_data.tool_calls_used || 0}/15</span>
                         </div>
                         <div class="budget-bar">
                             <div class="budget-fill" style="width: ${budgetPct}%"></div>
@@ -332,30 +701,30 @@
                     </div>
                 </div>
             </div>
-            <div class="mt-4 flex items-start gap-8">
-                <div>${createRadarChart(eval.dimensions, 220)}</div>
+            <div class="mt-4 flex flex-col md:flex-row items-start gap-6">
+                <div class="flex-shrink-0 mx-auto md:mx-0">${createRadarChart(eval_data.dimensions, 220)}</div>
                 <div class="flex-1">
                     <table class="w-full text-sm">
-                        <tr class="border-b"><td class="py-2 text-gray-500">Identity Completeness</td><td class="py-2 text-right font-semibold ${scoreClass(eval.dimensions.identity_completeness)}">${eval.dimensions.identity_completeness}</td></tr>
-                        <tr class="border-b"><td class="py-2 text-gray-500">Endpoint Liveness</td><td class="py-2 text-right font-semibold ${scoreClass(eval.dimensions.endpoint_liveness)}">${eval.dimensions.endpoint_liveness}</td></tr>
-                        <tr class="border-b"><td class="py-2 text-gray-500">On-chain History</td><td class="py-2 text-right font-semibold ${scoreClass(eval.dimensions.onchain_history)}">${eval.dimensions.onchain_history}</td></tr>
-                        <tr class="border-b"><td class="py-2 text-gray-500">Venice Trust Analysis</td><td class="py-2 text-right font-semibold ${scoreClass(eval.dimensions.venice_trust_analysis)}">${eval.dimensions.venice_trust_analysis}</td></tr>
-                        <tr><td class="py-2 text-gray-500">Spread</td><td class="py-2 text-right">${eval.spread}</td></tr>
+                        <tr class="border-b border-slate-700/50"><td class="py-2 text-gray-400">Identity Completeness</td><td class="py-2 text-right font-semibold ${scoreClass(d.identity_completeness ?? 0)}">${d.identity_completeness ?? 0}</td></tr>
+                        <tr class="border-b border-slate-700/50"><td class="py-2 text-gray-400">Endpoint Liveness</td><td class="py-2 text-right font-semibold ${scoreClass(d.endpoint_liveness ?? 0)}">${d.endpoint_liveness ?? 0}</td></tr>
+                        <tr class="border-b border-slate-700/50"><td class="py-2 text-gray-400">On-chain History</td><td class="py-2 text-right font-semibold ${scoreClass(d.onchain_history ?? 0)}">${d.onchain_history ?? 0}</td></tr>
+                        <tr class="border-b border-slate-700/50"><td class="py-2 text-gray-400">Venice Trust Analysis</td><td class="py-2 text-right font-semibold ${scoreClass(d.venice_trust_analysis ?? 0)}">${d.venice_trust_analysis ?? 0}</td></tr>
+                        <tr><td class="py-2 text-gray-400">Spread</td><td class="py-2 text-right text-gray-300">${eval_data.spread ?? 0}</td></tr>
                     </table>
                     <div class="mt-3 space-y-1">
                         <div class="text-xs text-gray-500">
-                            Endpoints: <span class="font-medium">${ep.live || 0}/${ep.declared || 0} live</span>,
-                            <span class="font-medium">${ep.secured || 0} secured</span>,
-                            <span class="font-medium ${(ep.dead || 0) > 0 ? 'text-red-500' : ''}">${ep.dead || 0} dead</span>
+                            Endpoints: <span class="font-medium text-gray-400">${ep.live || 0}/${ep.declared || 0} live</span>,
+                            <span class="font-medium text-gray-400">${ep.secured || 0} secured</span>,
+                            <span class="font-medium ${(ep.dead || 0) > 0 ? 'text-rose-400' : 'text-gray-400'}">${ep.dead || 0} dead</span>
                         </div>
                         ${identityRow}
                         ${onchainRow}
                         ${veniceRow}
-                        <div class="text-xs text-gray-400 mt-2">
-                            <div>Source: ${eval.discovery_source} | Tools: ${eval.tool_calls_used}/15</div>
+                        <div class="text-xs text-gray-600 mt-2">
+                            <div>Source: ${esc(eval_data.discovery_source)} | Tools: ${eval_data.tool_calls_used || 0}/15</div>
                             <div>Reputation TX: ${txLink}</div>
                             <div>EAS Attestation: ${attestLink}</div>
-                            <div>${eval.timestamp}</div>
+                            <div>${esc(eval_data.timestamp)}</div>
                         </div>
                     </div>
                 </div>
@@ -363,21 +732,20 @@
         </div>`;
     }
 
-    // State: all evaluation data + current filter
+    // ========== State ==========
     let allData = [];
     let currentFilter = 'all';
-
     const stateOrder = { 'PUBLISHED': 0, 'VERIFIED': 1, 'PENDING_HUMAN_REVIEW': 2, 'WITHHELD_LOW_CONFIDENCE': 3, 'FAILED': 4 };
 
+    // ========== Filters ==========
     function setFilter(filter) {
         currentFilter = filter;
-        // Update button styles
         ['all', 'published', 'withheld'].forEach(f => {
             const btn = document.getElementById('filter-' + f);
             if (f === filter) {
-                btn.className = 'px-3 py-1.5 text-sm font-medium rounded-lg bg-indigo-600 text-white';
+                btn.className = 'filter-btn active';
             } else {
-                btn.className = 'px-3 py-1.5 text-sm font-medium rounded-lg bg-gray-200 text-gray-700 hover:bg-gray-300';
+                btn.className = 'filter-btn';
             }
         });
         renderAll();
@@ -392,13 +760,253 @@
         }
         const container = document.getElementById('evaluations');
         container.innerHTML = filtered.map(renderEvaluation).join('');
-        document.getElementById('filter-count').textContent = `Showing ${filtered.length} of ${allData.length}`;
+        document.getElementById('filter-count').textContent = `${filtered.length} / ${allData.length}`;
+
+        // Staggered fade-in for cards
+        requestAnimationFrame(() => {
+            const cards = container.querySelectorAll('.eval-card');
+            cards.forEach((card, i) => {
+                card.style.opacity = '0';
+                card.style.transform = 'translateY(24px)';
+                card.style.transition = `opacity 0.5s ease ${i * 0.08}s, transform 0.5s ease ${i * 0.08}s`;
+                requestAnimationFrame(() => {
+                    card.style.opacity = '1';
+                    card.style.transform = 'translateY(0)';
+                });
+            });
+        });
     }
 
-    // Load data
+    // ========== Animated Counter ==========
+    function animateCounter(el, target, suffix = '') {
+        const duration = 800;
+        const start = performance.now();
+        const initial = 0;
+        function tick(now) {
+            const elapsed = now - start;
+            const progress = Math.min(elapsed / duration, 1);
+            const eased = 1 - Math.pow(1 - progress, 3); // ease-out cubic
+            const current = Math.round(initial + (target - initial) * eased);
+            el.textContent = current + suffix;
+            if (progress < 1) requestAnimationFrame(tick);
+        }
+        requestAnimationFrame(tick);
+    }
+
+    // ========== Pipeline Animation ==========
+    let pipelineTimer = null;
+    function startPipelineAnimation() {
+        const pipeline = document.getElementById('eval-pipeline');
+        pipeline.style.display = 'flex';
+        const stages = pipeline.querySelectorAll('.pipeline-stage');
+        const arrows = pipeline.querySelectorAll('.pipeline-arrow');
+        // Reset
+        stages.forEach(s => { s.classList.remove('active', 'done'); });
+        arrows.forEach(a => { a.classList.remove('lit'); });
+
+        let current = 0;
+        function advanceStage() {
+            if (current > 0) {
+                stages[current - 1].classList.remove('active');
+                stages[current - 1].classList.add('done');
+            }
+            if (current < stages.length) {
+                stages[current].classList.add('active');
+                if (current > 0) arrows[current - 1].classList.add('lit');
+                current++;
+                pipelineTimer = setTimeout(advanceStage, 3000 + Math.random() * 4000);
+            }
+        }
+        advanceStage();
+    }
+
+    function completePipeline() {
+        if (pipelineTimer) clearTimeout(pipelineTimer);
+        const pipeline = document.getElementById('eval-pipeline');
+        const stages = pipeline.querySelectorAll('.pipeline-stage');
+        const arrows = pipeline.querySelectorAll('.pipeline-arrow');
+        stages.forEach(s => { s.classList.remove('active'); s.classList.add('done'); });
+        arrows.forEach(a => { a.classList.add('lit'); });
+    }
+
+    function resetPipeline() {
+        const pipeline = document.getElementById('eval-pipeline');
+        pipeline.style.display = 'none';
+    }
+
+    // ========== Load Agent Info ==========
+    // Hardcoded fallback from agent.json — used when file can't be fetched (e.g. static server)
+    const AGENT_FALLBACK = {
+        operator: { wallet: '0xA8E23950073B9ee31433F327Ee63798939EAB0c3', erc8004_agent_id: 33465 },
+        evaluator: { wallet: '0xb85f6995E093411DfEB88c484D3A318a78A9f106' },
+        chain: {
+            registries: {
+                identity_sepolia: '0x8004A818BFB912233c491871b3d84c89A494BD9e',
+                reputation_sepolia: '0x8004B663056A597Dffe9eCcC1965A193B7388713',
+                eas: '0x4200000000000000000000000000000000000021'
+            }
+        }
+    };
+
+    async function loadAgent() {
+        let agent = null;
+        try {
+            // Try multiple paths: parent dir, same dir, root, API
+            const paths = ['../agent.json', 'agent.json', '/agent.json'];
+            if (API_BASE) paths.unshift(`${API_BASE}/agent.json`);
+            for (const path of paths) {
+                try {
+                    const resp = await fetch(path);
+                    if (resp.ok) { agent = await resp.json(); break; }
+                } catch (_) {}
+            }
+        } catch (_) {}
+
+        // Use fallback if fetch failed
+        if (!agent) agent = AGENT_FALLBACK;
+
+        try {
+            document.getElementById('operator-wallet').textContent = agent.operator?.wallet || 'Not set';
+            document.getElementById('evaluator-wallet').textContent = agent.evaluator?.wallet || 'Not set';
+            if (agent.operator?.erc8004_agent_id) {
+                document.getElementById('agent-id').textContent = `Agent #${agent.operator.erc8004_agent_id}`;
+            }
+
+            const regs = agent.chain?.registries;
+            if (regs) {
+                document.getElementById('erc8004-banner').style.display = 'block';
+                const explorer = 'https://sepolia.basescan.org';
+
+                const idAddr = regs.identity_sepolia || regs.identity_mainnet;
+                const repAddr = regs.reputation_sepolia || regs.reputation_mainnet;
+                const easAddr = regs.eas;
+
+                const idEl = document.getElementById('identity-registry');
+                idEl.textContent = idAddr?.slice(0, 12) + '...';
+                idEl.href = `${explorer}/address/${idAddr}`;
+
+                const repEl = document.getElementById('reputation-registry');
+                repEl.textContent = repAddr?.slice(0, 12) + '...';
+                repEl.href = `${explorer}/address/${repAddr}`;
+
+                const easEl = document.getElementById('eas-contract');
+                easEl.textContent = easAddr?.slice(0, 12) + '...';
+                easEl.href = `${explorer}/address/${easAddr}`;
+
+                if (agent.operator?.erc8004_agent_id) {
+                    document.getElementById('sentinel-agent-id').textContent = `#${agent.operator.erc8004_agent_id}`;
+                }
+            }
+        } catch (e) {}
+    }
+
+    // ========== API URL Detection ==========
+    const params = new URLSearchParams(window.location.search);
+    const API_BASE = params.get('api') || '';
+
+    // ========== Live Evaluation ==========
+    async function runLiveEval() {
+        const input = document.getElementById('eval-input');
+        const btn = document.getElementById('eval-btn');
+        const status = document.getElementById('eval-status');
+        const statusText = document.getElementById('eval-status-text');
+        const errorEl = document.getElementById('eval-error');
+        const successEl = document.getElementById('eval-success');
+
+        const agentId = parseInt(input.value, 10);
+        if (isNaN(agentId) || agentId < 0) {
+            errorEl.textContent = 'Please enter a valid agent ID (non-negative integer).';
+            errorEl.style.display = 'block';
+            successEl.style.display = 'none';
+            return;
+        }
+
+        // Disable UI
+        btn.disabled = true;
+        input.disabled = true;
+        status.style.display = 'block';
+        errorEl.style.display = 'none';
+        successEl.style.display = 'none';
+        statusText.textContent = `Evaluating Agent #${agentId}... this takes ~30-60s (Venice inference is thorough)`;
+
+        // Start pipeline animation
+        startPipelineAnimation();
+
+        try {
+            const resp = await fetch(`${API_BASE}/api/evaluate`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ agent_id: agentId }),
+            });
+
+            if (resp.status === 429) {
+                throw new Error('Another evaluation is in progress. Please wait and try again.');
+            }
+            if (!resp.ok) {
+                const err = await resp.json().catch(() => ({ detail: resp.statusText }));
+                throw new Error(err.detail || `HTTP ${resp.status}`);
+            }
+
+            const result = await resp.json();
+
+            // Complete pipeline animation
+            completePipeline();
+
+            // Insert new card at top
+            const existing = allData.findIndex(e => e.agent_id === result.agent_id);
+            if (existing >= 0) {
+                allData[existing] = result;
+            } else {
+                allData.unshift(result);
+            }
+            document.getElementById('empty-state').style.display = 'none';
+            document.getElementById('total-count').textContent = allData.length;
+            renderAll();
+
+            // Animate the score reveal on the first card
+            setTimeout(() => {
+                const firstCard = document.querySelector('.eval-card');
+                if (firstCard) {
+                    const scoreEl = firstCard.querySelector('.score-value');
+                    if (scoreEl) {
+                        scoreEl.classList.add('score-reveal');
+                        animateCounter(scoreEl, result.composite_score);
+                    }
+                    const confEl = firstCard.querySelector('.confidence-value');
+                    if (confEl) {
+                        animateCounter(confEl, result.confidence, '%');
+                    }
+                }
+            }, 200);
+
+            successEl.innerHTML = `Agent <span class="text-cyan-400 font-mono">#${parseInt(agentId, 10)}</span> evaluated! Trust score: <span class="font-bold ${scoreClass(result.composite_score ?? 0)}">${result.composite_score ?? 0}</span>, State: ${esc(result.state)}`;
+            successEl.style.display = 'block';
+
+            // Scroll to the new card
+            document.getElementById('evaluations').scrollIntoView({ behavior: 'smooth' });
+        } catch (e) {
+            errorEl.textContent = e.message;
+            errorEl.style.display = 'block';
+            resetPipeline();
+        } finally {
+            btn.disabled = false;
+            input.disabled = false;
+            status.style.display = 'none';
+            // Hide pipeline after a delay so user can see completion
+            setTimeout(resetPipeline, 3000);
+        }
+    }
+
+    // Allow Enter key to trigger evaluation
+    document.getElementById('eval-input').addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') runLiveEval();
+    });
+
+    // ========== Load Data ==========
     async function loadData() {
         try {
-            const resp = await fetch('results.json');
+            const url = API_BASE ? `${API_BASE}/api/results` : 'results.json';
+            const resp = await fetch(url);
             if (!resp.ok) throw new Error('No data');
             const data = await resp.json();
 
@@ -441,54 +1049,41 @@
         }
     }
 
-    // Load agent.json for wallet info + ERC-8004 banner
-    async function loadAgent() {
+    // ========== API Health Check ==========
+    async function checkApiHealth() {
+        const dot = document.getElementById('api-dot');
+        const label = document.getElementById('api-label');
+        const hint = document.getElementById('api-hint');
+        const btn = document.getElementById('eval-btn');
+
         try {
-            // Try relative path first (local dev), then root path (GitHub Pages)
-            let resp = await fetch('../agent.json');
-            if (!resp.ok) resp = await fetch('agent.json');
-            if (!resp.ok) return;
-            const agent = await resp.json();
-            document.getElementById('operator-wallet').textContent = agent.operator?.wallet || 'Not set';
-            document.getElementById('evaluator-wallet').textContent = agent.evaluator?.wallet || 'Not set';
-            if (agent.operator?.erc8004_agent_id) {
-                document.getElementById('agent-id').textContent = `Agent #${agent.operator.erc8004_agent_id}`;
+            const url = API_BASE ? `${API_BASE}/api/results` : '/api/results';
+            const resp = await fetch(url, { method: 'HEAD' }).catch(() => null);
+            if (resp && resp.ok) {
+                dot.className = 'inline-block w-2 h-2 rounded-full bg-emerald-400 pulse-glow-green';
+                label.textContent = 'API Connected';
+                label.className = 'text-emerald-400';
+                hint.style.display = 'none';
+                btn.disabled = false;
+                return true;
             }
+        } catch (_) {}
 
-            // Populate ERC-8004 banner
-            const regs = agent.chain?.registries;
-            if (regs) {
-                document.getElementById('erc8004-banner').style.display = 'block';
-                const isTestnet = agent.chain?.testnet?.chain_id === 84532;
-                const explorer = 'https://sepolia.basescan.org';
-
-                const idAddr = regs.identity_sepolia || regs.identity_mainnet;
-                const repAddr = regs.reputation_sepolia || regs.reputation_mainnet;
-                const easAddr = regs.eas;
-
-                const idEl = document.getElementById('identity-registry');
-                idEl.textContent = idAddr?.slice(0, 12) + '...';
-                idEl.href = `${explorer}/address/${idAddr}`;
-
-                const repEl = document.getElementById('reputation-registry');
-                repEl.textContent = repAddr?.slice(0, 12) + '...';
-                repEl.href = `${explorer}/address/${repAddr}`;
-
-                const easEl = document.getElementById('eas-contract');
-                easEl.textContent = easAddr?.slice(0, 12) + '...';
-                easEl.href = `${explorer}/address/${easAddr}`;
-
-                if (agent.operator?.erc8004_agent_id) {
-                    document.getElementById('sentinel-agent-id').textContent = `#${agent.operator.erc8004_agent_id}`;
-                }
-            }
-        } catch (e) {}
+        dot.className = 'inline-block w-2 h-2 rounded-full bg-amber-400';
+        label.textContent = 'API Offline — viewing cached results';
+        label.className = 'text-amber-400';
+        hint.style.display = 'block';
+        // Don't disable button — let them try and see the error
+        return false;
     }
 
     loadData();
     loadAgent();
+    checkApiHealth();
     // Auto-refresh every 10 seconds
     setInterval(loadData, 10000);
+    // Re-check API health every 30 seconds
+    setInterval(checkApiHealth, 30000);
     </script>
 </body>
 </html>

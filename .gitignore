@@ -7,6 +7,7 @@ venv/
 
 # Runtime logs
 agent_log.json
+sentinel.log
 .telegram_ingest_state.json
 
 # Telegram session
@@ -15,7 +16,11 @@ agent_log.json
 # Project-local docs (keep locally, not in repo)
 CLAUDE.md
 PLAN.md
+CONVERSATION_LOG.md
 hackathon_context.md
+
+# Builder artifacts
+.builder-team/
 
 # OS
 .DS_Store
