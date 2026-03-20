@@ -12,4 +12,4 @@ COPY . .
 # Railway sets PORT env var
 EXPOSE 8000
 
-CMD ["sh", "-c", "uvicorn api:app --host 0.0.0.0 --port ${PORT:-8000}"]
+CMD ["python3", "api.py"]
