@@ -422,6 +422,44 @@
             </div>
         </div>
 
+        <!-- Verify On-Chain -->
+        <div id="verify-banner" class="glass-card rounded-lg p-4 mb-6" style="display:none; border-color: rgba(251, 191, 36, 0.25);">
+            <div class="flex items-center gap-3 mb-3">
+                <div class="text-amber-400 font-semibold text-sm">Verify On-Chain — Don't Trust, Verify</div>
+                <span class="px-2 py-0.5 rounded bg-amber-900/40 text-amber-300 text-xs font-mono border border-amber-700/30">independent verification</span>
+            </div>
+            <p class="text-xs text-amber-500/80 mb-3">Every published evaluation creates immutable on-chain artifacts. Click any link below to independently verify on a block explorer — no need to trust this dashboard.</p>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div class="bg-slate-900/60 rounded-lg p-3 border border-amber-800/20">
+                    <div class="text-xs text-amber-500 mb-1">Reputation Transactions</div>
+                    <div class="text-[11px] text-amber-400/70 mb-2">Each published score calls <code class="bg-slate-800 px-1 rounded text-amber-300">giveFeedback()</code> on the Reputation Registry. Verify the agent ID, score value, and evaluator wallet in the TX input data.</div>
+                    <div id="verify-rep-links" class="flex flex-wrap gap-1.5"></div>
+                </div>
+                <div class="bg-slate-900/60 rounded-lg p-3 border border-amber-800/20">
+                    <div class="text-xs text-amber-500 mb-1">EAS Attestations</div>
+                    <div class="text-[11px] text-amber-400/70 mb-2">Each published score creates an EAS attestation with trust score, confidence, identity status, and endpoint counts. Attestations are immutable and timestamped.</div>
+                    <div id="verify-eas-links" class="flex flex-wrap gap-1.5"></div>
+                </div>
+            </div>
+            <div class="mt-3 grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div class="bg-slate-900/60 rounded-lg p-3 border border-amber-800/20">
+                    <div class="text-xs text-amber-500 mb-1">Evaluator Wallet</div>
+                    <div class="text-[11px] text-amber-400/70 mb-1">All reputation TXs are signed by this wallet — proving a single autonomous agent evaluated all agents.</div>
+                    <a id="verify-evaluator" href="#" target="_blank" rel="noopener noreferrer" class="text-amber-400 hover:text-amber-300 font-mono text-[10px] break-all"></a>
+                </div>
+                <div class="bg-slate-900/60 rounded-lg p-3 border border-amber-800/20">
+                    <div class="text-xs text-amber-500 mb-1">Reputation Registry Contract</div>
+                    <div class="text-[11px] text-amber-400/70 mb-1">ERC-8004 Reputation Registry — read the contract source and verify <code class="bg-slate-800 px-1 rounded text-amber-300">giveFeedback()</code> events.</div>
+                    <a id="verify-rep-contract" href="#" target="_blank" rel="noopener noreferrer" class="text-amber-400 hover:text-amber-300 font-mono text-[10px] break-all"></a>
+                </div>
+                <div class="bg-slate-900/60 rounded-lg p-3 border border-amber-800/20">
+                    <div class="text-xs text-amber-500 mb-1">GitHub Repository</div>
+                    <div class="text-[11px] text-amber-400/70 mb-1">Full source code — every line of the evaluation pipeline is open source.</div>
+                    <a href="https://github.com/geeythree/sentinel-trust-oracle" target="_blank" rel="noopener noreferrer" class="text-amber-400 hover:text-amber-300 font-mono text-[10px]">github.com/geeythree/sentinel-trust-oracle</a>
+                </div>
+            </div>
+        </div>
+
         <!-- Try It Live -->
         <div id="live-eval" class="glass-card p-6 mb-6">
             <div class="flex items-center justify-between mb-3">
@@ -1045,6 +1083,53 @@
             const withheld = data.filter(e => e.state === 'WITHHELD_LOW_CONFIDENCE').length;
             document.getElementById('autonomy-published').textContent = published;
             document.getElementById('autonomy-withheld').textContent = withheld;
+
+            // Populate Verify On-Chain section
+            const publishedEvals = data.filter(e => (e.state === 'PUBLISHED' || e.state === 'VERIFIED') && (e.tx_hash || e.attestation_uid));
+            if (publishedEvals.length > 0) {
+                document.getElementById('verify-banner').style.display = 'block';
+                const safeHex = (h) => typeof h === 'string' ? h.replace(/[^0-9a-fA-Fx]/g, '') : '';
+
+                // Reputation TX links
+                const repContainer = document.getElementById('verify-rep-links');
+                repContainer.innerHTML = publishedEvals
+                    .filter(e => e.tx_hash)
+                    .map(e => {
+                        const explorer = e.chain_id === 84532 ? 'https://sepolia.basescan.org' : 'https://basescan.org';
+                        const h = safeHex(e.tx_hash);
+                        return `<a href="${explorer}/tx/${h}" target="_blank" rel="noopener noreferrer" class="px-2 py-1 rounded bg-amber-900/30 text-amber-400 hover:text-amber-300 font-mono text-[10px] border border-amber-700/20">#${parseInt(e.agent_id,10)} → ${h.slice(0,10)}...</a>`;
+                    }).join('');
+                if (!repContainer.innerHTML) repContainer.innerHTML = '<span class="text-amber-600 text-[10px]">No published TXs yet</span>';
+
+                // EAS Attestation links
+                const easContainer = document.getElementById('verify-eas-links');
+                easContainer.innerHTML = publishedEvals
+                    .filter(e => e.attestation_uid)
+                    .map(e => {
+                        const easBase = e.chain_id === 84532 ? 'https://base-sepolia.easscan.org' : 'https://base.easscan.org';
+                        const uid = safeHex(e.attestation_uid);
+                        return `<a href="${easBase}/attestation/view/0x${uid}" target="_blank" rel="noopener noreferrer" class="px-2 py-1 rounded bg-amber-900/30 text-amber-400 hover:text-amber-300 font-mono text-[10px] border border-amber-700/20">#${parseInt(e.agent_id,10)} → 0x${uid.slice(0,8)}...</a>`;
+                    }).join('');
+                if (!easContainer.innerHTML) easContainer.innerHTML = '<span class="text-amber-600 text-[10px]">No EAS attestations yet</span>';
+
+                // Evaluator wallet link
+                const evalWallet = document.getElementById('evaluator-wallet')?.textContent || '';
+                if (evalWallet && evalWallet !== 'Not set') {
+                    const explorer = publishedEvals[0].chain_id === 84532 ? 'https://sepolia.basescan.org' : 'https://basescan.org';
+                    const walletEl = document.getElementById('verify-evaluator');
+                    walletEl.textContent = evalWallet;
+                    walletEl.href = `${explorer}/address/${safeHex(evalWallet)}`;
+                }
+
+                // Reputation Registry contract link
+                const repAddr = document.getElementById('reputation-registry')?.href || '';
+                if (repAddr) {
+                    const repContractEl = document.getElementById('verify-rep-contract');
+                    const repText = document.getElementById('reputation-registry')?.textContent || '';
+                    repContractEl.textContent = repText;
+                    repContractEl.href = repAddr;
+                }
+            }
 
         } catch (e) {
             // No data yet -- show empty state
