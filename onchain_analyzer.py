@@ -1,10 +1,14 @@
 """Onchain wallet analysis for agent trust evaluation."""
 from __future__ import annotations
 
+import logging
+
 from web3 import Web3
 
 from logger import AgentLogger
 from models import ExistingReputation, OnchainAnalysis
+
+_log = logging.getLogger(__name__)
 
 
 class OnchainAnalyzer:
@@ -45,6 +49,7 @@ class OnchainAnalyzer:
                 onchain_score=score,
             )
         except Exception as e:
+            _log.warning("On-chain analysis failed for %s: %s", agent_wallet, e, exc_info=True)
             return OnchainAnalysis(
                 success=False,
                 wallet_address=agent_wallet,

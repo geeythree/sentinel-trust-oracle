@@ -244,6 +244,9 @@ class Orchestrator:
         _retry_count: int = 0,
     ) -> TrustVerdict:
         """Run the full pipeline on a single agent."""
+        # Reset budget for each new evaluation (not retries)
+        if _retry_count == 0:
+            self._logger.reset_budget()
         now = datetime.now(timezone.utc).isoformat()
         eval_id = f"agent_{agent.agent_id}_{int(time.time())}"
 

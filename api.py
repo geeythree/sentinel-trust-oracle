@@ -103,7 +103,7 @@ async def health():
             "network": "Base Sepolia" if cfg.USE_TESTNET else "Base Mainnet",
         }
     except Exception:
-        return {"status": "ok", "note": "Pipeline not yet initialized"}
+        return {"status": "degraded", "note": "Pipeline not yet initialized"}
 
 
 @app.post("/api/evaluate")

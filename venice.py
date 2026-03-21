@@ -198,6 +198,9 @@ class VeniceClient:
             score = max(0, min(100, int(parsed["score"])))
             reasoning = str(parsed["reasoning"])
             latency = int((time.monotonic() - start_ms) * 1000)
+            # Update token counts from Layer 3 response
+            tokens_sent = raw_response.get("usage", {}).get("prompt_tokens", tokens_sent)
+            tokens_received = raw_response.get("usage", {}).get("completion_tokens", tokens_received)
             return VeniceEvaluation(
                 dimension=dimension, score=score, reasoning=reasoning,
                 parse_method=VeniceParseMethod.RETRY_CORRECTION,

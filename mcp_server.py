@@ -3,11 +3,14 @@ from __future__ import annotations
 
 import asyncio
 import json
+import logging
 from typing import Any
 
 from mcp.server import Server
 from mcp.server.stdio import stdio_server
 from mcp.types import Tool, TextContent
+
+_log = logging.getLogger(__name__)
 
 
 app = Server("sentinel-trust-oracle")
@@ -102,22 +105,23 @@ async def call_tool(name: str, arguments: dict) -> list[TextContent]:
 
     if name == "verify_agent":
         agent_id = arguments.get("agent_id")
-        if agent_id is None:
-            return [TextContent(type="text", text=json.dumps({"error": "agent_id is required"}))]
+        if agent_id is None or not isinstance(agent_id, int) or agent_id < 0:
+            return [TextContent(type="text", text=json.dumps({"error": "agent_id must be a non-negative integer"}))]
         try:
             agent = await loop.run_in_executor(None, discovery.discover_agent_by_id, agent_id)
             result = await loop.run_in_executor(None, orchestrator.evaluate_single, agent)
             return [TextContent(type="text", text=json.dumps(result.to_verdict_dict()))]
         except Exception as e:
+            _log.exception("verify_agent failed for agent %s", agent_id)
             return [TextContent(type="text", text=json.dumps({
                 "agent_id": agent_id,
-                "error": str(e),
+                "error": "Evaluation failed. Please try again.",
             }))]
 
     elif name == "check_reputation":
         agent_id = arguments.get("agent_id")
-        if agent_id is None:
-            return [TextContent(type="text", text=json.dumps({"error": "agent_id is required"}))]
+        if agent_id is None or not isinstance(agent_id, int) or agent_id < 0:
+            return [TextContent(type="text", text=json.dumps({"error": "agent_id must be a non-negative integer"}))]
         try:
             count, value, decimals = await loop.run_in_executor(
                 None, blockchain.get_reputation_summary, agent_id
@@ -129,9 +133,10 @@ async def call_tool(name: str, arguments: dict) -> list[TextContent]:
                 "summary_decimals": decimals,
             }))]
         except Exception as e:
+            _log.exception("check_reputation failed for agent %s", agent_id)
             return [TextContent(type="text", text=json.dumps({
                 "agent_id": agent_id,
-                "error": str(e),
+                "error": "Reputation lookup failed. Please try again.",
             }))]
 
     return [TextContent(type="text", text=json.dumps({"error": f"Unknown tool: {name}"}))]

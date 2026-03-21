@@ -9,6 +9,8 @@ __pycache__/
 .DS_Store
 agent_log.json
 sentinel.log
+dashboard/results.json
+results.json
 CLAUDE.md
 PLAN.md
 CONVERSATION_LOG.md

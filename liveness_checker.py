@@ -1,6 +1,10 @@
 """Endpoint liveness checking for agent services."""
 from __future__ import annotations
 
+import ipaddress
+import logging
+import socket
+
 import requests
 from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
@@ -8,6 +12,8 @@ from urllib3.util.retry import Retry
 from config import config
 from logger import AgentLogger
 from models import EndpointCheck, LivenessResult
+
+_log = logging.getLogger(__name__)
 
 
 class LivenessChecker:
@@ -82,19 +88,44 @@ class LivenessChecker:
             details=details,
         )
 
+    @staticmethod
+    def _is_private_endpoint(endpoint: str) -> bool:
+        """SSRF guard: block requests to private/internal IPs."""
+        from urllib.parse import urlparse
+        parsed = urlparse(endpoint)
+        hostname = parsed.hostname or ""
+        if not hostname:
+            return True
+        try:
+            resolved = socket.gethostbyname(hostname)
+            ip = ipaddress.ip_address(resolved)
+            return (
+                ip.is_private or ip.is_loopback or ip.is_link_local
+                or ip.is_multicast or ip.is_reserved
+            )
+        except Exception:
+            return True  # DNS failure = block (conservative)
+
     def _check_endpoint(self, endpoint: str) -> EndpointCheck:
         """Check a single endpoint. Interpret status codes correctly."""
+        # SSRF guard: block private/internal IPs
+        if self._is_private_endpoint(endpoint):
+            _log.warning("Blocked liveness check to private/internal endpoint: %s", endpoint)
+            return EndpointCheck(endpoint=endpoint, status="blocked_private", http_code=0, score=0)
+
         try:
             # Use HEAD request first (lighter), fall back to GET if 405
             resp = self._session.head(
                 endpoint, timeout=config.LIVENESS_TIMEOUT, allow_redirects=False
             )
+            resp.close()
             status = resp.status_code
             if status == 405:
                 # Method Not Allowed — try GET instead
                 resp = self._session.get(
                     endpoint, timeout=config.LIVENESS_TIMEOUT, allow_redirects=False
                 )
+                resp.close()
                 status = resp.status_code
         except requests.Timeout:
             return EndpointCheck(endpoint=endpoint, status="timeout", http_code=0, score=0)

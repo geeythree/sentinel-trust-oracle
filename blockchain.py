@@ -31,9 +31,17 @@ class BlockchainClient:
         # Base is OP Stack -- needs POA middleware
         self._w3.middleware_onion.inject(ExtraDataToPOAMiddleware, layer=0)
 
-        # Load accounts
-        self._operator_account = Account.from_key(config.OPERATOR_PRIVATE_KEY)
-        self._evaluator_account = Account.from_key(config.EVALUATOR_PRIVATE_KEY)
+        # Load accounts (defer crash to write operations if keys missing)
+        try:
+            self._operator_account = Account.from_key(config.OPERATOR_PRIVATE_KEY)
+        except (ValueError, TypeError):
+            _log.warning("OPERATOR_PRIVATE_KEY not set — write operations will fail")
+            self._operator_account = None
+        try:
+            self._evaluator_account = Account.from_key(config.EVALUATOR_PRIVATE_KEY)
+        except (ValueError, TypeError):
+            _log.warning("EVALUATOR_PRIVATE_KEY not set — write operations will fail")
+            self._evaluator_account = None
         self._auditor_account = (
             Account.from_key(config.AUDITOR_PRIVATE_KEY)
             if config.AUDITOR_PRIVATE_KEY else None
@@ -287,6 +295,8 @@ class BlockchainClient:
 
         Returns (agent_id, tx_hash) tuple.
         """
+        if not self._operator_account:
+            raise BlockchainError("OPERATOR_PRIVATE_KEY not configured")
         tx = self._identity_registry.functions.register(
             agent_uri
         ).build_transaction(self._build_tx_params(self._operator_account))
@@ -326,6 +336,8 @@ class BlockchainClient:
 
         CRITICAL: This MUST use a different wallet from the agent owner.
         """
+        if not self._evaluator_account:
+            raise BlockchainError("EVALUATOR_PRIVATE_KEY not configured")
         report_json = verdict.to_report_json()
         feedback_hash = Web3.keccak(text=report_json)
         # FIX: Use data: URI instead of placeholder ipfs:// URI
@@ -443,6 +455,8 @@ class BlockchainClient:
         verdict: TrustVerdict,
     ) -> str:
         """Create an EAS attestation for a trust verdict."""
+        if not self._evaluator_account:
+            raise EASError("EVALUATOR_PRIVATE_KEY not configured")
         if not config.EAS_SCHEMA_UID:
             raise EASError("EAS_SCHEMA_UID not configured. Run register-schema first.")
 
@@ -594,12 +608,12 @@ class BlockchainClient:
         return self._w3
 
     @property
-    def operator_address(self) -> str:
-        return self._operator_account.address
+    def operator_address(self) -> Optional[str]:
+        return self._operator_account.address if self._operator_account else None
 
     @property
-    def evaluator_address(self) -> str:
-        return self._evaluator_account.address
+    def evaluator_address(self) -> Optional[str]:
+        return self._evaluator_account.address if self._evaluator_account else None
 
     @property
     def auditor_address(self) -> Optional[str]:

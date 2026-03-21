@@ -6,6 +6,7 @@
   },
   "deploy": {
     "startCommand": "python3 api.py",
+    "healthcheckPath": "/api/health",
     "restartPolicyType": "ON_FAILURE",
     "restartPolicyMaxRetries": 10
   }

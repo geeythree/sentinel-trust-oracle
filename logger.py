@@ -33,6 +33,11 @@ class AgentLogger:
     def tool_calls_used(self) -> int:
         return self._tool_calls_used
 
+    def reset_budget(self) -> None:
+        """Reset budget for a new evaluation."""
+        self._tool_calls_used = 0
+        self._budget_remaining = self._budget_total
+
     def consume_budget(self, count: int = 1) -> int:
         """Decrement budget. Returns remaining."""
         self._tool_calls_used += count

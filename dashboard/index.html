@@ -448,7 +448,7 @@
                 API server not connected. To enable live evaluations, start the server:<br>
                 <code class="bg-slate-800 text-amber-400 px-1.5 py-0.5 rounded font-mono text-[10px]">cd aqe && python3 main.py serve</code>
                 &nbsp;or open with&nbsp;
-                <code class="bg-slate-800 text-amber-400 px-1.5 py-0.5 rounded font-mono text-[10px]">?api=http://localhost:8080</code>
+                <code class="bg-slate-800 text-amber-400 px-1.5 py-0.5 rounded font-mono text-[10px]">?api=http://localhost:8000</code>
             </div>
 
             <!-- Pipeline Visualization -->
@@ -596,7 +596,7 @@
             'PENDING_HUMAN_REVIEW': ['Pending Review', 'badge-pending'],
             'FAILED': ['Failed', 'badge-failed'],
         };
-        const [label, cls] = map[state] || [state, 'bg-slate-700 text-gray-300'];
+        const [label, cls] = map[state] || [esc(state), 'bg-slate-700 text-gray-300'];
         return `<span class="px-2 py-1 rounded-full text-xs font-medium ${cls}">${label}</span>`;
     }
 
@@ -902,7 +902,9 @@
 
     // ========== API URL Detection ==========
     const params = new URLSearchParams(window.location.search);
-    const API_BASE = params.get('api') || '';
+    const rawApi = params.get('api') || '';
+    // Only allow same-origin or localhost API URLs to prevent open redirect
+    const API_BASE = (rawApi === '' || rawApi.startsWith('/') || /^https?:\/\/localhost[:/]/.test(rawApi) || rawApi.startsWith(window.location.origin)) ? rawApi : '';
 
     // ========== Live Evaluation ==========
     async function runLiveEval() {
@@ -1060,6 +1062,13 @@
             const url = API_BASE ? `${API_BASE}/api/health` : '/api/health';
             const resp = await fetch(url).catch(() => null);
             if (resp && resp.ok) {
+                const data = await resp.json().catch(() => ({}));
+                if (data.status === 'degraded') {
+                    dot.className = 'inline-block w-2 h-2 rounded-full bg-amber-400';
+                    label.textContent = 'API Degraded — pipeline not initialized';
+                    label.className = 'text-amber-400';
+                    return false;
+                }
                 dot.className = 'inline-block w-2 h-2 rounded-full bg-emerald-400 pulse-glow-green';
                 label.textContent = 'API Connected';
                 label.className = 'text-emerald-400';
