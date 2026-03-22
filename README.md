@@ -238,6 +238,12 @@ Terminal: WITHHELD_LOW_CONFIDENCE | PENDING_HUMAN_REVIEW | FAILED
 | **Discovery scale** | Scans `Registered` events via `eth_getLogs` — O(n blocks). | Migrate to a Graph Protocol subgraph for instant historical queries. |
 | **Venice model dependency** | Tied to Qwen3-235B via Venice. | Abstract the LLM layer to support model rotation and multi-model consensus scoring. |
 
+## Development History
+
+Sentinel was developed during the [Synthesis Hackathon](https://synthesis.md/) (March 2026) by Gayathri Satheesh with Claude Code as the AI engineering assistant. The project evolved from an earlier prototype called AQE (Agent Quality Evaluator) that targeted smart contract evaluation — the core pipeline architecture (discover → verify → analyze → score → publish) was adapted for agent trust evaluation when the ERC-8004 opportunity became clear.
+
+The full development conversation log is available in [`CONVERSATION_LOG.md`](CONVERSATION_LOG.md).
+
 ## Built With
 
 - [ERC-8004](https://eips.ethereum.org/EIPS/eip-8004) — On-chain agent identity and reputation
