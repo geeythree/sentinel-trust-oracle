@@ -18,7 +18,6 @@ class EvaluationState(str, Enum):
     VERIFYING = "VERIFYING"
     VERIFIED = "VERIFIED"
     WITHHELD_LOW_CONFIDENCE = "WITHHELD_LOW_CONFIDENCE"
-    PENDING_HUMAN_REVIEW = "PENDING_HUMAN_REVIEW"
     PUBLISHING = "PUBLISHING"
     PUBLISHED = "PUBLISHED"
     FAILED = "FAILED"
@@ -85,6 +84,8 @@ class IdentityVerification:
     services_declared: int = 0
     identity_score: int = 0
     error_message: Optional[str] = None
+    is_duplicate_manifest: bool = False
+    duplicate_of_agent_id: Optional[int] = None
 
 
 @dataclass
@@ -94,6 +95,7 @@ class EndpointCheck:
     status: str  # "alive", "secured", "timeout", "not_found", etc.
     http_code: int = 0
     score: int = 0
+    response_time_ms: int = 0
 
 
 @dataclass
@@ -105,6 +107,7 @@ class LivenessResult:
     endpoints_secured: int = 0
     endpoints_dead: int = 0
     liveness_score: int = 0
+    protocol_compliance_score: int = 0  # MCP protocol handshake check
     details: list[EndpointCheck] = field(default_factory=list)
 
 
@@ -123,6 +126,7 @@ class OnchainAnalysis:
     wallet_address: str = ""
     transaction_count: int = 0
     balance_eth: float = 0.0
+    has_contract_code: bool = False
     existing_reputation: ExistingReputation = field(default_factory=ExistingReputation)
     onchain_score: int = 0  # default 0; neutral baseline (50) set explicitly by analyzer on success
 
@@ -143,22 +147,33 @@ class VeniceEvaluation:
 
 @dataclass
 class TrustDimensions:
-    """All 4 trust dimension scores."""
+    """All 5 trust dimension scores."""
     identity_completeness: int
     endpoint_liveness: int
     onchain_history: int
     venice_trust_analysis: int
+    protocol_compliance: int = 0
 
     @property
     def as_list(self) -> list[int]:
         return [self.identity_completeness, self.endpoint_liveness,
-                self.onchain_history, self.venice_trust_analysis]
+                self.onchain_history, self.venice_trust_analysis,
+                self.protocol_compliance]
 
     @property
     def spread(self) -> int:
         """Max difference between any two dimensions."""
         scores = self.as_list
         return max(scores) - min(scores)
+
+
+@dataclass
+class ValidationResult:
+    """Result of an ERC-8004 Validation Registry request/response."""
+    request_hash: str
+    response_score: int
+    tag: str
+    tx_hash: str
 
 
 @dataclass
@@ -179,7 +194,27 @@ class TrustVerdict:
     tool_calls_budget: int = 15
     tx_hash: Optional[str] = None
     attestation_uid: Optional[str] = None
+    validation_tx_hash: Optional[str] = None
     human_decision: Optional[HumanDecision] = None
+    is_self_evaluation: bool = False
+    input_hash: Optional[str] = None
+
+    def compute_input_hash(self) -> str:
+        """SHA-256 hash of evaluation inputs for tamper-proof attestation."""
+        import hashlib
+        inputs = json.dumps({
+            "manifest": self.identity_verification.manifest,
+            "identity_score": self.identity_verification.identity_score,
+            "liveness_score": self.liveness_result.liveness_score,
+            "endpoints_declared": self.liveness_result.endpoints_declared,
+            "endpoints_live": self.liveness_result.endpoints_live,
+            "onchain_score": self.onchain_analysis.onchain_score,
+            "tx_count": self.onchain_analysis.transaction_count,
+            "balance_eth": self.onchain_analysis.balance_eth,
+            "venice_score": self.venice_evaluation.score,
+            "venice_parse_method": self.venice_evaluation.parse_method.value,
+        }, sort_keys=True)
+        return hashlib.sha256(inputs.encode()).hexdigest()
 
     def to_report_json(self) -> str:
         """Serialize for feedbackHash computation. Deterministic key order."""
@@ -194,9 +229,11 @@ class TrustVerdict:
                 "endpoint_liveness": self.dimensions.endpoint_liveness,
                 "onchain_history": self.dimensions.onchain_history,
                 "venice_trust_analysis": self.dimensions.venice_trust_analysis,
+                "protocol_compliance": self.dimensions.protocol_compliance,
             },
             "evaluation_confidence": self.evaluation_confidence,
             "timestamp": self.timestamp,
+            "input_hash": self.input_hash,
         }
         return json.dumps(data, sort_keys=True)
 
@@ -214,6 +251,7 @@ class TrustVerdict:
                 "endpoint_liveness": self.dimensions.endpoint_liveness,
                 "onchain_history": self.dimensions.onchain_history,
                 "venice_trust_analysis": self.dimensions.venice_trust_analysis,
+                "protocol_compliance": self.dimensions.protocol_compliance,
             },
             "spread": self.dimensions.spread,
             "endpoints": {
@@ -230,7 +268,6 @@ class TrustVerdict:
             "chain_id": self.agent.chain_id,
             "venice": {
                 "model": self.venice_evaluation.model,
-                "reasoning": self.venice_evaluation.reasoning,
                 "tokens_sent": self.venice_evaluation.tokens_sent,
                 "tokens_received": self.venice_evaluation.tokens_received,
                 "latency_ms": self.venice_evaluation.latency_ms,
@@ -240,6 +277,7 @@ class TrustVerdict:
                 "wallet_address": self.onchain_analysis.wallet_address,
                 "tx_count": self.onchain_analysis.transaction_count,
                 "balance_eth": self.onchain_analysis.balance_eth,
+                "has_contract_code": self.onchain_analysis.has_contract_code,
                 "reputation_entries": self.onchain_analysis.existing_reputation.feedback_count,
             },
             "identity": {
@@ -248,6 +286,8 @@ class TrustVerdict:
                 "services_declared": self.identity_verification.services_declared,
                 "uri_resolved": self.identity_verification.uri_resolved,
             },
+            "is_self_evaluation": self.is_self_evaluation,
+            "input_hash": self.input_hash,
         }
 
     def to_verdict_dict(self) -> dict:

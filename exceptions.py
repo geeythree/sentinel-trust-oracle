@@ -6,10 +6,6 @@ class SentinelError(Exception):
     pass
 
 
-# Keep AQEError as alias for backward compatibility
-AQEError = SentinelError
-
-
 class ConfigurationError(SentinelError):
     """Missing or invalid configuration."""
     pass

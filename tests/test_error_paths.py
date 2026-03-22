@@ -92,22 +92,27 @@ class TestScorerEdgeCases:
         return Scorer()
 
     def test_all_zero_dimensions(self, scorer):
-        dims = TrustDimensions(0, 0, 0, 0)
+        dims = TrustDimensions(0, 0, 0, 0, 0)
         composite = scorer.compute_composite(dims)
         assert composite == 0
 
     def test_all_100_dimensions(self, scorer):
-        dims = TrustDimensions(100, 100, 100, 100)
+        dims = TrustDimensions(100, 100, 100, 100, 100)
         composite = scorer.compute_composite(dims)
         assert composite == 100
 
-    def test_extreme_spread_triggers_review(self, scorer):
-        dims = TrustDimensions(100, 0, 50, 50)
+    def test_extreme_spread_withheld(self, scorer):
+        dims = TrustDimensions(100, 0, 50, 50, 50)
         assert dims.spread == 100
         state = scorer.determine_state(50, dims)
-        assert state == EvaluationState.PENDING_HUMAN_REVIEW
+        assert state == EvaluationState.WITHHELD_LOW_CONFIDENCE
 
-    def test_venice_parse_failure_zero_confidence(self, scorer):
+    def test_venice_parse_failure_abstains(self, scorer):
+        """Venice parse failure → abstain (LR=1, no update to log-odds)."""
+        # With all abstained, confidence should be exactly 50 (prior)
+        identity = IdentityVerification(success=False, identity_score=0)
+        liveness = LivenessResult(success=True, endpoints_declared=0, liveness_score=0)
+        onchain = OnchainAnalysis(success=False, onchain_score=0)
         venice = VeniceEvaluation(
             dimension="trust_analysis",
             score=50,
@@ -115,8 +120,9 @@ class TestScorerEdgeCases:
             parse_method=VeniceParseMethod.FALLBACK_NEUTRAL,
             venice_parse_failed=True,
         )
-        contrib = scorer._venice_confidence_contribution(venice)
-        assert contrib == 0
+        dims = TrustDimensions(0, 0, 0, 50)
+        conf = scorer.compute_confidence(identity, liveness, onchain, venice, dims)
+        assert conf == 50  # all abstained → prior unchanged
 
     def test_confidence_never_negative(self, scorer):
         identity = IdentityVerification(success=False, identity_score=0)

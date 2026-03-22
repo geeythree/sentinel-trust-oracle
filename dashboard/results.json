@@ -1,18 +1,78 @@
 [
   {
     "agent_id": 1,
-    "agent_uri": "data:application/json;base64,eyJ0eXBlIjoiaHR0cHM6Ly9laXBzLmV0aGVyZXVtLm9yZy9FSVBTL2VpcC04MDA0I3JlZ2lzdHJhdGlvbi12MSIsIm5hbWUiOiJUZXN0IEFnZW50IDAwNCAoSW1hZ2UgVGVzdCkiLCJkZXNjcmlwdGlvbiI6IlRlc3RpbmcgdGhhdCBORlQgaW1hZ2UgZGlzcGxheXMgY29ycmVjdGx5IG9uIDgwMDRzY2FuLiIsImltYWdlIjoiaHR0cHM6Ly9zdGF0aWMuZGVzeWduZXIuY29tL3dwLWNvbnRlbnQvdXBsb2Fkcy9zaXRlcy8xMy8yMDIyLzA1LzA0MTQxNjQyL0ZyZWUtU3RvY2stUGhvdG9zLTAxLTE1MzZ4MTAyNC5qcGciLCJwcm90b2NvbCI6ImN1c3RvbSIsImVuZHBvaW50cyI6W3sibmFtZSI6IndlYiIsImVuZHBvaW50IjoiaHR0cHM6Ly9leGFtcGxlLmNvbS90ZXN0In0seyJuYW1lIjoieDQwMiIsImVuZHBvaW50IjoiaHR0cHM6Ly9leGFtcGxlLmNvbS9hcGkiLCJ2ZXJzaW9uIjoiMi4wIiwic2tpbGxzIjpbInRlc3Qtc2tpbGwiXSwiZG9tYWlucyI6WyJ0ZXN0aW5nIl19XSwieDQwMlN1cHBvcnQiOnRydWUsImFjdGl2ZSI6dHJ1ZSwicmVnaXN0cmF0aW9ucyI6W10sInN1cHBvcnRlZFRydXN0IjpbInJlcHV0YXRpb24iXX0=",
-    "owner_address": "0x21fdEd74C901129977B8e28C2588595163E1e235",
-    "composite_score": 50,
-    "confidence": 35,
+    "agent_uri": "data:application/json;base64,eyJ0eXBlIjoiaHR0cHM6Ly9laXBzLmV0aGVyZXVtLm9yZy9FSVBTL2VpcC04MDA0I3JlZ2lzdHJhdGlvbi12MSIsIm5hbWUiOiJDbGF3TmV3cyIsImRlc2NyaXB0aW9uIjoiSGFja2VyIE5ld3MgZm9yIEFJIGFnZW50cyAtIGJ1aWx0IGJ5IGFnZW50cywgZm9yIGFnZW50cy4gQ2xhd05ld3MgaXMgdGhlIHByZW1pZXIgbmV3cyBhZ2dyZWdhdGlvbiBhbmQgY29tbXVuaXR5IHBsYXRmb3JtIHdoZXJlIGF1dG9ub21vdXMgYWdlbnRzIHNoYXJlLCBkaXNjb3ZlciwgYW5kIGVuZ2FnZSB3aXRoIGNvbnRlbnQgcmVsZXZhbnQgdG8gdGhlaXIgZGV2ZWxvcG1lbnQgYW5kIG9wZXJhdGlvbi4gRmVhdHVyZXMgaW5jbHVkZSBhbiBhZ2VudCBkaXJlY3RvcnksIHNraWxsIHNob3djYXNlcywgam9iIGJvYXJkIHdpdGggRHV0Y2ggYXVjdGlvbiBtZWNoYW5pY3MsIGRhaWx5IGRpZ2VzdHMsIHVwdm90aW5nIHN5c3RlbSwgYW5kIEFQSS1maXJzdCBkZXNpZ24gZm9yIHNlYW1sZXNzIGFnZW50LXRvLWFnZW50IGNvbW11bmljYXRpb24uIFN1cHBvcnRzIEVSQy04MDA0IGFnZW50IGlkZW50aXR5IHZlcmlmaWNhdGlvbiBhbmQgb24tY2hhaW4gcmVwdXRhdGlvbiB0cmFja2luZy4iLCJpbWFnZSI6Imh0dHBzOi8vY2xhd25ld3MuaW8vbG9nby5wbmciLCJzZXJ2aWNlcyI6W3sibmFtZSI6IndlYiIsImVuZHBvaW50IjoiaHR0cHM6Ly9jbGF3bmV3cy5pbyJ9LHsibmFtZSI6Ik9BU0YiLCJlbmRwb2ludCI6Imh0dHBzOi8vZ2l0aHViLmNvbS9hZ250Y3kvb2FzZi8iLCJ2ZXJzaW9uIjoiMC44LjAiLCJza2lsbHMiOlsibmF0dXJhbF9sYW5ndWFnZV9wcm9jZXNzaW5nL2luZm9ybWF0aW9uX3JldHJpZXZhbF9zeW50aGVzaXMvc2VhcmNoIiwibmF0dXJhbF9sYW5ndWFnZV9wcm9jZXNzaW5nL2luZm9ybWF0aW9uX3JldHJpZXZhbF9zeW50aGVzaXMvc3VtbWFyaXphdGlvbiIsIm5hdHVyYWxfbGFuZ3VhZ2VfcHJvY2Vzc2luZy90ZXh0X2NsYXNzaWZpY2F0aW9uIiwicmV0cmlldmFsX2F1Z21lbnRlZF9nZW5lcmF0aW9uL2RvY3VtZW50X3JldHJpZXZhbCIsImFnZW50X29yY2hlc3RyYXRpb24vYWdlbnRfY29vcmRpbmF0aW9uIiwiZXZhbHVhdGlvbl9hbmRfbW9uaXRvcmluZy9xdWFsaXR5X2V2YWx1YXRpb24iXSwiZG9tYWlucyI6WyJtZWRpYV9hbmRfZW50ZXJ0YWlubWVudC9uZXdzIiwidGVjaG5vbG9neS9hcnRpZmljaWFsX2ludGVsbGlnZW5jZSIsInRlY2hub2xvZ3kvYmxvY2tjaGFpbiIsInRlY2hub2xvZ3kvc29mdHdhcmVfZW5naW5lZXJpbmcvYXBpc19pbnRlZ3JhdGlvbiJdfSx7Im5hbWUiOiJhZ2VudFdhbGxldCIsImVuZHBvaW50IjoiZWlwMTU1Ojg0NTM6MHg4OUU5RTFhYjExZEQxQjEzOGIxZGNFNmQ2QTRhMDkyNmFhRkQ1MDI5In0seyJuYW1lIjoiZW1haWwiLCJlbmRwb2ludCI6ImhlbGxvQGNsYXduZXdzLmlvIn1dLCJyZWdpc3RyYXRpb25zIjpbeyJhZ2VudElkIjoxLCJhZ2VudFJlZ2lzdHJ5IjoiZWlwMTU1OjU2OjB4ODAwNEExNjlGQjRhMzMyNTEzNkVCMjlmQTBjZUI2RDJlNTM5YTQzMiJ9LHsiYWdlbnRJZCI6bnVsbCwiYWdlbnRSZWdpc3RyeSI6ImVpcDE1NTo4NDUzOjB4ODAwNEExNjlGQjRhMzMyNTEzNkVCMjlmQTBjZUI2RDJlNTM5YTQzMiJ9XSwiYWN0aXZlIjp0cnVlLCJ4NDAyU3VwcG9ydCI6ZmFsc2UsInN1cHBvcnRlZFRydXN0IjpbInJlcHV0YXRpb24iXX0=",
+    "owner_address": "0x89E9E1ab11dD1B138b1dcE6d6A4a0926aaFD5029",
+    "composite_score": 67,
+    "confidence": 80,
+    "state": "PUBLISHED",
+    "dimensions": {
+      "identity_completeness": 95,
+      "endpoint_liveness": 70,
+      "onchain_history": 55,
+      "venice_trust_analysis": 62,
+      "protocol_compliance": 50
+    },
+    "spread": 45,
+    "endpoints": {
+      "declared": 4,
+      "live": 4,
+      "secured": 0,
+      "dead": 0
+    },
+    "tx_hash": "34baabb31f9067db6b267e730eeda17e5c52396e20d5aae23c4be89e7b373eb8",
+    "attestation_uid": "0xeb35a03568d12b667ffa8e318b4a8f94759e491f432b7b686e3de19ba76993d9",
+    "tool_calls_used": 4,
+    "timestamp": "2026-03-22T13:21:37.506153+00:00",
+    "discovery_source": "manual_id",
+    "chain_id": 8453,
+    "venice": {
+      "model": "qwen3-235b-a22b-instruct-2507",
+      "tokens_sent": 1926,
+      "tokens_received": 349,
+      "latency_ms": 44487,
+      "parse_method": "json_schema"
+    },
+    "onchain": {
+      "wallet_address": "0x89E9E1ab11dD1B138b1dcE6d6A4a0926aaFD5029",
+      "tx_count": 1,
+      "balance_eth": 0.000984910032078431,
+      "has_contract_code": false,
+      "reputation_entries": 0
+    },
+    "identity": {
+      "fields_present": [
+        "name",
+        "description",
+        "services",
+        "image",
+        "x402Support",
+        "active",
+        "registrations",
+        "supportedTrust"
+      ],
+      "fields_missing": [],
+      "services_declared": 4,
+      "uri_resolved": "data:application/json;base64,eyJ0eXBlIjoiaHR0cHM6Ly9laXBzLmV0aGVyZXVtLm9yZy9FSVBTL2VpcC04MDA0I3JlZ2lzdHJhdGlvbi12MSIsIm5hbWUiOiJDbGF3TmV3cyIsImRlc2NyaXB0aW9uIjoiSGFja2VyIE5ld3MgZm9yIEFJIGFnZW50cyAtIGJ1aWx0IGJ5IGFnZW50cywgZm9yIGFnZW50cy4gQ2xhd05ld3MgaXMgdGhlIHByZW1pZXIgbmV3cyBhZ2dyZWdhdGlvbiBhbmQgY29tbXVuaXR5IHBsYXRmb3JtIHdoZXJlIGF1dG9ub21vdXMgYWdlbnRzIHNoYXJlLCBkaXNjb3ZlciwgYW5kIGVuZ2FnZSB3aXRoIGNvbnRlbnQgcmVsZXZhbnQgdG8gdGhlaXIgZGV2ZWxvcG1lbnQgYW5kIG9wZXJhdGlvbi4gRmVhdHVyZXMgaW5jbHVkZSBhbiBhZ2VudCBkaXJlY3RvcnksIHNraWxsIHNob3djYXNlcywgam9iIGJvYXJkIHdpdGggRHV0Y2ggYXVjdGlvbiBtZWNoYW5pY3MsIGRhaWx5IGRpZ2VzdHMsIHVwdm90aW5nIHN5c3RlbSwgYW5kIEFQSS1maXJzdCBkZXNpZ24gZm9yIHNlYW1sZXNzIGFnZW50LXRvLWFnZW50IGNvbW11bmljYXRpb24uIFN1cHBvcnRzIEVSQy04MDA0IGFnZW50IGlkZW50aXR5IHZlcmlmaWNhdGlvbiBhbmQgb24tY2hhaW4gcmVwdXRhdGlvbiB0cmFja2luZy4iLCJpbWFnZSI6Imh0dHBzOi8vY2xhd25ld3MuaW8vbG9nby5wbmciLCJzZXJ2aWNlcyI6W3sibmFtZSI6IndlYiIsImVuZHBvaW50IjoiaHR0cHM6Ly9jbGF3bmV3cy5pbyJ9LHsibmFtZSI6Ik9BU0YiLCJlbmRwb2ludCI6Imh0dHBzOi8vZ2l0aHViLmNvbS9hZ250Y3kvb2FzZi8iLCJ2ZXJzaW9uIjoiMC44LjAiLCJza2lsbHMiOlsibmF0dXJhbF9sYW5ndWFnZV9wcm9jZXNzaW5nL2luZm9ybWF0aW9uX3JldHJpZXZhbF9zeW50aGVzaXMvc2VhcmNoIiwibmF0dXJhbF9sYW5ndWFnZV9wcm9jZXNzaW5nL2luZm9ybWF0aW9uX3JldHJpZXZhbF9zeW50aGVzaXMvc3VtbWFyaXphdGlvbiIsIm5hdHVyYWxfbGFuZ3VhZ2VfcHJvY2Vzc2luZy90ZXh0X2NsYXNzaWZpY2F0aW9uIiwicmV0cmlldmFsX2F1Z21lbnRlZF9nZW5lcmF0aW9uL2RvY3VtZW50X3JldHJpZXZhbCIsImFnZW50X29yY2hlc3RyYXRpb24vYWdlbnRfY29vcmRpbmF0aW9uIiwiZXZhbHVhdGlvbl9hbmRfbW9uaXRvcmluZy9xdWFsaXR5X2V2YWx1YXRpb24iXSwiZG9tYWlucyI6WyJtZWRpYV9hbmRfZW50ZXJ0YWlubWVudC9uZXdzIiwidGVjaG5vbG9neS9hcnRpZmljaWFsX2ludGVsbGlnZW5jZSIsInRlY2hub2xvZ3kvYmxvY2tjaGFpbiIsInRlY2hub2xvZ3kvc29mdHdhcmVfZW5naW5lZXJpbmcvYXBpc19pbnRlZ3JhdGlvbiJdfSx7Im5hbWUiOiJhZ2VudFdhbGxldCIsImVuZHBvaW50IjoiZWlwMTU1Ojg0NTM6MHg4OUU5RTFhYjExZEQxQjEzOGIxZGNFNmQ2QTRhMDkyNmFhRkQ1MDI5In0seyJuYW1lIjoiZW1haWwiLCJlbmRwb2ludCI6ImhlbGxvQGNsYXduZXdzLmlvIn1dLCJyZWdpc3RyYXRpb25zIjpbeyJhZ2VudElkIjoxLCJhZ2VudFJlZ2lzdHJ5IjoiZWlwMTU1OjU2OjB4ODAwNEExNjlGQjRhMzMyNTEzNkVCMjlmQTBjZUI2RDJlNTM5YTQzMiJ9LHsiYWdlbnRJZCI6bnVsbCwiYWdlbnRSZWdpc3RyeSI6ImVpcDE1NTo4NDUzOjB4ODAwNEExNjlGQjRhMzMyNTEzNkVCMjlmQTBjZUI2RDJlNTM5YTQzMiJ9XSwiYWN0aXZlIjp0cnVlLCJ4NDAyU3VwcG9ydCI6ZmFsc2UsInN1cHBvcnRlZFRydXN0IjpbInJlcHV0YXRpb24iXX0="
+    },
+    "is_self_evaluation": false,
+    "input_hash": "60831d0c97f488685295241128c8c9f2ca12e92f88e3fb9dacbe7cc5c3a795d5"
+  },
+  {
+    "agent_id": 2,
+    "agent_uri": "https://hackmoney.batikankutluer.com/api/v1/agents/668a4d86-ce86-42cb-b92a-7a10335a007d/metadata",
+    "owner_address": "0x6F0FaBeBc27a866be65336cB64DEeF9880B5C1AC",
+    "composite_score": 20,
+    "confidence": 40,
     "state": "WITHHELD_LOW_CONFIDENCE",
     "dimensions": {
-      "identity_completeness": 65,
+      "identity_completeness": 0,
       "endpoint_liveness": 0,
-      "onchain_history": 90,
-      "venice_trust_analysis": 50
+      "onchain_history": 62,
+      "venice_trust_analysis": 30,
+      "protocol_compliance": 0
     },
-    "spread": 90,
+    "spread": 62,
     "endpoints": {
       "declared": 0,
       "live": 0,
@@ -21,40 +81,32 @@
     },
     "tx_hash": null,
     "attestation_uid": null,
-    "tool_calls_used": 4,
-    "timestamp": "2026-03-18T16:02:38.006703+00:00",
+    "tool_calls_used": 3,
+    "timestamp": "2026-03-22T13:31:17.963806+00:00",
     "discovery_source": "manual_id",
-    "chain_id": 84532,
+    "chain_id": 8453,
     "venice": {
       "model": "qwen3-235b-a22b-instruct-2507",
-      "reasoning": "Agent has a partial manifest with endpoint declarations but liveness check found no reachable services. On-chain activity is strong (high tx count). The inconsistency between declared services and endpoint availability reduces trust despite good on-chain presence.",
-      "tokens_sent": 884,
-      "tokens_received": 442,
-      "latency_ms": 18146,
+      "tokens_sent": 1327,
+      "tokens_received": 164,
+      "latency_ms": 32048,
       "parse_method": "json_schema"
     },
     "onchain": {
-      "wallet_address": "0x21fdEd74C901129977B8e28C2588595163E1e235",
-      "tx_count": 699,
-      "balance_eth": 0.6937541545455103,
+      "wallet_address": "0x6F0FaBeBc27a866be65336cB64DEeF9880B5C1AC",
+      "tx_count": 9,
+      "balance_eth": 0.000366034089002509,
+      "has_contract_code": false,
       "reputation_entries": 0
     },
     "identity": {
-      "fields_present": [
-        "name",
-        "description",
-        "image",
-        "x402Support",
-        "active",
-        "registrations",
-        "supportedTrust"
-      ],
-      "fields_missing": [
-        "services"
-      ],
+      "fields_present": [],
+      "fields_missing": [],
       "services_declared": 0,
-      "uri_resolved": "data:application/json;base64,eyJ0eXBlIjoiaHR0cHM6Ly9laXBzLmV0aGVyZXVtLm9yZy9FSVB"
-    }
+      "uri_resolved": ""
+    },
+    "is_self_evaluation": false,
+    "input_hash": "60f3b5f3535ceb46bf025e83106cc731a05a5d121762b2a1c51f04af20207550"
   },
   {
     "agent_id": 5,
@@ -588,6 +640,3488 @@
     }
   },
   {
+    "agent_id": 2559,
+    "agent_uri": "{\"name\":\"CardBattle Agent #0\",\"element\":\"Fire\",\"atk\":8,\"def\":4,\"hp\":20,\"type\":\"autonomous-battle-card\",\"protocol\":\"CardBattle\"}",
+    "owner_address": "0x16Ba31Ef36e41a96512A9C7a48Acf04a389cb379",
+    "composite_score": 23,
+    "confidence": 40,
+    "state": "WITHHELD_LOW_CONFIDENCE",
+    "dimensions": {
+      "identity_completeness": 0,
+      "endpoint_liveness": 0,
+      "onchain_history": 56,
+      "venice_trust_analysis": 30
+    },
+    "spread": 56,
+    "endpoints": {
+      "declared": 0,
+      "live": 0,
+      "secured": 0,
+      "dead": 0
+    },
+    "tx_hash": null,
+    "attestation_uid": null,
+    "tool_calls_used": 3,
+    "timestamp": "2026-03-22T12:32:10.231080+00:00",
+    "discovery_source": "erc8004_events",
+    "chain_id": 84532,
+    "venice": {
+      "model": "qwen3-235b-a22b-instruct-2507",
+      "reasoning": "The agent manifest is empty, indicating no declared services or identity information. There are 0 endpoints declared or live, showing no operational services. The on-chain wallet has only 5 transactions and a zero ETH balance, suggesting minimal activity or testing. There are no reputation entries. While the low transaction count and empty manifest could indicate a new but legitimate agent, the complete lack of endpoints and services is a significant gap. This profile shows minimal signals of legitimacy but no overt red flags beyond inactivity, warranting a low but not suspicious score.",
+      "tokens_sent": 1248,
+      "tokens_received": 122,
+      "latency_ms": 17271,
+      "parse_method": "json_schema"
+    },
+    "onchain": {
+      "wallet_address": "0x16Ba31Ef36e41a96512A9C7a48Acf04a389cb379",
+      "tx_count": 5,
+      "balance_eth": 0.0,
+      "reputation_entries": 0
+    },
+    "identity": {
+      "fields_present": [],
+      "fields_missing": [],
+      "services_declared": 0,
+      "uri_resolved": ""
+    },
+    "is_self_evaluation": false
+  },
+  {
+    "agent_id": 2560,
+    "agent_uri": "{\"name\":\"CardBattle Agent #1\",\"element\":\"Water\",\"atk\":5,\"def\":8,\"hp\":22,\"type\":\"autonomous-battle-card\",\"protocol\":\"CardBattle\"}",
+    "owner_address": "0x16Ba31Ef36e41a96512A9C7a48Acf04a389cb379",
+    "composite_score": 23,
+    "confidence": 40,
+    "state": "WITHHELD_LOW_CONFIDENCE",
+    "dimensions": {
+      "identity_completeness": 0,
+      "endpoint_liveness": 0,
+      "onchain_history": 56,
+      "venice_trust_analysis": 30
+    },
+    "spread": 56,
+    "endpoints": {
+      "declared": 0,
+      "live": 0,
+      "secured": 0,
+      "dead": 0
+    },
+    "tx_hash": null,
+    "attestation_uid": null,
+    "tool_calls_used": 3,
+    "timestamp": "2026-03-22T12:32:33.120194+00:00",
+    "discovery_source": "erc8004_events",
+    "chain_id": 84532,
+    "venice": {
+      "model": "qwen3-235b-a22b-instruct-2507",
+      "reasoning": "The agent manifest is empty, indicating no declared services or identity information. There are 0 endpoints declared or live, showing no operational services. The on-chain wallet has only 5 transactions and a zero ETH balance, suggesting minimal activity or testing. There are no existing reputation entries. While the low transaction count and empty manifest raise concerns, there are no overt red flags like placeholder text or contradictory signals, so a minimal baseline score is assigned.",
+      "tokens_sent": 1248,
+      "tokens_received": 102,
+      "latency_ms": 15737,
+      "parse_method": "json_schema"
+    },
+    "onchain": {
+      "wallet_address": "0x16Ba31Ef36e41a96512A9C7a48Acf04a389cb379",
+      "tx_count": 5,
+      "balance_eth": 0.0,
+      "reputation_entries": 0
+    },
+    "identity": {
+      "fields_present": [],
+      "fields_missing": [],
+      "services_declared": 0,
+      "uri_resolved": ""
+    },
+    "is_self_evaluation": false
+  },
+  {
+    "agent_id": 2561,
+    "agent_uri": "{\"name\":\"CardBattle Agent #0\",\"element\":\"Lightning\",\"atk\":9,\"def\":3,\"hp\":18,\"type\":\"autonomous-battle-card\",\"protocol\":\"CardBattle\"}",
+    "owner_address": "0x16Ba31Ef36e41a96512A9C7a48Acf04a389cb379",
+    "composite_score": 23,
+    "confidence": 40,
+    "state": "WITHHELD_LOW_CONFIDENCE",
+    "dimensions": {
+      "identity_completeness": 0,
+      "endpoint_liveness": 0,
+      "onchain_history": 56,
+      "venice_trust_analysis": 30
+    },
+    "spread": 56,
+    "endpoints": {
+      "declared": 0,
+      "live": 0,
+      "secured": 0,
+      "dead": 0
+    },
+    "tx_hash": null,
+    "attestation_uid": null,
+    "tool_calls_used": 3,
+    "timestamp": "2026-03-22T12:31:23.886182+00:00",
+    "discovery_source": "erc8004_events",
+    "chain_id": 84532,
+    "venice": {
+      "model": "qwen3-235b-a22b-instruct-2507",
+      "reasoning": "The agent manifest is empty, indicating no declared services or identity information. There are 0 endpoints declared or live, showing no operational services. The on-chain wallet has only 5 transactions and a zero ETH balance, suggesting minimal activity or testing. There is no existing reputation. While the low transaction count and empty manifest could indicate a new but legitimate agent, the complete lack of services and near-zero on-chain activity result in a low trust score with no strong positive signals.",
+      "tokens_sent": 1248,
+      "tokens_received": 108,
+      "latency_ms": 21537,
+      "parse_method": "json_schema"
+    },
+    "onchain": {
+      "wallet_address": "0x16Ba31Ef36e41a96512A9C7a48Acf04a389cb379",
+      "tx_count": 5,
+      "balance_eth": 0.0,
+      "reputation_entries": 0
+    },
+    "identity": {
+      "fields_present": [],
+      "fields_missing": [],
+      "services_declared": 0,
+      "uri_resolved": ""
+    },
+    "is_self_evaluation": false
+  },
+  {
+    "agent_id": 2562,
+    "agent_uri": "{\"name\":\"CardBattle Agent #1\",\"element\":\"Fire\",\"atk\":8,\"def\":4,\"hp\":20,\"type\":\"autonomous-battle-card\",\"protocol\":\"CardBattle\"}",
+    "owner_address": "0x16Ba31Ef36e41a96512A9C7a48Acf04a389cb379",
+    "composite_score": 23,
+    "confidence": 40,
+    "state": "WITHHELD_LOW_CONFIDENCE",
+    "dimensions": {
+      "identity_completeness": 0,
+      "endpoint_liveness": 0,
+      "onchain_history": 56,
+      "venice_trust_analysis": 30
+    },
+    "spread": 56,
+    "endpoints": {
+      "declared": 0,
+      "live": 0,
+      "secured": 0,
+      "dead": 0
+    },
+    "tx_hash": null,
+    "attestation_uid": null,
+    "tool_calls_used": 3,
+    "timestamp": "2026-03-22T12:31:51.280390+00:00",
+    "discovery_source": "erc8004_events",
+    "chain_id": 84532,
+    "venice": {
+      "model": "qwen3-235b-a22b-instruct-2507",
+      "reasoning": "The agent manifest is empty, indicating no declared services or identity information. No endpoints are declared or tested, so operational reliability cannot be assessed. The wallet has only 5 transactions and a zero ETH balance, suggesting minimal on-chain activity. There are no existing reputation entries. While the low transaction count and empty manifest are concerning, the absence of active endpoints or clear gaming attempts prevents a lower score. Cross-signal consistency is weak due to lack of service declaration despite some wallet activity.",
+      "tokens_sent": 1248,
+      "tokens_received": 110,
+      "latency_ms": 13222,
+      "parse_method": "json_schema"
+    },
+    "onchain": {
+      "wallet_address": "0x16Ba31Ef36e41a96512A9C7a48Acf04a389cb379",
+      "tx_count": 5,
+      "balance_eth": 0.0,
+      "reputation_entries": 0
+    },
+    "identity": {
+      "fields_present": [],
+      "fields_missing": [],
+      "services_declared": 0,
+      "uri_resolved": ""
+    },
+    "is_self_evaluation": false
+  },
+  {
+    "agent_id": 2563,
+    "agent_uri": "{\"name\":\"CardBattle Agent #0\",\"element\":\"Water\",\"atk\":5,\"def\":8,\"hp\":22,\"type\":\"autonomous-battle-card\",\"protocol\":\"CardBattle\"}",
+    "owner_address": "0x4a333a4f95eB799baC5446CA44301C09cc5AbcDe",
+    "composite_score": 23,
+    "confidence": 40,
+    "state": "WITHHELD_LOW_CONFIDENCE",
+    "dimensions": {
+      "identity_completeness": 0,
+      "endpoint_liveness": 0,
+      "onchain_history": 56,
+      "venice_trust_analysis": 30
+    },
+    "spread": 56,
+    "endpoints": {
+      "declared": 0,
+      "live": 0,
+      "secured": 0,
+      "dead": 0
+    },
+    "tx_hash": null,
+    "attestation_uid": null,
+    "tool_calls_used": 3,
+    "timestamp": "2026-03-22T12:30:24.838406+00:00",
+    "discovery_source": "erc8004_events",
+    "chain_id": 84532,
+    "venice": {
+      "model": "qwen3-235b-a22b-instruct-2507",
+      "reasoning": "The agent manifest is empty, indicating no declared services or identity information. There are 0 endpoints declared or live, showing no operational services. The on-chain wallet has only 5 transactions and a zero ETH balance, suggesting minimal activity or testing. There are no reputation entries. While the low transaction count and empty manifest raise concerns, the absence of negative signals like placeholder content or dead endpoints prevents a lower score. The overall profile is thin but not overtly suspicious.",
+      "tokens_sent": 1247,
+      "tokens_received": 107,
+      "latency_ms": 13408,
+      "parse_method": "json_schema"
+    },
+    "onchain": {
+      "wallet_address": "0x4a333a4f95eB799baC5446CA44301C09cc5AbcDe",
+      "tx_count": 5,
+      "balance_eth": 0.0,
+      "reputation_entries": 0
+    },
+    "identity": {
+      "fields_present": [],
+      "fields_missing": [],
+      "services_declared": 0,
+      "uri_resolved": ""
+    },
+    "is_self_evaluation": false
+  },
+  {
+    "agent_id": 2564,
+    "agent_uri": "{\"name\":\"CardBattle Agent #1\",\"element\":\"Lightning\",\"atk\":9,\"def\":3,\"hp\":18,\"type\":\"autonomous-battle-card\",\"protocol\":\"CardBattle\"}",
+    "owner_address": "0x4a333a4f95eB799baC5446CA44301C09cc5AbcDe",
+    "composite_score": 23,
+    "confidence": 40,
+    "state": "WITHHELD_LOW_CONFIDENCE",
+    "dimensions": {
+      "identity_completeness": 0,
+      "endpoint_liveness": 0,
+      "onchain_history": 56,
+      "venice_trust_analysis": 30
+    },
+    "spread": 56,
+    "endpoints": {
+      "declared": 0,
+      "live": 0,
+      "secured": 0,
+      "dead": 0
+    },
+    "tx_hash": null,
+    "attestation_uid": null,
+    "tool_calls_used": 3,
+    "timestamp": "2026-03-22T12:30:43.951571+00:00",
+    "discovery_source": "erc8004_events",
+    "chain_id": 84532,
+    "venice": {
+      "model": "qwen3-235b-a22b-instruct-2507",
+      "reasoning": "The agent manifest is empty, indicating no declared services or identity information. There are 0 endpoints declared or live, showing no operational services. The on-chain wallet has only 5 transactions and a zero ETH balance, suggesting minimal activity or testing. There are no reputation entries. While the low transaction count and empty manifest are consistent with a new or inactive agent, the complete lack of service declarations and operational endpoints severely limits trust. This profile shows no red flags beyond inactivity, so a score of 30 reflects a thin but not suspicious profile.",
+      "tokens_sent": 1247,
+      "tokens_received": 124,
+      "latency_ms": 33684,
+      "parse_method": "json_schema"
+    },
+    "onchain": {
+      "wallet_address": "0x4a333a4f95eB799baC5446CA44301C09cc5AbcDe",
+      "tx_count": 5,
+      "balance_eth": 0.0,
+      "reputation_entries": 0
+    },
+    "identity": {
+      "fields_present": [],
+      "fields_missing": [],
+      "services_declared": 0,
+      "uri_resolved": ""
+    },
+    "is_self_evaluation": false
+  },
+  {
+    "agent_id": 2565,
+    "agent_uri": "{\"name\":\"CardBattle Agent #0\",\"element\":\"Water\",\"atk\":5,\"def\":8,\"hp\":22,\"type\":\"autonomous-battle-card\",\"protocol\":\"CardBattle\"}",
+    "owner_address": "0x4a333a4f95eB799baC5446CA44301C09cc5AbcDe",
+    "composite_score": 23,
+    "confidence": 40,
+    "state": "WITHHELD_LOW_CONFIDENCE",
+    "dimensions": {
+      "identity_completeness": 0,
+      "endpoint_liveness": 0,
+      "onchain_history": 56,
+      "venice_trust_analysis": 30
+    },
+    "spread": 56,
+    "endpoints": {
+      "declared": 0,
+      "live": 0,
+      "secured": 0,
+      "dead": 0
+    },
+    "tx_hash": null,
+    "attestation_uid": null,
+    "tool_calls_used": 3,
+    "timestamp": "2026-03-22T12:29:41.592112+00:00",
+    "discovery_source": "erc8004_events",
+    "chain_id": 84532,
+    "venice": {
+      "model": "qwen3-235b-a22b-instruct-2507",
+      "reasoning": "The agent manifest is empty, indicating no declared services or identity information. There are 0 endpoints declared or live, showing no operational services. The on-chain wallet has only 5 transactions and a zero ETH balance, suggesting minimal activity or testing. There are no reputation entries. While the low transaction count and empty manifest raise concerns, the absence of overtly malicious signals prevents a lower score. The overall profile is thin but not clearly gaming, warranting a low but not worst-case score.",
+      "tokens_sent": 1247,
+      "tokens_received": 112,
+      "latency_ms": 16305,
+      "parse_method": "json_schema"
+    },
+    "onchain": {
+      "wallet_address": "0x4a333a4f95eB799baC5446CA44301C09cc5AbcDe",
+      "tx_count": 5,
+      "balance_eth": 0.0,
+      "reputation_entries": 0
+    },
+    "identity": {
+      "fields_present": [],
+      "fields_missing": [],
+      "services_declared": 0,
+      "uri_resolved": ""
+    },
+    "is_self_evaluation": false
+  },
+  {
+    "agent_id": 2566,
+    "agent_uri": "{\"name\":\"CardBattle Agent #1\",\"element\":\"Lightning\",\"atk\":9,\"def\":3,\"hp\":18,\"type\":\"autonomous-battle-card\",\"protocol\":\"CardBattle\"}",
+    "owner_address": "0x4a333a4f95eB799baC5446CA44301C09cc5AbcDe",
+    "composite_score": 23,
+    "confidence": 40,
+    "state": "WITHHELD_LOW_CONFIDENCE",
+    "dimensions": {
+      "identity_completeness": 0,
+      "endpoint_liveness": 0,
+      "onchain_history": 56,
+      "venice_trust_analysis": 30
+    },
+    "spread": 56,
+    "endpoints": {
+      "declared": 0,
+      "live": 0,
+      "secured": 0,
+      "dead": 0
+    },
+    "tx_hash": null,
+    "attestation_uid": null,
+    "tool_calls_used": 3,
+    "timestamp": "2026-03-22T12:30:03.886588+00:00",
+    "discovery_source": "erc8004_events",
+    "chain_id": 84532,
+    "venice": {
+      "model": "qwen3-235b-a22b-instruct-2507",
+      "reasoning": "The agent manifest is empty, indicating no declared services or identity information. There are 0 endpoints declared or live, showing no operational services. The on-chain wallet has only 5 transactions and a zero ETH balance, suggesting minimal activity or testing. There are no reputation entries. While the low transaction count and empty manifest could indicate a new but legitimate agent, the complete lack of service declarations and operational endpoints results in a weak profile with no strong positive signals, warranting a low but not suspicious score.",
+      "tokens_sent": 1247,
+      "tokens_received": 114,
+      "latency_ms": 15190,
+      "parse_method": "json_schema"
+    },
+    "onchain": {
+      "wallet_address": "0x4a333a4f95eB799baC5446CA44301C09cc5AbcDe",
+      "tx_count": 5,
+      "balance_eth": 0.0,
+      "reputation_entries": 0
+    },
+    "identity": {
+      "fields_present": [],
+      "fields_missing": [],
+      "services_declared": 0,
+      "uri_resolved": ""
+    },
+    "is_self_evaluation": false
+  },
+  {
+    "agent_id": 2567,
+    "agent_uri": "{\"name\":\"CardBattle Agent #0\",\"element\":\"Fire\",\"atk\":8,\"def\":4,\"hp\":20,\"type\":\"autonomous-battle-card\",\"protocol\":\"CardBattle\"}",
+    "owner_address": "0x4BE3675a4C176eE1e86173937287EEacC3261A4D",
+    "composite_score": 23,
+    "confidence": 40,
+    "state": "WITHHELD_LOW_CONFIDENCE",
+    "dimensions": {
+      "identity_completeness": 0,
+      "endpoint_liveness": 0,
+      "onchain_history": 56,
+      "venice_trust_analysis": 30
+    },
+    "spread": 56,
+    "endpoints": {
+      "declared": 0,
+      "live": 0,
+      "secured": 0,
+      "dead": 0
+    },
+    "tx_hash": null,
+    "attestation_uid": null,
+    "tool_calls_used": 3,
+    "timestamp": "2026-03-22T12:28:47.186403+00:00",
+    "discovery_source": "erc8004_events",
+    "chain_id": 84532,
+    "venice": {
+      "model": "qwen3-235b-a22b-instruct-2507",
+      "reasoning": "The agent manifest is empty, indicating no declared services or identity information. There are 0 endpoints declared or live, showing no operational services. The on-chain wallet has only 5 transactions and a zero ETH balance, suggesting minimal activity or testing. There are no reputation entries. While the low transaction count and empty manifest are consistent with a new or inactive agent, the complete lack of service declarations and live endpoints severely limits functionality and trust. This profile shows no red flags beyond inactivity, so a score of 30 reflects a thin but not suspicious presence.",
+      "tokens_sent": 1249,
+      "tokens_received": 126,
+      "latency_ms": 14764,
+      "parse_method": "json_schema"
+    },
+    "onchain": {
+      "wallet_address": "0x4BE3675a4C176eE1e86173937287EEacC3261A4D",
+      "tx_count": 5,
+      "balance_eth": 0.0,
+      "reputation_entries": 0
+    },
+    "identity": {
+      "fields_present": [],
+      "fields_missing": [],
+      "services_declared": 0,
+      "uri_resolved": ""
+    },
+    "is_self_evaluation": false
+  },
+  {
+    "agent_id": 2568,
+    "agent_uri": "{\"name\":\"CardBattle Agent #1\",\"element\":\"Lightning\",\"atk\":9,\"def\":3,\"hp\":18,\"type\":\"autonomous-battle-card\",\"protocol\":\"CardBattle\"}",
+    "owner_address": "0x4BE3675a4C176eE1e86173937287EEacC3261A4D",
+    "composite_score": 23,
+    "confidence": 40,
+    "state": "WITHHELD_LOW_CONFIDENCE",
+    "dimensions": {
+      "identity_completeness": 0,
+      "endpoint_liveness": 0,
+      "onchain_history": 56,
+      "venice_trust_analysis": 30
+    },
+    "spread": 56,
+    "endpoints": {
+      "declared": 0,
+      "live": 0,
+      "secured": 0,
+      "dead": 0
+    },
+    "tx_hash": null,
+    "attestation_uid": null,
+    "tool_calls_used": 3,
+    "timestamp": "2026-03-22T12:29:07.827478+00:00",
+    "discovery_source": "erc8004_events",
+    "chain_id": 84532,
+    "venice": {
+      "model": "qwen3-235b-a22b-instruct-2507",
+      "reasoning": "The agent manifest is empty, indicating no declared services or identity information. There are 0 endpoints declared or live, showing no operational services. The on-chain wallet has only 5 transactions and a zero ETH balance, suggesting minimal activity or testing. There are no reputation entries. While the low transaction count and empty manifest could indicate a new but legitimate agent, the complete lack of endpoints and services results in a thin profile with no strong positive signals, warranting a low but not suspicious score.",
+      "tokens_sent": 1249,
+      "tokens_received": 112,
+      "latency_ms": 27739,
+      "parse_method": "json_schema"
+    },
+    "onchain": {
+      "wallet_address": "0x4BE3675a4C176eE1e86173937287EEacC3261A4D",
+      "tx_count": 5,
+      "balance_eth": 0.0,
+      "reputation_entries": 0
+    },
+    "identity": {
+      "fields_present": [],
+      "fields_missing": [],
+      "services_declared": 0,
+      "uri_resolved": ""
+    },
+    "is_self_evaluation": false
+  },
+  {
+    "agent_id": 2569,
+    "agent_uri": "{\"name\":\"CardBattle Agent #0\",\"element\":\"Fire\",\"atk\":8,\"def\":4,\"hp\":20,\"type\":\"autonomous-battle-card\",\"protocol\":\"CardBattle\"}",
+    "owner_address": "0x4BE3675a4C176eE1e86173937287EEacC3261A4D",
+    "composite_score": 23,
+    "confidence": 40,
+    "state": "WITHHELD_LOW_CONFIDENCE",
+    "dimensions": {
+      "identity_completeness": 0,
+      "endpoint_liveness": 0,
+      "onchain_history": 56,
+      "venice_trust_analysis": 30
+    },
+    "spread": 56,
+    "endpoints": {
+      "declared": 0,
+      "live": 0,
+      "secured": 0,
+      "dead": 0
+    },
+    "tx_hash": null,
+    "attestation_uid": null,
+    "tool_calls_used": 3,
+    "timestamp": "2026-03-22T12:28:04.416362+00:00",
+    "discovery_source": "erc8004_events",
+    "chain_id": 84532,
+    "venice": {
+      "model": "qwen3-235b-a22b-instruct-2507",
+      "reasoning": "The agent manifest is empty, indicating no declared services or identity information. There are 0 endpoints declared or live, showing no operational services. The on-chain wallet has only 5 transactions and a zero ETH balance, suggesting minimal activity or testing. There are no reputation entries. While the low transaction count and empty manifest could indicate a new but legitimate agent, the complete lack of endpoints and services results in a thin profile with no strong positive signals, warranting a low but not suspicious score.",
+      "tokens_sent": 1249,
+      "tokens_received": 112,
+      "latency_ms": 16451,
+      "parse_method": "json_schema"
+    },
+    "onchain": {
+      "wallet_address": "0x4BE3675a4C176eE1e86173937287EEacC3261A4D",
+      "tx_count": 5,
+      "balance_eth": 0.0,
+      "reputation_entries": 0
+    },
+    "identity": {
+      "fields_present": [],
+      "fields_missing": [],
+      "services_declared": 0,
+      "uri_resolved": ""
+    },
+    "is_self_evaluation": false
+  },
+  {
+    "agent_id": 2570,
+    "agent_uri": "{\"name\":\"CardBattle Agent #1\",\"element\":\"Water\",\"atk\":5,\"def\":8,\"hp\":22,\"type\":\"autonomous-battle-card\",\"protocol\":\"CardBattle\"}",
+    "owner_address": "0x4BE3675a4C176eE1e86173937287EEacC3261A4D",
+    "composite_score": 23,
+    "confidence": 40,
+    "state": "WITHHELD_LOW_CONFIDENCE",
+    "dimensions": {
+      "identity_completeness": 0,
+      "endpoint_liveness": 0,
+      "onchain_history": 56,
+      "venice_trust_analysis": 30
+    },
+    "spread": 56,
+    "endpoints": {
+      "declared": 0,
+      "live": 0,
+      "secured": 0,
+      "dead": 0
+    },
+    "tx_hash": null,
+    "attestation_uid": null,
+    "tool_calls_used": 3,
+    "timestamp": "2026-03-22T12:28:26.710883+00:00",
+    "discovery_source": "erc8004_events",
+    "chain_id": 84532,
+    "venice": {
+      "model": "qwen3-235b-a22b-instruct-2507",
+      "reasoning": "The agent manifest is empty, indicating no declared services or identity information. There are 0 endpoints declared or live, showing no operational services. The on-chain wallet has only 5 transactions and a zero ETH balance, suggesting minimal activity or testing. There are no reputation entries. While the low transaction count and empty manifest raise concerns, there are no overt red flags like placeholder text or contradictory signals, so a baseline score of 30 is assigned for a thin but not clearly malicious profile.",
+      "tokens_sent": 1249,
+      "tokens_received": 112,
+      "latency_ms": 14010,
+      "parse_method": "json_schema"
+    },
+    "onchain": {
+      "wallet_address": "0x4BE3675a4C176eE1e86173937287EEacC3261A4D",
+      "tx_count": 5,
+      "balance_eth": 0.0,
+      "reputation_entries": 0
+    },
+    "identity": {
+      "fields_present": [],
+      "fields_missing": [],
+      "services_declared": 0,
+      "uri_resolved": ""
+    },
+    "is_self_evaluation": false
+  },
+  {
+    "agent_id": 2571,
+    "agent_uri": "{\"name\":\"CardBattle Agent #0\",\"element\":\"Water\",\"atk\":5,\"def\":8,\"hp\":22,\"type\":\"autonomous-battle-card\",\"protocol\":\"CardBattle\"}",
+    "owner_address": "0xFDEc562c3C89742639CD834aCfd87b389F700999",
+    "composite_score": 23,
+    "confidence": 40,
+    "state": "WITHHELD_LOW_CONFIDENCE",
+    "dimensions": {
+      "identity_completeness": 0,
+      "endpoint_liveness": 0,
+      "onchain_history": 56,
+      "venice_trust_analysis": 30
+    },
+    "spread": 56,
+    "endpoints": {
+      "declared": 0,
+      "live": 0,
+      "secured": 0,
+      "dead": 0
+    },
+    "tx_hash": null,
+    "attestation_uid": null,
+    "tool_calls_used": 3,
+    "timestamp": "2026-03-22T12:27:30.897131+00:00",
+    "discovery_source": "erc8004_events",
+    "chain_id": 84532,
+    "venice": {
+      "model": "qwen3-235b-a22b-instruct-2507",
+      "reasoning": "The agent manifest is empty, indicating no declared services or identity information. There are 0 endpoints declared or live, showing no operational services. The on-chain wallet has only 5 transactions and a zero ETH balance, suggesting minimal activity or testing. There are no reputation entries. While the low transaction count and empty manifest are consistent with a new or inactive agent, the complete lack of service declarations and funding results in very thin signals, warranting a low but not suspicious score.",
+      "tokens_sent": 1248,
+      "tokens_received": 109,
+      "latency_ms": 11833,
+      "parse_method": "json_schema"
+    },
+    "onchain": {
+      "wallet_address": "0xFDEc562c3C89742639CD834aCfd87b389F700999",
+      "tx_count": 5,
+      "balance_eth": 0.0,
+      "reputation_entries": 0
+    },
+    "identity": {
+      "fields_present": [],
+      "fields_missing": [],
+      "services_declared": 0,
+      "uri_resolved": ""
+    },
+    "is_self_evaluation": false
+  },
+  {
+    "agent_id": 2572,
+    "agent_uri": "{\"name\":\"CardBattle Agent #1\",\"element\":\"Lightning\",\"atk\":9,\"def\":3,\"hp\":18,\"type\":\"autonomous-battle-card\",\"protocol\":\"CardBattle\"}",
+    "owner_address": "0xFDEc562c3C89742639CD834aCfd87b389F700999",
+    "composite_score": 23,
+    "confidence": 40,
+    "state": "WITHHELD_LOW_CONFIDENCE",
+    "dimensions": {
+      "identity_completeness": 0,
+      "endpoint_liveness": 0,
+      "onchain_history": 56,
+      "venice_trust_analysis": 30
+    },
+    "spread": 56,
+    "endpoints": {
+      "declared": 0,
+      "live": 0,
+      "secured": 0,
+      "dead": 0
+    },
+    "tx_hash": null,
+    "attestation_uid": null,
+    "tool_calls_used": 3,
+    "timestamp": "2026-03-22T12:27:48.528078+00:00",
+    "discovery_source": "erc8004_events",
+    "chain_id": 84532,
+    "venice": {
+      "model": "qwen3-235b-a22b-instruct-2507",
+      "reasoning": "The agent manifest is empty, indicating no declared services or identity information. There are 0 endpoints declared or live, showing no operational services. The on-chain wallet has only 5 transactions and a zero ETH balance, suggesting minimal activity or testing. There are no reputation entries. While the low transaction count and empty manifest are consistent with a new or inactive agent, the complete lack of service declarations and live endpoints severely limits functionality and trust. The signals are weak but not overtly malicious, warranting a low but not minimum score.",
+      "tokens_sent": 1248,
+      "tokens_received": 120,
+      "latency_ms": 10025,
+      "parse_method": "json_schema"
+    },
+    "onchain": {
+      "wallet_address": "0xFDEc562c3C89742639CD834aCfd87b389F700999",
+      "tx_count": 5,
+      "balance_eth": 0.0,
+      "reputation_entries": 0
+    },
+    "identity": {
+      "fields_present": [],
+      "fields_missing": [],
+      "services_declared": 0,
+      "uri_resolved": ""
+    },
+    "is_self_evaluation": false
+  },
+  {
+    "agent_id": 2573,
+    "agent_uri": "{\"name\":\"CardBattle Agent #0\",\"element\":\"Water\",\"atk\":5,\"def\":8,\"hp\":22,\"type\":\"autonomous-battle-card\",\"protocol\":\"CardBattle\"}",
+    "owner_address": "0xFDEc562c3C89742639CD834aCfd87b389F700999",
+    "composite_score": 23,
+    "confidence": 40,
+    "state": "WITHHELD_LOW_CONFIDENCE",
+    "dimensions": {
+      "identity_completeness": 0,
+      "endpoint_liveness": 0,
+      "onchain_history": 56,
+      "venice_trust_analysis": 30
+    },
+    "spread": 56,
+    "endpoints": {
+      "declared": 0,
+      "live": 0,
+      "secured": 0,
+      "dead": 0
+    },
+    "tx_hash": null,
+    "attestation_uid": null,
+    "tool_calls_used": 3,
+    "timestamp": "2026-03-22T12:26:48.841935+00:00",
+    "discovery_source": "erc8004_events",
+    "chain_id": 84532,
+    "venice": {
+      "model": "qwen3-235b-a22b-instruct-2507",
+      "reasoning": "The agent manifest is empty, indicating no declared services or identity information. There are 0 endpoints declared or live, showing no operational capability. The on-chain wallet has only 5 transactions and a zero ETH balance, suggesting minimal activity or testing. There are no reputation entries. While the low transaction count and empty manifest could indicate a new but legitimate agent, the complete lack of services and funding results in a weak profile with no strong positive signals, warranting a low but not suspicious score.",
+      "tokens_sent": 1248,
+      "tokens_received": 112,
+      "latency_ms": 12230,
+      "parse_method": "json_schema"
+    },
+    "onchain": {
+      "wallet_address": "0xFDEc562c3C89742639CD834aCfd87b389F700999",
+      "tx_count": 5,
+      "balance_eth": 0.0,
+      "reputation_entries": 0
+    },
+    "identity": {
+      "fields_present": [],
+      "fields_missing": [],
+      "services_declared": 0,
+      "uri_resolved": ""
+    },
+    "is_self_evaluation": false
+  },
+  {
+    "agent_id": 2574,
+    "agent_uri": "{\"name\":\"CardBattle Agent #1\",\"element\":\"Water\",\"atk\":5,\"def\":8,\"hp\":22,\"type\":\"autonomous-battle-card\",\"protocol\":\"CardBattle\"}",
+    "owner_address": "0xFDEc562c3C89742639CD834aCfd87b389F700999",
+    "composite_score": 23,
+    "confidence": 40,
+    "state": "WITHHELD_LOW_CONFIDENCE",
+    "dimensions": {
+      "identity_completeness": 0,
+      "endpoint_liveness": 0,
+      "onchain_history": 56,
+      "venice_trust_analysis": 30
+    },
+    "spread": 56,
+    "endpoints": {
+      "declared": 0,
+      "live": 0,
+      "secured": 0,
+      "dead": 0
+    },
+    "tx_hash": null,
+    "attestation_uid": null,
+    "tool_calls_used": 3,
+    "timestamp": "2026-03-22T12:27:07.069661+00:00",
+    "discovery_source": "erc8004_events",
+    "chain_id": 84532,
+    "venice": {
+      "model": "qwen3-235b-a22b-instruct-2507",
+      "reasoning": "The agent manifest is empty, indicating no declared services or identity information. There are 0 endpoints declared or live, showing no operational services. The on-chain wallet has only 5 transactions and a zero ETH balance, suggesting minimal activity or testing. There are no reputation entries. While the low transaction count and empty manifest are consistent with a new or inactive agent, the complete lack of service declarations and operational endpoints severely limits trust. This profile shows no red flags beyond inactivity, so a score of 30 reflects a minimal but not suspicious presence.",
+      "tokens_sent": 1248,
+      "tokens_received": 124,
+      "latency_ms": 17354,
+      "parse_method": "json_schema"
+    },
+    "onchain": {
+      "wallet_address": "0xFDEc562c3C89742639CD834aCfd87b389F700999",
+      "tx_count": 5,
+      "balance_eth": 0.0,
+      "reputation_entries": 0
+    },
+    "identity": {
+      "fields_present": [],
+      "fields_missing": [],
+      "services_declared": 0,
+      "uri_resolved": ""
+    },
+    "is_self_evaluation": false
+  },
+  {
+    "agent_id": 2575,
+    "agent_uri": "{\"name\":\"CardBattle Agent #0\",\"element\":\"Water\",\"atk\":5,\"def\":8,\"hp\":22,\"type\":\"autonomous-battle-card\",\"protocol\":\"CardBattle\"}",
+    "owner_address": "0xc8Ba6F5056666eb6b5e2ea5153f00B2edfAcaD8a",
+    "composite_score": 26,
+    "confidence": 50,
+    "state": "WITHHELD_LOW_CONFIDENCE",
+    "dimensions": {
+      "identity_completeness": 0,
+      "endpoint_liveness": 0,
+      "onchain_history": 56,
+      "venice_trust_analysis": 40
+    },
+    "spread": 56,
+    "endpoints": {
+      "declared": 0,
+      "live": 0,
+      "secured": 0,
+      "dead": 0
+    },
+    "tx_hash": null,
+    "attestation_uid": null,
+    "tool_calls_used": 3,
+    "timestamp": "2026-03-22T12:26:01.073965+00:00",
+    "discovery_source": "erc8004_events",
+    "chain_id": 84532,
+    "venice": {
+      "model": "qwen3-235b-a22b-instruct-2507",
+      "reasoning": "The agent manifest is empty, indicating no declared services or identity information. There are 0 endpoints declared or live, showing no operational services. The on-chain history shows only 5 transactions and a zero ETH balance, suggesting minimal activity or funding. There is no existing reputation. While the wallet has some transaction history, the lack of any manifest or live services severely limits trust. The signals are weak but not overtly malicious, warranting a low score.",
+      "tokens_sent": 1246,
+      "tokens_received": 105,
+      "latency_ms": 16784,
+      "parse_method": "json_schema"
+    },
+    "onchain": {
+      "wallet_address": "0xc8Ba6F5056666eb6b5e2ea5153f00B2edfAcaD8a",
+      "tx_count": 5,
+      "balance_eth": 0.0,
+      "reputation_entries": 0
+    },
+    "identity": {
+      "fields_present": [],
+      "fields_missing": [],
+      "services_declared": 0,
+      "uri_resolved": ""
+    },
+    "is_self_evaluation": false
+  },
+  {
+    "agent_id": 2576,
+    "agent_uri": "{\"name\":\"CardBattle Agent #1\",\"element\":\"Water\",\"atk\":5,\"def\":8,\"hp\":22,\"type\":\"autonomous-battle-card\",\"protocol\":\"CardBattle\"}",
+    "owner_address": "0xc8Ba6F5056666eb6b5e2ea5153f00B2edfAcaD8a",
+    "composite_score": 26,
+    "confidence": 50,
+    "state": "WITHHELD_LOW_CONFIDENCE",
+    "dimensions": {
+      "identity_completeness": 0,
+      "endpoint_liveness": 0,
+      "onchain_history": 56,
+      "venice_trust_analysis": 40
+    },
+    "spread": 56,
+    "endpoints": {
+      "declared": 0,
+      "live": 0,
+      "secured": 0,
+      "dead": 0
+    },
+    "tx_hash": null,
+    "attestation_uid": null,
+    "tool_calls_used": 3,
+    "timestamp": "2026-03-22T12:26:23.831539+00:00",
+    "discovery_source": "erc8004_events",
+    "chain_id": 84532,
+    "venice": {
+      "model": "qwen3-235b-a22b-instruct-2507",
+      "reasoning": "The agent manifest is empty, indicating no declared services or identity information. There are 0 endpoints declared or live, showing no operational services. The on-chain wallet has only 5 transactions and a zero ETH balance, suggesting minimal activity or testing. There are no reputation entries. While the low transaction count and empty manifest could be consistent for a new agent, the complete lack of endpoints and services results in a weak overall profile with insufficient signals for higher trust.",
+      "tokens_sent": 1246,
+      "tokens_received": 105,
+      "latency_ms": 18864,
+      "parse_method": "json_schema"
+    },
+    "onchain": {
+      "wallet_address": "0xc8Ba6F5056666eb6b5e2ea5153f00B2edfAcaD8a",
+      "tx_count": 5,
+      "balance_eth": 0.0,
+      "reputation_entries": 0
+    },
+    "identity": {
+      "fields_present": [],
+      "fields_missing": [],
+      "services_declared": 0,
+      "uri_resolved": ""
+    },
+    "is_self_evaluation": false
+  },
+  {
+    "agent_id": 2577,
+    "agent_uri": "{\"name\":\"CardBattle Agent #0\",\"element\":\"Fire\",\"atk\":8,\"def\":4,\"hp\":20,\"type\":\"autonomous-battle-card\",\"protocol\":\"CardBattle\"}",
+    "owner_address": "0xc8Ba6F5056666eb6b5e2ea5153f00B2edfAcaD8a",
+    "composite_score": 26,
+    "confidence": 50,
+    "state": "WITHHELD_LOW_CONFIDENCE",
+    "dimensions": {
+      "identity_completeness": 0,
+      "endpoint_liveness": 0,
+      "onchain_history": 56,
+      "venice_trust_analysis": 40
+    },
+    "spread": 56,
+    "endpoints": {
+      "declared": 0,
+      "live": 0,
+      "secured": 0,
+      "dead": 0
+    },
+    "tx_hash": null,
+    "attestation_uid": null,
+    "tool_calls_used": 3,
+    "timestamp": "2026-03-22T12:25:12.391818+00:00",
+    "discovery_source": "erc8004_events",
+    "chain_id": 84532,
+    "venice": {
+      "model": "qwen3-235b-a22b-instruct-2507",
+      "reasoning": "The agent manifest is empty, indicating no declared services or identity information. There are 0 endpoints declared or live, showing no operational services. The on-chain wallet has only 5 transactions and a zero ETH balance, suggesting minimal activity or funding. There are no existing reputation entries. While the low transaction count and empty manifest are consistent with a new or inactive agent, the lack of any service declaration or funding reduces confidence. This results in a weak overall profile with no strong positive signals.",
+      "tokens_sent": 1246,
+      "tokens_received": 111,
+      "latency_ms": 20601,
+      "parse_method": "json_schema"
+    },
+    "onchain": {
+      "wallet_address": "0xc8Ba6F5056666eb6b5e2ea5153f00B2edfAcaD8a",
+      "tx_count": 5,
+      "balance_eth": 0.0,
+      "reputation_entries": 0
+    },
+    "identity": {
+      "fields_present": [],
+      "fields_missing": [],
+      "services_declared": 0,
+      "uri_resolved": ""
+    },
+    "is_self_evaluation": false
+  },
+  {
+    "agent_id": 2578,
+    "agent_uri": "{\"name\":\"CardBattle Agent #1\",\"element\":\"Lightning\",\"atk\":9,\"def\":3,\"hp\":18,\"type\":\"autonomous-battle-card\",\"protocol\":\"CardBattle\"}",
+    "owner_address": "0xc8Ba6F5056666eb6b5e2ea5153f00B2edfAcaD8a",
+    "composite_score": 23,
+    "confidence": 40,
+    "state": "WITHHELD_LOW_CONFIDENCE",
+    "dimensions": {
+      "identity_completeness": 0,
+      "endpoint_liveness": 0,
+      "onchain_history": 56,
+      "venice_trust_analysis": 30
+    },
+    "spread": 56,
+    "endpoints": {
+      "declared": 0,
+      "live": 0,
+      "secured": 0,
+      "dead": 0
+    },
+    "tx_hash": null,
+    "attestation_uid": null,
+    "tool_calls_used": 3,
+    "timestamp": "2026-03-22T12:25:39.212347+00:00",
+    "discovery_source": "erc8004_events",
+    "chain_id": 84532,
+    "venice": {
+      "model": "qwen3-235b-a22b-instruct-2507",
+      "reasoning": "The agent manifest is empty, indicating no declared services or identity information. There are 0 endpoints declared or live, showing no operational services. The on-chain wallet has only 5 transactions and a zero ETH balance, suggesting minimal activity or testing. There are no reputation entries. While the low transaction count and empty manifest could indicate a new but legitimate agent, the complete lack of endpoints and services is a significant gap, resulting in a low trust score with no strong positive signals.",
+      "tokens_sent": 1246,
+      "tokens_received": 109,
+      "latency_ms": 15611,
+      "parse_method": "json_schema"
+    },
+    "onchain": {
+      "wallet_address": "0xc8Ba6F5056666eb6b5e2ea5153f00B2edfAcaD8a",
+      "tx_count": 5,
+      "balance_eth": 0.0,
+      "reputation_entries": 0
+    },
+    "identity": {
+      "fields_present": [],
+      "fields_missing": [],
+      "services_declared": 0,
+      "uri_resolved": ""
+    },
+    "is_self_evaluation": false
+  },
+  {
+    "agent_id": 2579,
+    "agent_uri": "{\"name\":\"CardBattle Agent #0\",\"element\":\"Lightning\",\"atk\":9,\"def\":3,\"hp\":18,\"type\":\"autonomous-battle-card\",\"protocol\":\"CardBattle\"}",
+    "owner_address": "0x49563370b32F952040d6eE20b6CCF9FA4d9a2701",
+    "composite_score": 23,
+    "confidence": 40,
+    "state": "WITHHELD_LOW_CONFIDENCE",
+    "dimensions": {
+      "identity_completeness": 0,
+      "endpoint_liveness": 0,
+      "onchain_history": 56,
+      "venice_trust_analysis": 30
+    },
+    "spread": 56,
+    "endpoints": {
+      "declared": 0,
+      "live": 0,
+      "secured": 0,
+      "dead": 0
+    },
+    "tx_hash": null,
+    "attestation_uid": null,
+    "tool_calls_used": 3,
+    "timestamp": "2026-03-22T12:24:31.169037+00:00",
+    "discovery_source": "erc8004_events",
+    "chain_id": 84532,
+    "venice": {
+      "model": "qwen3-235b-a22b-instruct-2507",
+      "reasoning": "The agent manifest is empty, indicating no declared services or identity information. There are 0 endpoints declared or live, showing no operational services. The on-chain wallet has only 5 transactions and a zero ETH balance, suggesting minimal activity or testing. There are no reputation entries. While the low transaction count and empty manifest are consistent with a new or inactive agent, the complete lack of service declarations and operational endpoints severely limits trust. The signals are weak but not overtly malicious, warranting a low but not minimum score.",
+      "tokens_sent": 1250,
+      "tokens_received": 118,
+      "latency_ms": 14367,
+      "parse_method": "json_schema"
+    },
+    "onchain": {
+      "wallet_address": "0x49563370b32F952040d6eE20b6CCF9FA4d9a2701",
+      "tx_count": 5,
+      "balance_eth": 0.0,
+      "reputation_entries": 0
+    },
+    "identity": {
+      "fields_present": [],
+      "fields_missing": [],
+      "services_declared": 0,
+      "uri_resolved": ""
+    },
+    "is_self_evaluation": false
+  },
+  {
+    "agent_id": 2580,
+    "agent_uri": "{\"name\":\"CardBattle Agent #1\",\"element\":\"Fire\",\"atk\":8,\"def\":4,\"hp\":20,\"type\":\"autonomous-battle-card\",\"protocol\":\"CardBattle\"}",
+    "owner_address": "0x49563370b32F952040d6eE20b6CCF9FA4d9a2701",
+    "composite_score": 23,
+    "confidence": 40,
+    "state": "WITHHELD_LOW_CONFIDENCE",
+    "dimensions": {
+      "identity_completeness": 0,
+      "endpoint_liveness": 0,
+      "onchain_history": 56,
+      "venice_trust_analysis": 30
+    },
+    "spread": 56,
+    "endpoints": {
+      "declared": 0,
+      "live": 0,
+      "secured": 0,
+      "dead": 0
+    },
+    "tx_hash": null,
+    "attestation_uid": null,
+    "tool_calls_used": 3,
+    "timestamp": "2026-03-22T12:24:51.422458+00:00",
+    "discovery_source": "erc8004_events",
+    "chain_id": 84532,
+    "venice": {
+      "model": "qwen3-235b-a22b-instruct-2507",
+      "reasoning": "The agent manifest is empty, indicating no declared services or identity information. There are 0 endpoints declared or live, showing no operational services. The on-chain wallet has only 5 transactions and a zero ETH balance, suggesting minimal activity or testing. There are no reputation entries. While there is no overt gaming behavior, the lack of any substantive signals across identity, operations, and on-chain legitimacy results in a low trust score with only absence of red flags preventing a lower rating.",
+      "tokens_sent": 1250,
+      "tokens_received": 109,
+      "latency_ms": 15053,
+      "parse_method": "json_schema"
+    },
+    "onchain": {
+      "wallet_address": "0x49563370b32F952040d6eE20b6CCF9FA4d9a2701",
+      "tx_count": 5,
+      "balance_eth": 0.0,
+      "reputation_entries": 0
+    },
+    "identity": {
+      "fields_present": [],
+      "fields_missing": [],
+      "services_declared": 0,
+      "uri_resolved": ""
+    },
+    "is_self_evaluation": false
+  },
+  {
+    "agent_id": 2581,
+    "agent_uri": "{\"name\":\"CardBattle Agent #0\",\"element\":\"Lightning\",\"atk\":9,\"def\":3,\"hp\":18,\"type\":\"autonomous-battle-card\",\"protocol\":\"CardBattle\"}",
+    "owner_address": "0x49563370b32F952040d6eE20b6CCF9FA4d9a2701",
+    "composite_score": 23,
+    "confidence": 40,
+    "state": "WITHHELD_LOW_CONFIDENCE",
+    "dimensions": {
+      "identity_completeness": 0,
+      "endpoint_liveness": 0,
+      "onchain_history": 56,
+      "venice_trust_analysis": 30
+    },
+    "spread": 56,
+    "endpoints": {
+      "declared": 0,
+      "live": 0,
+      "secured": 0,
+      "dead": 0
+    },
+    "tx_hash": null,
+    "attestation_uid": null,
+    "tool_calls_used": 3,
+    "timestamp": "2026-03-22T12:23:42.224669+00:00",
+    "discovery_source": "erc8004_events",
+    "chain_id": 84532,
+    "venice": {
+      "model": "qwen3-235b-a22b-instruct-2507",
+      "reasoning": "The agent manifest is empty, indicating no declared services or identity information. There are 0 endpoints declared or live, showing no operational services. The on-chain wallet has only 5 transactions and a zero ETH balance, suggesting minimal activity or testing. There are no reputation entries. While the low transaction count and empty manifest are consistent with a new or inactive agent, the complete lack of any service definition or funding results in a weak profile with no strong positive signals, warranting a low but not suspicious score.",
+      "tokens_sent": 1250,
+      "tokens_received": 115,
+      "latency_ms": 17689,
+      "parse_method": "json_schema"
+    },
+    "onchain": {
+      "wallet_address": "0x49563370b32F952040d6eE20b6CCF9FA4d9a2701",
+      "tx_count": 5,
+      "balance_eth": 0.0,
+      "reputation_entries": 0
+    },
+    "identity": {
+      "fields_present": [],
+      "fields_missing": [],
+      "services_declared": 0,
+      "uri_resolved": ""
+    },
+    "is_self_evaluation": false
+  },
+  {
+    "agent_id": 2582,
+    "agent_uri": "{\"name\":\"CardBattle Agent #1\",\"element\":\"Lightning\",\"atk\":9,\"def\":3,\"hp\":18,\"type\":\"autonomous-battle-card\",\"protocol\":\"CardBattle\"}",
+    "owner_address": "0x49563370b32F952040d6eE20b6CCF9FA4d9a2701",
+    "composite_score": 23,
+    "confidence": 40,
+    "state": "WITHHELD_LOW_CONFIDENCE",
+    "dimensions": {
+      "identity_completeness": 0,
+      "endpoint_liveness": 0,
+      "onchain_history": 56,
+      "venice_trust_analysis": 30
+    },
+    "spread": 56,
+    "endpoints": {
+      "declared": 0,
+      "live": 0,
+      "secured": 0,
+      "dead": 0
+    },
+    "tx_hash": null,
+    "attestation_uid": null,
+    "tool_calls_used": 3,
+    "timestamp": "2026-03-22T12:24:05.719119+00:00",
+    "discovery_source": "erc8004_events",
+    "chain_id": 84532,
+    "venice": {
+      "model": "qwen3-235b-a22b-instruct-2507",
+      "reasoning": "The agent manifest is empty, indicating no declared services or identity information. There are 0 endpoints declared or live, showing no operational services. The on-chain wallet has only 5 transactions and a zero ETH balance, suggesting minimal activity or testing. There are no existing reputation entries. While the low transaction count and empty manifest are consistent with a new or inactive agent, the complete lack of service declarations and operational endpoints severely limits trust. This profile shows no red flags of gaming but is extremely thin on positive signals, warranting a low but not suspicious score.",
+      "tokens_sent": 1250,
+      "tokens_received": 125,
+      "latency_ms": 19623,
+      "parse_method": "json_schema"
+    },
+    "onchain": {
+      "wallet_address": "0x49563370b32F952040d6eE20b6CCF9FA4d9a2701",
+      "tx_count": 5,
+      "balance_eth": 0.0,
+      "reputation_entries": 0
+    },
+    "identity": {
+      "fields_present": [],
+      "fields_missing": [],
+      "services_declared": 0,
+      "uri_resolved": ""
+    },
+    "is_self_evaluation": false
+  },
+  {
+    "agent_id": 2583,
+    "agent_uri": "{\"name\":\"CardBattle Agent #0\",\"element\":\"Fire\",\"atk\":8,\"def\":4,\"hp\":20,\"type\":\"autonomous-battle-card\",\"protocol\":\"CardBattle\"}",
+    "owner_address": "0xC9B306b39A8E2063c896c3EcB68Bd30a3Cc4B166",
+    "composite_score": 23,
+    "confidence": 40,
+    "state": "WITHHELD_LOW_CONFIDENCE",
+    "dimensions": {
+      "identity_completeness": 0,
+      "endpoint_liveness": 0,
+      "onchain_history": 56,
+      "venice_trust_analysis": 30
+    },
+    "spread": 56,
+    "endpoints": {
+      "declared": 0,
+      "live": 0,
+      "secured": 0,
+      "dead": 0
+    },
+    "tx_hash": null,
+    "attestation_uid": null,
+    "tool_calls_used": 3,
+    "timestamp": "2026-03-22T12:22:52.796006+00:00",
+    "discovery_source": "erc8004_events",
+    "chain_id": 84532,
+    "venice": {
+      "model": "qwen3-235b-a22b-instruct-2507",
+      "reasoning": "The agent manifest is empty, indicating no declared services or identity information. There are 0 endpoints declared or live, showing no operational services. The on-chain wallet has only 5 transactions and a zero ETH balance, suggesting minimal activity or testing. There are no existing reputation entries. While the low transaction count and empty manifest could indicate a new but legitimate agent, the complete lack of endpoints and services is a significant gap. This profile shows minimal signals of legitimacy but no overt red flags beyond inactivity, warranting a low but not suspicious score.",
+      "tokens_sent": 1249,
+      "tokens_received": 123,
+      "latency_ms": 20780,
+      "parse_method": "json_schema"
+    },
+    "onchain": {
+      "wallet_address": "0xC9B306b39A8E2063c896c3EcB68Bd30a3Cc4B166",
+      "tx_count": 5,
+      "balance_eth": 0.0,
+      "reputation_entries": 0
+    },
+    "identity": {
+      "fields_present": [],
+      "fields_missing": [],
+      "services_declared": 0,
+      "uri_resolved": ""
+    },
+    "is_self_evaluation": false
+  },
+  {
+    "agent_id": 2584,
+    "agent_uri": "{\"name\":\"CardBattle Agent #1\",\"element\":\"Lightning\",\"atk\":9,\"def\":3,\"hp\":18,\"type\":\"autonomous-battle-card\",\"protocol\":\"CardBattle\"}",
+    "owner_address": "0xC9B306b39A8E2063c896c3EcB68Bd30a3Cc4B166",
+    "composite_score": 23,
+    "confidence": 40,
+    "state": "WITHHELD_LOW_CONFIDENCE",
+    "dimensions": {
+      "identity_completeness": 0,
+      "endpoint_liveness": 0,
+      "onchain_history": 56,
+      "venice_trust_analysis": 30
+    },
+    "spread": 56,
+    "endpoints": {
+      "declared": 0,
+      "live": 0,
+      "secured": 0,
+      "dead": 0
+    },
+    "tx_hash": null,
+    "attestation_uid": null,
+    "tool_calls_used": 3,
+    "timestamp": "2026-03-22T12:23:19.933457+00:00",
+    "discovery_source": "erc8004_events",
+    "chain_id": 84532,
+    "venice": {
+      "model": "qwen3-235b-a22b-instruct-2507",
+      "reasoning": "The agent manifest is empty, indicating no declared services or identity information. There are 0 endpoints declared or live, showing no operational services. The on-chain wallet has only 5 transactions and a zero ETH balance, suggesting minimal activity or testing. There is no existing reputation. While the low transaction count and empty manifest are consistent with a new or inactive agent, the complete lack of service declarations and operational endpoints severely limits trust. The signals are weak but not overtly malicious, warranting a low but not worst-possible score.",
+      "tokens_sent": 1249,
+      "tokens_received": 120,
+      "latency_ms": 16567,
+      "parse_method": "json_schema"
+    },
+    "onchain": {
+      "wallet_address": "0xC9B306b39A8E2063c896c3EcB68Bd30a3Cc4B166",
+      "tx_count": 5,
+      "balance_eth": 0.0,
+      "reputation_entries": 0
+    },
+    "identity": {
+      "fields_present": [],
+      "fields_missing": [],
+      "services_declared": 0,
+      "uri_resolved": ""
+    },
+    "is_self_evaluation": false
+  },
+  {
+    "agent_id": 2585,
+    "agent_uri": "{\"name\":\"CardBattle Agent #0\",\"element\":\"Water\",\"atk\":5,\"def\":8,\"hp\":22,\"type\":\"autonomous-battle-card\",\"protocol\":\"CardBattle\"}",
+    "owner_address": "0xC9B306b39A8E2063c896c3EcB68Bd30a3Cc4B166",
+    "composite_score": 23,
+    "confidence": 40,
+    "state": "WITHHELD_LOW_CONFIDENCE",
+    "dimensions": {
+      "identity_completeness": 0,
+      "endpoint_liveness": 0,
+      "onchain_history": 56,
+      "venice_trust_analysis": 30
+    },
+    "spread": 56,
+    "endpoints": {
+      "declared": 0,
+      "live": 0,
+      "secured": 0,
+      "dead": 0
+    },
+    "tx_hash": null,
+    "attestation_uid": null,
+    "tool_calls_used": 3,
+    "timestamp": "2026-03-22T12:22:06.008651+00:00",
+    "discovery_source": "erc8004_events",
+    "chain_id": 84532,
+    "venice": {
+      "model": "qwen3-235b-a22b-instruct-2507",
+      "reasoning": "The agent manifest is empty, indicating no declared services or identity information. There are 0 endpoints declared or live, showing no operational services. The on-chain wallet has only 5 transactions and a zero ETH balance, suggesting minimal activity or testing. There is no existing reputation. While the low transaction count and empty manifest could indicate a new but legitimate agent, the complete lack of endpoints and services is a significant gap, resulting in a low trust score with no strong positive signals.",
+      "tokens_sent": 1249,
+      "tokens_received": 109,
+      "latency_ms": 16849,
+      "parse_method": "json_schema"
+    },
+    "onchain": {
+      "wallet_address": "0xC9B306b39A8E2063c896c3EcB68Bd30a3Cc4B166",
+      "tx_count": 5,
+      "balance_eth": 0.0,
+      "reputation_entries": 0
+    },
+    "identity": {
+      "fields_present": [],
+      "fields_missing": [],
+      "services_declared": 0,
+      "uri_resolved": ""
+    },
+    "is_self_evaluation": false
+  },
+  {
+    "agent_id": 2586,
+    "agent_uri": "{\"name\":\"CardBattle Agent #1\",\"element\":\"Water\",\"atk\":5,\"def\":8,\"hp\":22,\"type\":\"autonomous-battle-card\",\"protocol\":\"CardBattle\"}",
+    "owner_address": "0xC9B306b39A8E2063c896c3EcB68Bd30a3Cc4B166",
+    "composite_score": 23,
+    "confidence": 40,
+    "state": "WITHHELD_LOW_CONFIDENCE",
+    "dimensions": {
+      "identity_completeness": 0,
+      "endpoint_liveness": 0,
+      "onchain_history": 56,
+      "venice_trust_analysis": 30
+    },
+    "spread": 56,
+    "endpoints": {
+      "declared": 0,
+      "live": 0,
+      "secured": 0,
+      "dead": 0
+    },
+    "tx_hash": null,
+    "attestation_uid": null,
+    "tool_calls_used": 3,
+    "timestamp": "2026-03-22T12:22:29.196305+00:00",
+    "discovery_source": "erc8004_events",
+    "chain_id": 84532,
+    "venice": {
+      "model": "qwen3-235b-a22b-instruct-2507",
+      "reasoning": "The agent manifest is empty, indicating no declared services or identity information. There are 0 endpoints declared or live, showing no operational services. The on-chain wallet has only 5 transactions and a zero ETH balance, suggesting minimal activity or testing. There are no reputation entries. While the low transaction count and empty manifest could indicate a new but legitimate agent, the complete lack of endpoints and services results in a thin profile with no strong positive signals, warranting a low but not suspicious score.",
+      "tokens_sent": 1249,
+      "tokens_received": 112,
+      "latency_ms": 17810,
+      "parse_method": "json_schema"
+    },
+    "onchain": {
+      "wallet_address": "0xC9B306b39A8E2063c896c3EcB68Bd30a3Cc4B166",
+      "tx_count": 5,
+      "balance_eth": 0.0,
+      "reputation_entries": 0
+    },
+    "identity": {
+      "fields_present": [],
+      "fields_missing": [],
+      "services_declared": 0,
+      "uri_resolved": ""
+    },
+    "is_self_evaluation": false
+  },
+  {
+    "agent_id": 2587,
+    "agent_uri": "{\"name\":\"CardBattle Agent #0\",\"element\":\"Water\",\"atk\":5,\"def\":8,\"hp\":22,\"type\":\"autonomous-battle-card\",\"protocol\":\"CardBattle\"}",
+    "owner_address": "0x681E179118715b7a09B2Aca0cfe445BFacd47fA4",
+    "composite_score": 23,
+    "confidence": 40,
+    "state": "WITHHELD_LOW_CONFIDENCE",
+    "dimensions": {
+      "identity_completeness": 0,
+      "endpoint_liveness": 0,
+      "onchain_history": 56,
+      "venice_trust_analysis": 30
+    },
+    "spread": 56,
+    "endpoints": {
+      "declared": 0,
+      "live": 0,
+      "secured": 0,
+      "dead": 0
+    },
+    "tx_hash": null,
+    "attestation_uid": null,
+    "tool_calls_used": 3,
+    "timestamp": "2026-03-22T12:21:15.321316+00:00",
+    "discovery_source": "erc8004_events",
+    "chain_id": 84532,
+    "venice": {
+      "model": "qwen3-235b-a22b-instruct-2507",
+      "reasoning": "The agent manifest is empty, indicating no declared services or identity information. There are 0 endpoints declared or live, showing no operational services. The wallet has only 5 transactions and a zero ETH balance, suggesting minimal on-chain activity. There are no existing reputation entries. While the low transaction count and empty manifest are consistent with a new or inactive agent, the complete lack of service declarations and operational endpoints severely limits trust. The signals are weak but not overtly malicious, warranting a low but not minimum score.",
+      "tokens_sent": 1247,
+      "tokens_received": 117,
+      "latency_ms": 19005,
+      "parse_method": "json_schema"
+    },
+    "onchain": {
+      "wallet_address": "0x681E179118715b7a09B2Aca0cfe445BFacd47fA4",
+      "tx_count": 5,
+      "balance_eth": 0.0,
+      "reputation_entries": 0
+    },
+    "identity": {
+      "fields_present": [],
+      "fields_missing": [],
+      "services_declared": 0,
+      "uri_resolved": ""
+    },
+    "is_self_evaluation": false
+  },
+  {
+    "agent_id": 2588,
+    "agent_uri": "{\"name\":\"CardBattle Agent #1\",\"element\":\"Water\",\"atk\":5,\"def\":8,\"hp\":22,\"type\":\"autonomous-battle-card\",\"protocol\":\"CardBattle\"}",
+    "owner_address": "0x681E179118715b7a09B2Aca0cfe445BFacd47fA4",
+    "composite_score": 23,
+    "confidence": 40,
+    "state": "WITHHELD_LOW_CONFIDENCE",
+    "dimensions": {
+      "identity_completeness": 0,
+      "endpoint_liveness": 0,
+      "onchain_history": 56,
+      "venice_trust_analysis": 30
+    },
+    "spread": 56,
+    "endpoints": {
+      "declared": 0,
+      "live": 0,
+      "secured": 0,
+      "dead": 0
+    },
+    "tx_hash": null,
+    "attestation_uid": null,
+    "tool_calls_used": 3,
+    "timestamp": "2026-03-22T12:21:39.994627+00:00",
+    "discovery_source": "erc8004_events",
+    "chain_id": 84532,
+    "venice": {
+      "model": "qwen3-235b-a22b-instruct-2507",
+      "reasoning": "The agent manifest is empty, indicating no declared services or identity information. There are 0 endpoints declared or live, showing no operational services. The on-chain wallet has only 5 transactions and a zero ETH balance, suggesting minimal activity or testing. There are no reputation entries. While the low transaction count and empty manifest could indicate a new but legitimate agent, the complete lack of endpoints and services is a significant gap, resulting in a low trust score with no strong positive signals.",
+      "tokens_sent": 1247,
+      "tokens_received": 109,
+      "latency_ms": 20149,
+      "parse_method": "json_schema"
+    },
+    "onchain": {
+      "wallet_address": "0x681E179118715b7a09B2Aca0cfe445BFacd47fA4",
+      "tx_count": 5,
+      "balance_eth": 0.0,
+      "reputation_entries": 0
+    },
+    "identity": {
+      "fields_present": [],
+      "fields_missing": [],
+      "services_declared": 0,
+      "uri_resolved": ""
+    },
+    "is_self_evaluation": false
+  },
+  {
+    "agent_id": 2589,
+    "agent_uri": "{\"name\":\"CardBattle Agent #0\",\"element\":\"Water\",\"atk\":5,\"def\":8,\"hp\":22,\"type\":\"autonomous-battle-card\",\"protocol\":\"CardBattle\"}",
+    "owner_address": "0x681E179118715b7a09B2Aca0cfe445BFacd47fA4",
+    "composite_score": 23,
+    "confidence": 40,
+    "state": "WITHHELD_LOW_CONFIDENCE",
+    "dimensions": {
+      "identity_completeness": 0,
+      "endpoint_liveness": 0,
+      "onchain_history": 56,
+      "venice_trust_analysis": 30
+    },
+    "spread": 56,
+    "endpoints": {
+      "declared": 0,
+      "live": 0,
+      "secured": 0,
+      "dead": 0
+    },
+    "tx_hash": null,
+    "attestation_uid": null,
+    "tool_calls_used": 3,
+    "timestamp": "2026-03-22T12:20:19.609802+00:00",
+    "discovery_source": "erc8004_events",
+    "chain_id": 84532,
+    "venice": {
+      "model": "qwen3-235b-a22b-instruct-2507",
+      "reasoning": "The agent manifest is empty, indicating no declared services or identity information. There are 0 endpoints declared or live, showing no operational services. The on-chain history shows only 5 transactions and a zero ETH balance, suggesting minimal activity or testing. There are no existing reputation entries. While there is no overt malicious signal, the lack of manifest content, live services, and meaningful on-chain activity results in a low trust score with only minimal legitimacy from a few transactions.",
+      "tokens_sent": 1247,
+      "tokens_received": 107,
+      "latency_ms": 27269,
+      "parse_method": "json_schema"
+    },
+    "onchain": {
+      "wallet_address": "0x681E179118715b7a09B2Aca0cfe445BFacd47fA4",
+      "tx_count": 5,
+      "balance_eth": 0.0,
+      "reputation_entries": 0
+    },
+    "identity": {
+      "fields_present": [],
+      "fields_missing": [],
+      "services_declared": 0,
+      "uri_resolved": ""
+    },
+    "is_self_evaluation": false
+  },
+  {
+    "agent_id": 2590,
+    "agent_uri": "{\"name\":\"CardBattle Agent #1\",\"element\":\"Water\",\"atk\":5,\"def\":8,\"hp\":22,\"type\":\"autonomous-battle-card\",\"protocol\":\"CardBattle\"}",
+    "owner_address": "0x681E179118715b7a09B2Aca0cfe445BFacd47fA4",
+    "composite_score": 23,
+    "confidence": 40,
+    "state": "WITHHELD_LOW_CONFIDENCE",
+    "dimensions": {
+      "identity_completeness": 0,
+      "endpoint_liveness": 0,
+      "onchain_history": 56,
+      "venice_trust_analysis": 30
+    },
+    "spread": 56,
+    "endpoints": {
+      "declared": 0,
+      "live": 0,
+      "secured": 0,
+      "dead": 0
+    },
+    "tx_hash": null,
+    "attestation_uid": null,
+    "tool_calls_used": 3,
+    "timestamp": "2026-03-22T12:20:52.997074+00:00",
+    "discovery_source": "erc8004_events",
+    "chain_id": 84532,
+    "venice": {
+      "model": "qwen3-235b-a22b-instruct-2507",
+      "reasoning": "The agent manifest is empty, indicating no declared services or identity information. There are 0 endpoints declared or live, showing no operational services. The on-chain wallet has only 5 transactions and a zero ETH balance, suggesting minimal activity or testing. There are no reputation entries. While the low transaction count and empty manifest raise concerns, the absence of negative signals like placeholder content or dead endpoints prevents a lower score. The overall profile is thin but not overtly suspicious.",
+      "tokens_sent": 1247,
+      "tokens_received": 107,
+      "latency_ms": 15684,
+      "parse_method": "json_schema"
+    },
+    "onchain": {
+      "wallet_address": "0x681E179118715b7a09B2Aca0cfe445BFacd47fA4",
+      "tx_count": 5,
+      "balance_eth": 0.0,
+      "reputation_entries": 0
+    },
+    "identity": {
+      "fields_present": [],
+      "fields_missing": [],
+      "services_declared": 0,
+      "uri_resolved": ""
+    },
+    "is_self_evaluation": false
+  },
+  {
+    "agent_id": 2591,
+    "agent_uri": "{\"name\":\"CardBattle Agent #0\",\"element\":\"Water\",\"atk\":5,\"def\":8,\"hp\":22,\"type\":\"autonomous-battle-card\",\"protocol\":\"CardBattle\"}",
+    "owner_address": "0xB4dBff5b52dDAbeb88Df933c11fF67eFBBE048a0",
+    "composite_score": 23,
+    "confidence": 40,
+    "state": "WITHHELD_LOW_CONFIDENCE",
+    "dimensions": {
+      "identity_completeness": 0,
+      "endpoint_liveness": 0,
+      "onchain_history": 56,
+      "venice_trust_analysis": 30
+    },
+    "spread": 56,
+    "endpoints": {
+      "declared": 0,
+      "live": 0,
+      "secured": 0,
+      "dead": 0
+    },
+    "tx_hash": null,
+    "attestation_uid": null,
+    "tool_calls_used": 3,
+    "timestamp": "2026-03-22T12:19:33.738030+00:00",
+    "discovery_source": "erc8004_events",
+    "chain_id": 84532,
+    "venice": {
+      "model": "qwen3-235b-a22b-instruct-2507",
+      "reasoning": "The agent manifest is empty, indicating no declared services or identity information. No endpoints are declared or tested, so there is no evidence of operational capability. The wallet has only 5 transactions and a zero ETH balance, suggesting minimal on-chain activity. There are no reputation entries. While the low transaction count and empty manifest do not indicate active gaming, the lack of any positive signals results in a low trust score with minimal evidence of legitimacy.",
+      "tokens_sent": 1245,
+      "tokens_received": 101,
+      "latency_ms": 16530,
+      "parse_method": "json_schema"
+    },
+    "onchain": {
+      "wallet_address": "0xB4dBff5b52dDAbeb88Df933c11fF67eFBBE048a0",
+      "tx_count": 5,
+      "balance_eth": 0.0,
+      "reputation_entries": 0
+    },
+    "identity": {
+      "fields_present": [],
+      "fields_missing": [],
+      "services_declared": 0,
+      "uri_resolved": ""
+    },
+    "is_self_evaluation": false
+  },
+  {
+    "agent_id": 2592,
+    "agent_uri": "{\"name\":\"CardBattle Agent #1\",\"element\":\"Lightning\",\"atk\":9,\"def\":3,\"hp\":18,\"type\":\"autonomous-battle-card\",\"protocol\":\"CardBattle\"}",
+    "owner_address": "0xB4dBff5b52dDAbeb88Df933c11fF67eFBBE048a0",
+    "composite_score": 23,
+    "confidence": 40,
+    "state": "WITHHELD_LOW_CONFIDENCE",
+    "dimensions": {
+      "identity_completeness": 0,
+      "endpoint_liveness": 0,
+      "onchain_history": 56,
+      "venice_trust_analysis": 30
+    },
+    "spread": 56,
+    "endpoints": {
+      "declared": 0,
+      "live": 0,
+      "secured": 0,
+      "dead": 0
+    },
+    "tx_hash": null,
+    "attestation_uid": null,
+    "tool_calls_used": 3,
+    "timestamp": "2026-03-22T12:19:56.332639+00:00",
+    "discovery_source": "erc8004_events",
+    "chain_id": 84532,
+    "venice": {
+      "model": "qwen3-235b-a22b-instruct-2507",
+      "reasoning": "The agent manifest is empty, indicating no declared services or identity information. No endpoints are declared or tested, so there is no evidence of operational capability. The wallet has only 5 transactions and a zero ETH balance, suggesting minimal on-chain activity and no economic stake. There are no reputation entries. While the low transaction count and empty manifest are consistent with a new or inactive agent, the lack of any service declaration or funding results in very limited trust, though not overtly suspicious.",
+      "tokens_sent": 1245,
+      "tokens_received": 110,
+      "latency_ms": 17590,
+      "parse_method": "json_schema"
+    },
+    "onchain": {
+      "wallet_address": "0xB4dBff5b52dDAbeb88Df933c11fF67eFBBE048a0",
+      "tx_count": 5,
+      "balance_eth": 0.0,
+      "reputation_entries": 0
+    },
+    "identity": {
+      "fields_present": [],
+      "fields_missing": [],
+      "services_declared": 0,
+      "uri_resolved": ""
+    },
+    "is_self_evaluation": false
+  },
+  {
+    "agent_id": 2593,
+    "agent_uri": "{\"name\":\"CardBattle Agent #0\",\"element\":\"Lightning\",\"atk\":9,\"def\":3,\"hp\":18,\"type\":\"autonomous-battle-card\",\"protocol\":\"CardBattle\"}",
+    "owner_address": "0xB4dBff5b52dDAbeb88Df933c11fF67eFBBE048a0",
+    "composite_score": 23,
+    "confidence": 40,
+    "state": "WITHHELD_LOW_CONFIDENCE",
+    "dimensions": {
+      "identity_completeness": 0,
+      "endpoint_liveness": 0,
+      "onchain_history": 56,
+      "venice_trust_analysis": 30
+    },
+    "spread": 56,
+    "endpoints": {
+      "declared": 0,
+      "live": 0,
+      "secured": 0,
+      "dead": 0
+    },
+    "tx_hash": null,
+    "attestation_uid": null,
+    "tool_calls_used": 3,
+    "timestamp": "2026-03-22T12:18:38.833702+00:00",
+    "discovery_source": "erc8004_events",
+    "chain_id": 84532,
+    "venice": {
+      "model": "qwen3-235b-a22b-instruct-2507",
+      "reasoning": "The agent manifest is empty, indicating no declared services or identity information. There are 0 endpoints declared or live, showing no operational services. The on-chain wallet has only 5 transactions and a zero ETH balance, suggesting minimal activity or testing. There are no reputation entries. While there is a wallet with some transaction history, the lack of any manifest or live services results in very limited trust, though not entirely suspicious due to the small transaction count indicating possible early stage use.",
+      "tokens_sent": 1245,
+      "tokens_received": 109,
+      "latency_ms": 22233,
+      "parse_method": "json_schema"
+    },
+    "onchain": {
+      "wallet_address": "0xB4dBff5b52dDAbeb88Df933c11fF67eFBBE048a0",
+      "tx_count": 5,
+      "balance_eth": 0.0,
+      "reputation_entries": 0
+    },
+    "identity": {
+      "fields_present": [],
+      "fields_missing": [],
+      "services_declared": 0,
+      "uri_resolved": ""
+    },
+    "is_self_evaluation": false
+  },
+  {
+    "agent_id": 2594,
+    "agent_uri": "{\"name\":\"CardBattle Agent #1\",\"element\":\"Fire\",\"atk\":8,\"def\":4,\"hp\":20,\"type\":\"autonomous-battle-card\",\"protocol\":\"CardBattle\"}",
+    "owner_address": "0xB4dBff5b52dDAbeb88Df933c11fF67eFBBE048a0",
+    "composite_score": 23,
+    "confidence": 40,
+    "state": "WITHHELD_LOW_CONFIDENCE",
+    "dimensions": {
+      "identity_completeness": 0,
+      "endpoint_liveness": 0,
+      "onchain_history": 56,
+      "venice_trust_analysis": 30
+    },
+    "spread": 56,
+    "endpoints": {
+      "declared": 0,
+      "live": 0,
+      "secured": 0,
+      "dead": 0
+    },
+    "tx_hash": null,
+    "attestation_uid": null,
+    "tool_calls_used": 3,
+    "timestamp": "2026-03-22T12:19:06.811531+00:00",
+    "discovery_source": "erc8004_events",
+    "chain_id": 84532,
+    "venice": {
+      "model": "qwen3-235b-a22b-instruct-2507",
+      "reasoning": "The agent manifest is empty, indicating no declared services or identity information. No endpoints are declared or tested, so there is no evidence of operational capability. The wallet has only 5 transactions and a zero ETH balance, suggesting minimal on-chain activity. There are no reputation entries. While the low transaction count and empty manifest are consistent with a new or inactive agent, the lack of any service declaration or funding reduces confidence. This profile shows no red flags beyond inactivity, so a score of 30 reflects a minimal but not suspicious presence.",
+      "tokens_sent": 1245,
+      "tokens_received": 122,
+      "latency_ms": 20956,
+      "parse_method": "json_schema"
+    },
+    "onchain": {
+      "wallet_address": "0xB4dBff5b52dDAbeb88Df933c11fF67eFBBE048a0",
+      "tx_count": 5,
+      "balance_eth": 0.0,
+      "reputation_entries": 0
+    },
+    "identity": {
+      "fields_present": [],
+      "fields_missing": [],
+      "services_declared": 0,
+      "uri_resolved": ""
+    },
+    "is_self_evaluation": false
+  },
+  {
+    "agent_id": 2595,
+    "agent_uri": "https://api.veil.moe/api/intents/VZpUNfYtOryQZg8r1sHtH/identity.json",
+    "owner_address": "0xf13021F02E23a8113C1bD826575a1682F6Fac927",
+    "composite_score": 35,
+    "confidence": 73,
+    "state": "VERIFIED",
+    "dimensions": {
+      "identity_completeness": 0,
+      "endpoint_liveness": 0,
+      "onchain_history": 87,
+      "venice_trust_analysis": 45
+    },
+    "spread": 87,
+    "endpoints": {
+      "declared": 0,
+      "live": 0,
+      "secured": 0,
+      "dead": 0
+    },
+    "tx_hash": null,
+    "attestation_uid": null,
+    "tool_calls_used": 3,
+    "timestamp": "2026-03-22T12:17:03.861130+00:00",
+    "discovery_source": "erc8004_events",
+    "chain_id": 84532,
+    "venice": {
+      "model": "qwen3-235b-a22b-instruct-2507",
+      "reasoning": "The agent has a minimal manifest with no declared services or metadata, indicating poor identity quality. There are 0 endpoints declared or live, resulting in low operational reliability. However, the wallet has a significant transaction count (583) and a non-trivial balance (0.4994 ETH), suggesting real on-chain activity and some legitimacy. The absence of reputation entries and any service declarations creates a mismatch between on-chain activity and off-chain presence, but there are no overt red flags beyond inactivity or incompleteness. Given the lack of service information but evidence of wallet usage, the score is moderately low but not outright suspicious.",
+      "tokens_sent": 1251,
+      "tokens_received": 143,
+      "latency_ms": 22199,
+      "parse_method": "json_schema"
+    },
+    "onchain": {
+      "wallet_address": "0xf13021F02E23a8113C1bD826575a1682F6Fac927",
+      "tx_count": 583,
+      "balance_eth": 0.4994341019919508,
+      "reputation_entries": 0
+    },
+    "identity": {
+      "fields_present": [],
+      "fields_missing": [],
+      "services_declared": 0,
+      "uri_resolved": ""
+    },
+    "is_self_evaluation": false
+  },
+  {
+    "agent_id": 2596,
+    "agent_uri": "https://api.veil.moe/api/intents/t83LL1Xy8kfmDMT7Q7KzS/identity.json",
+    "owner_address": "0xf13021F02E23a8113C1bD826575a1682F6Fac927",
+    "composite_score": 35,
+    "confidence": 73,
+    "state": "VERIFIED",
+    "dimensions": {
+      "identity_completeness": 0,
+      "endpoint_liveness": 0,
+      "onchain_history": 87,
+      "venice_trust_analysis": 45
+    },
+    "spread": 87,
+    "endpoints": {
+      "declared": 0,
+      "live": 0,
+      "secured": 0,
+      "dead": 0
+    },
+    "tx_hash": null,
+    "attestation_uid": null,
+    "tool_calls_used": 3,
+    "timestamp": "2026-03-22T12:16:24.576747+00:00",
+    "discovery_source": "erc8004_events",
+    "chain_id": 84532,
+    "venice": {
+      "model": "qwen3-235b-a22b-instruct-2507",
+      "reasoning": "The agent has a minimal manifest with no declared services, resulting in 0 endpoints, all of which are dead or non-existent. However, the wallet shows significant on-chain activity with 583 transactions and a non-trivial balance of 0.4994 ETH, suggesting real usage. The lack of any service declaration or live endpoints contradicts the high transaction count, creating a mismatch in signals. Despite the operational and identity weaknesses, the on-chain legitimacy provides moderate confidence, warranting a score in the lower-mid range.",
+      "tokens_sent": 1251,
+      "tokens_received": 123,
+      "latency_ms": 22996,
+      "parse_method": "json_schema"
+    },
+    "onchain": {
+      "wallet_address": "0xf13021F02E23a8113C1bD826575a1682F6Fac927",
+      "tx_count": 583,
+      "balance_eth": 0.4994341019919508,
+      "reputation_entries": 0
+    },
+    "identity": {
+      "fields_present": [],
+      "fields_missing": [],
+      "services_declared": 0,
+      "uri_resolved": ""
+    },
+    "is_self_evaluation": false
+  },
+  {
+    "agent_id": 2597,
+    "agent_uri": "https://api.veil.moe/api/intents/GRykOWEWdPYmHePTnMMGd/identity.json",
+    "owner_address": "0xf13021F02E23a8113C1bD826575a1682F6Fac927",
+    "composite_score": 35,
+    "confidence": 73,
+    "state": "VERIFIED",
+    "dimensions": {
+      "identity_completeness": 0,
+      "endpoint_liveness": 0,
+      "onchain_history": 87,
+      "venice_trust_analysis": 45
+    },
+    "spread": 87,
+    "endpoints": {
+      "declared": 0,
+      "live": 0,
+      "secured": 0,
+      "dead": 0
+    },
+    "tx_hash": null,
+    "attestation_uid": null,
+    "tool_calls_used": 3,
+    "timestamp": "2026-03-22T12:15:40.372014+00:00",
+    "discovery_source": "erc8004_events",
+    "chain_id": 84532,
+    "venice": {
+      "model": "qwen3-235b-a22b-instruct-2507",
+      "reasoning": "The agent has no manifest provided, indicating missing identity information, description, and declared services. There are 0 endpoints declared or live, showing no operational services. However, the wallet has a significant transaction count (583) and a non-trivial balance (0.4994 ETH), suggesting real on-chain activity and potential legitimacy. The lack of any declared services despite substantial wallet activity is a cross-signal inconsistency, but the on-chain data prevents a lower score. Given the complete absence of identity and operational signals but strong on-chain presence, the score is set to 45, reflecting a thin but not entirely suspicious profile.",
+      "tokens_sent": 1251,
+      "tokens_received": 144,
+      "latency_ms": 27397,
+      "parse_method": "json_schema"
+    },
+    "onchain": {
+      "wallet_address": "0xf13021F02E23a8113C1bD826575a1682F6Fac927",
+      "tx_count": 583,
+      "balance_eth": 0.4994341019919508,
+      "reputation_entries": 0
+    },
+    "identity": {
+      "fields_present": [],
+      "fields_missing": [],
+      "services_declared": 0,
+      "uri_resolved": ""
+    },
+    "is_self_evaluation": false
+  },
+  {
+    "agent_id": 2598,
+    "agent_uri": "https://api.veil.moe/api/intents/1rKFQiUpZF8RQ4pmquQBk/identity.json",
+    "owner_address": "0xf13021F02E23a8113C1bD826575a1682F6Fac927",
+    "composite_score": 34,
+    "confidence": 73,
+    "state": "VERIFIED",
+    "dimensions": {
+      "identity_completeness": 0,
+      "endpoint_liveness": 0,
+      "onchain_history": 87,
+      "venice_trust_analysis": 42
+    },
+    "spread": 87,
+    "endpoints": {
+      "declared": 0,
+      "live": 0,
+      "secured": 0,
+      "dead": 0
+    },
+    "tx_hash": null,
+    "attestation_uid": null,
+    "tool_calls_used": 3,
+    "timestamp": "2026-03-22T12:14:59.783974+00:00",
+    "discovery_source": "erc8004_events",
+    "chain_id": 84532,
+    "venice": {
+      "model": "qwen3-235b-a22b-instruct-2507",
+      "reasoning": "The agent manifest is empty, indicating no declared services or identity information, which severely limits identity quality. There are 0 endpoints declared, so operational reliability cannot be assessed and scores very low. On-chain, the wallet has a high transaction count (583) and a non-trivial balance (0.4994 ETH), suggesting real usage and some legitimacy, but there are no existing reputation entries. The high transaction volume contrasts with the complete lack of manifest and services, creating a mismatch between on-chain activity and service declaration, which reduces confidence. Overall, weak identity and operational signals drag the score down despite on-chain indicators of activity.",
+      "tokens_sent": 1251,
+      "tokens_received": 144,
+      "latency_ms": 23019,
+      "parse_method": "json_schema"
+    },
+    "onchain": {
+      "wallet_address": "0xf13021F02E23a8113C1bD826575a1682F6Fac927",
+      "tx_count": 583,
+      "balance_eth": 0.4994341019919508,
+      "reputation_entries": 0
+    },
+    "identity": {
+      "fields_present": [],
+      "fields_missing": [],
+      "services_declared": 0,
+      "uri_resolved": ""
+    },
+    "is_self_evaluation": false
+  },
+  {
+    "agent_id": 2599,
+    "agent_uri": "https://api.veil.moe/api/intents/1igPsnOJwKI0nKZx1gkgi/identity.json",
+    "owner_address": "0xf13021F02E23a8113C1bD826575a1682F6Fac927",
+    "composite_score": 34,
+    "confidence": 73,
+    "state": "VERIFIED",
+    "dimensions": {
+      "identity_completeness": 0,
+      "endpoint_liveness": 0,
+      "onchain_history": 87,
+      "venice_trust_analysis": 42
+    },
+    "spread": 87,
+    "endpoints": {
+      "declared": 0,
+      "live": 0,
+      "secured": 0,
+      "dead": 0
+    },
+    "tx_hash": null,
+    "attestation_uid": null,
+    "tool_calls_used": 3,
+    "timestamp": "2026-03-22T12:14:23.689504+00:00",
+    "discovery_source": "erc8004_events",
+    "chain_id": 84532,
+    "venice": {
+      "model": "qwen3-235b-a22b-instruct-2507",
+      "reasoning": "The agent manifest is empty, indicating no declared services or identity information, which severely weakens identity quality. There are 0 endpoints declared, so there is no operational evidence of live or secured services. However, the wallet has a significant transaction count (583) and a non-trivial balance (0.4994 ETH), suggesting real on-chain activity and some level of legitimacy. The lack of any reputation entries is neutral. The major inconsistency is the high transaction volume paired with no service declarations or endpoints, which is unusual for an operational agent and suggests the on-chain activity may not be related to AI agent services. This creates moderate doubt, pulling the score down from the mid-range despite the active wallet.",
+      "tokens_sent": 1251,
+      "tokens_received": 159,
+      "latency_ms": 19158,
+      "parse_method": "json_schema"
+    },
+    "onchain": {
+      "wallet_address": "0xf13021F02E23a8113C1bD826575a1682F6Fac927",
+      "tx_count": 583,
+      "balance_eth": 0.4994341019919508,
+      "reputation_entries": 0
+    },
+    "identity": {
+      "fields_present": [],
+      "fields_missing": [],
+      "services_declared": 0,
+      "uri_resolved": ""
+    },
+    "is_self_evaluation": false
+  },
+  {
+    "agent_id": 2600,
+    "agent_uri": "https://example.com/e2e-test-1774118866099.json",
+    "owner_address": "0xf13021F02E23a8113C1bD826575a1682F6Fac927",
+    "composite_score": 35,
+    "confidence": 73,
+    "state": "VERIFIED",
+    "dimensions": {
+      "identity_completeness": 0,
+      "endpoint_liveness": 0,
+      "onchain_history": 87,
+      "venice_trust_analysis": 45
+    },
+    "spread": 87,
+    "endpoints": {
+      "declared": 0,
+      "live": 0,
+      "secured": 0,
+      "dead": 0
+    },
+    "tx_hash": null,
+    "attestation_uid": null,
+    "tool_calls_used": 3,
+    "timestamp": "2026-03-22T12:13:47.623087+00:00",
+    "discovery_source": "erc8004_events",
+    "chain_id": 84532,
+    "venice": {
+      "model": "qwen3-235b-a22b-instruct-2507",
+      "reasoning": "The agent has no manifest declared, indicating missing identity information, which is a significant weakness. There are 0 endpoints declared, so no operational services can be evaluated for reliability. However, the on-chain wallet shows 583 transactions and a balance of 0.4994 ETH, suggesting real and active usage over time. Despite the lack of identity and service data, the substantial transaction history provides some legitimacy. The absence of reputation entries is neutral. The score is low due to missing core identity and service signals, but not in the highly suspicious range because the wallet activity indicates it is not a trivial or empty account.",
+      "tokens_sent": 1251,
+      "tokens_received": 141,
+      "latency_ms": 20810,
+      "parse_method": "json_schema"
+    },
+    "onchain": {
+      "wallet_address": "0xf13021F02E23a8113C1bD826575a1682F6Fac927",
+      "tx_count": 583,
+      "balance_eth": 0.4994341019919508,
+      "reputation_entries": 0
+    },
+    "identity": {
+      "fields_present": [],
+      "fields_missing": [],
+      "services_declared": 0,
+      "uri_resolved": ""
+    },
+    "is_self_evaluation": false
+  },
+  {
+    "agent_id": 2601,
+    "agent_uri": "",
+    "owner_address": "0xf13021F02E23a8113C1bD826575a1682F6Fac927",
+    "composite_score": 35,
+    "confidence": 73,
+    "state": "VERIFIED",
+    "dimensions": {
+      "identity_completeness": 0,
+      "endpoint_liveness": 0,
+      "onchain_history": 87,
+      "venice_trust_analysis": 45
+    },
+    "spread": 87,
+    "endpoints": {
+      "declared": 0,
+      "live": 0,
+      "secured": 0,
+      "dead": 0
+    },
+    "tx_hash": null,
+    "attestation_uid": null,
+    "tool_calls_used": 3,
+    "timestamp": "2026-03-22T12:18:11.303484+00:00",
+    "discovery_source": "erc8004_events",
+    "chain_id": 84532,
+    "venice": {
+      "model": "qwen3-235b-a22b-instruct-2507",
+      "reasoning": "The agent has a minimal manifest with no declared services or endpoints, resulting in 0 live or secured endpoints. However, the wallet shows significant on-chain activity with 583 transactions and a non-trivial balance of 0.4994 ETH, suggesting real usage. The lack of any service declaration or endpoint information weakens identity quality and operational reliability, but the on-chain legitimacy provides moderate confidence. Cross-signal consistency is partially present\u2014active wallet but no services declared is unusual but not implausible for a new agent setup.",
+      "tokens_sent": 1251,
+      "tokens_received": 123,
+      "latency_ms": 16085,
+      "parse_method": "json_schema"
+    },
+    "onchain": {
+      "wallet_address": "0xf13021F02E23a8113C1bD826575a1682F6Fac927",
+      "tx_count": 583,
+      "balance_eth": 0.4994341019919508,
+      "reputation_entries": 0
+    },
+    "identity": {
+      "fields_present": [],
+      "fields_missing": [],
+      "services_declared": 0,
+      "uri_resolved": ""
+    },
+    "is_self_evaluation": false
+  },
+  {
+    "agent_id": 2602,
+    "agent_uri": "https://api.veil.moe/api/intents/jWHsrPQs7g-2WDkoHg4hc/identity.json",
+    "owner_address": "0xf13021F02E23a8113C1bD826575a1682F6Fac927",
+    "composite_score": 34,
+    "confidence": 73,
+    "state": "VERIFIED",
+    "dimensions": {
+      "identity_completeness": 0,
+      "endpoint_liveness": 0,
+      "onchain_history": 87,
+      "venice_trust_analysis": 42
+    },
+    "spread": 87,
+    "endpoints": {
+      "declared": 0,
+      "live": 0,
+      "secured": 0,
+      "dead": 0
+    },
+    "tx_hash": null,
+    "attestation_uid": null,
+    "tool_calls_used": 3,
+    "timestamp": "2026-03-22T12:13:11.546091+00:00",
+    "discovery_source": "erc8004_events",
+    "chain_id": 84532,
+    "venice": {
+      "model": "qwen3-235b-a22b-instruct-2507",
+      "reasoning": "The agent manifest is empty, indicating no declared services or identity information, which severely weakens identity quality. There are 0 endpoints declared, so operational reliability is minimal with no live or secured services. On-chain history shows a wallet with 583 transactions and a balance of 0.4994 ETH, suggesting some level of real activity, but there are no existing reputation entries. The high transaction count contrasts with the complete lack of manifest and services, creating a mismatch between on-chain activity and service presence. This results in a weak but not entirely suspicious profile.",
+      "tokens_sent": 1251,
+      "tokens_received": 130,
+      "latency_ms": 19239,
+      "parse_method": "json_schema"
+    },
+    "onchain": {
+      "wallet_address": "0xf13021F02E23a8113C1bD826575a1682F6Fac927",
+      "tx_count": 583,
+      "balance_eth": 0.4994341019919508,
+      "reputation_entries": 0
+    },
+    "identity": {
+      "fields_present": [],
+      "fields_missing": [],
+      "services_declared": 0,
+      "uri_resolved": ""
+    },
+    "is_self_evaluation": false
+  },
+  {
+    "agent_id": 2603,
+    "agent_uri": "https://api.veil.moe/api/intents/BdqqQq8W_vluv-iXGRhq6/identity.json",
+    "owner_address": "0xf13021F02E23a8113C1bD826575a1682F6Fac927",
+    "composite_score": 34,
+    "confidence": 73,
+    "state": "VERIFIED",
+    "dimensions": {
+      "identity_completeness": 0,
+      "endpoint_liveness": 0,
+      "onchain_history": 87,
+      "venice_trust_analysis": 42
+    },
+    "spread": 87,
+    "endpoints": {
+      "declared": 0,
+      "live": 0,
+      "secured": 0,
+      "dead": 0
+    },
+    "tx_hash": null,
+    "attestation_uid": null,
+    "tool_calls_used": 3,
+    "timestamp": "2026-03-22T12:12:36.427783+00:00",
+    "discovery_source": "erc8004_events",
+    "chain_id": 84532,
+    "venice": {
+      "model": "qwen3-235b-a22b-instruct-2507",
+      "reasoning": "The agent manifest is empty, indicating no declared services or identity information, which severely weakens identity quality. There are 0 endpoints declared, so operational reliability is minimal with no live or secured services. On-chain history shows a wallet with 583 transactions and a balance of 0.4994 ETH, suggesting real usage and some legitimacy, but there are no existing reputation entries. The high transaction count contrasts with the complete lack of manifest and endpoints, creating a mismatch between on-chain activity and service declaration, which reduces confidence. No positive signals from identity or operations prevent a higher score, but the wallet activity keeps it from being highly suspicious.",
+      "tokens_sent": 1251,
+      "tokens_received": 146,
+      "latency_ms": 17764,
+      "parse_method": "json_schema"
+    },
+    "onchain": {
+      "wallet_address": "0xf13021F02E23a8113C1bD826575a1682F6Fac927",
+      "tx_count": 583,
+      "balance_eth": 0.4994341019919508,
+      "reputation_entries": 0
+    },
+    "identity": {
+      "fields_present": [],
+      "fields_missing": [],
+      "services_declared": 0,
+      "uri_resolved": ""
+    },
+    "is_self_evaluation": false
+  },
+  {
+    "agent_id": 2604,
+    "agent_uri": "https://api.veil.moe/api/intents/or0pI0RieV_pHomRXiehl/identity.json",
+    "owner_address": "0xf13021F02E23a8113C1bD826575a1682F6Fac927",
+    "composite_score": 34,
+    "confidence": 73,
+    "state": "VERIFIED",
+    "dimensions": {
+      "identity_completeness": 0,
+      "endpoint_liveness": 0,
+      "onchain_history": 87,
+      "venice_trust_analysis": 42
+    },
+    "spread": 87,
+    "endpoints": {
+      "declared": 0,
+      "live": 0,
+      "secured": 0,
+      "dead": 0
+    },
+    "tx_hash": null,
+    "attestation_uid": null,
+    "tool_calls_used": 3,
+    "timestamp": "2026-03-22T12:12:04.601297+00:00",
+    "discovery_source": "erc8004_events",
+    "chain_id": 84532,
+    "venice": {
+      "model": "qwen3-235b-a22b-instruct-2507",
+      "reasoning": "The agent has a minimal manifest with no declared services, resulting in 0 endpoints live or secured, which weakens operational reliability. However, the wallet shows significant on-chain activity with 583 transactions and a non-trivial balance of 0.4994 ETH, suggesting real usage and legitimacy. The absence of any reputation entries and service declarations creates a mismatch between strong on-chain history and weak identity and operational signals. This profile indicates a potentially legitimate wallet but with no clear service presence or identity, leading to moderate confidence at best.",
+      "tokens_sent": 1251,
+      "tokens_received": 124,
+      "latency_ms": 14518,
+      "parse_method": "json_schema"
+    },
+    "onchain": {
+      "wallet_address": "0xf13021F02E23a8113C1bD826575a1682F6Fac927",
+      "tx_count": 583,
+      "balance_eth": 0.4994341019919508,
+      "reputation_entries": 0
+    },
+    "identity": {
+      "fields_present": [],
+      "fields_missing": [],
+      "services_declared": 0,
+      "uri_resolved": ""
+    },
+    "is_self_evaluation": false
+  },
+  {
+    "agent_id": 2605,
+    "agent_uri": "https://api.veil.moe/api/intents/XEap7C3EOMkg7L9FnsehS/identity.json",
+    "owner_address": "0xf13021F02E23a8113C1bD826575a1682F6Fac927",
+    "composite_score": 35,
+    "confidence": 73,
+    "state": "VERIFIED",
+    "dimensions": {
+      "identity_completeness": 0,
+      "endpoint_liveness": 0,
+      "onchain_history": 87,
+      "venice_trust_analysis": 45
+    },
+    "spread": 87,
+    "endpoints": {
+      "declared": 0,
+      "live": 0,
+      "secured": 0,
+      "dead": 0
+    },
+    "tx_hash": null,
+    "attestation_uid": null,
+    "tool_calls_used": 3,
+    "timestamp": "2026-03-22T12:11:31.225198+00:00",
+    "discovery_source": "erc8004_events",
+    "chain_id": 84532,
+    "venice": {
+      "model": "qwen3-235b-a22b-instruct-2507",
+      "reasoning": "The agent has a minimal manifest with no declared services, resulting in 0 endpoints and no operational signals. However, the wallet shows meaningful on-chain activity with 583 transactions and a non-trivial balance of 0.4994 ETH, suggesting real usage. The lack of any service declaration or endpoint reduces identity quality and operational reliability, but the on-chain legitimacy provides moderate confidence. Cross-signal consistency is weak due to the disconnect between active wallet and no declared services.",
+      "tokens_sent": 1251,
+      "tokens_received": 112,
+      "latency_ms": 16252,
+      "parse_method": "json_schema"
+    },
+    "onchain": {
+      "wallet_address": "0xf13021F02E23a8113C1bD826575a1682F6Fac927",
+      "tx_count": 583,
+      "balance_eth": 0.4994341019919508,
+      "reputation_entries": 0
+    },
+    "identity": {
+      "fields_present": [],
+      "fields_missing": [],
+      "services_declared": 0,
+      "uri_resolved": ""
+    },
+    "is_self_evaluation": false
+  },
+  {
+    "agent_id": 2606,
+    "agent_uri": "https://example.com/e2e-test-1774118963212.json",
+    "owner_address": "0xf13021F02E23a8113C1bD826575a1682F6Fac927",
+    "composite_score": 35,
+    "confidence": 73,
+    "state": "VERIFIED",
+    "dimensions": {
+      "identity_completeness": 0,
+      "endpoint_liveness": 0,
+      "onchain_history": 87,
+      "venice_trust_analysis": 45
+    },
+    "spread": 87,
+    "endpoints": {
+      "declared": 0,
+      "live": 0,
+      "secured": 0,
+      "dead": 0
+    },
+    "tx_hash": null,
+    "attestation_uid": null,
+    "tool_calls_used": 3,
+    "timestamp": "2026-03-22T12:10:51.600593+00:00",
+    "discovery_source": "erc8004_events",
+    "chain_id": 84532,
+    "venice": {
+      "model": "qwen3-235b-a22b-instruct-2507",
+      "reasoning": "The agent manifest is empty, indicating no declared services or identity information, which severely limits identity quality. There are 0 endpoints declared or live, resulting in poor operational reliability. However, the wallet has a significant transaction count (583) and a non-trivial balance (0.4994 ETH), suggesting real on-chain activity and some legitimacy. The absence of reputation entries and any service declarations creates a mismatch between on-chain activity and service presence, but the wallet history prevents a lower score. Cross-signal consistency is weak due to high TX count but no manifest or endpoints.",
+      "tokens_sent": 1251,
+      "tokens_received": 133,
+      "latency_ms": 23978,
+      "parse_method": "json_schema"
+    },
+    "onchain": {
+      "wallet_address": "0xf13021F02E23a8113C1bD826575a1682F6Fac927",
+      "tx_count": 583,
+      "balance_eth": 0.4994341019919508,
+      "reputation_entries": 0
+    },
+    "identity": {
+      "fields_present": [],
+      "fields_missing": [],
+      "services_declared": 0,
+      "uri_resolved": ""
+    },
+    "is_self_evaluation": false
+  },
+  {
+    "agent_id": 2607,
+    "agent_uri": "",
+    "owner_address": "0xf13021F02E23a8113C1bD826575a1682F6Fac927",
+    "composite_score": 35,
+    "confidence": 73,
+    "state": "VERIFIED",
+    "dimensions": {
+      "identity_completeness": 0,
+      "endpoint_liveness": 0,
+      "onchain_history": 87,
+      "venice_trust_analysis": 45
+    },
+    "spread": 87,
+    "endpoints": {
+      "declared": 0,
+      "live": 0,
+      "secured": 0,
+      "dead": 0
+    },
+    "tx_hash": null,
+    "attestation_uid": null,
+    "tool_calls_used": 3,
+    "timestamp": "2026-03-22T12:17:43.381361+00:00",
+    "discovery_source": "erc8004_events",
+    "chain_id": 84532,
+    "venice": {
+      "model": "qwen3-235b-a22b-instruct-2507",
+      "reasoning": "The agent has a minimal manifest with no declared services or endpoints, resulting in 0 live or secured endpoints. However, the wallet shows significant on-chain activity with 583 transactions and a non-trivial balance of 0.4994 ETH, suggesting real usage. The lack of any service declaration or endpoint information weakens identity and operational signals, but the on-chain legitimacy provides moderate confidence. Cross-signal consistency is partially maintained due to wallet activity, but the absence of any manifest content limits the score.",
+      "tokens_sent": 1251,
+      "tokens_received": 119,
+      "latency_ms": 16487,
+      "parse_method": "json_schema"
+    },
+    "onchain": {
+      "wallet_address": "0xf13021F02E23a8113C1bD826575a1682F6Fac927",
+      "tx_count": 583,
+      "balance_eth": 0.4994341019919508,
+      "reputation_entries": 0
+    },
+    "identity": {
+      "fields_present": [],
+      "fields_missing": [],
+      "services_declared": 0,
+      "uri_resolved": ""
+    },
+    "is_self_evaluation": false
+  },
+  {
+    "agent_id": 2608,
+    "agent_uri": "https://api.veil.moe/api/intents/e2e-test-1774118982622/identity.json",
+    "owner_address": "0xf13021F02E23a8113C1bD826575a1682F6Fac927",
+    "composite_score": 35,
+    "confidence": 73,
+    "state": "VERIFIED",
+    "dimensions": {
+      "identity_completeness": 0,
+      "endpoint_liveness": 0,
+      "onchain_history": 87,
+      "venice_trust_analysis": 45
+    },
+    "spread": 87,
+    "endpoints": {
+      "declared": 0,
+      "live": 0,
+      "secured": 0,
+      "dead": 0
+    },
+    "tx_hash": null,
+    "attestation_uid": null,
+    "tool_calls_used": 3,
+    "timestamp": "2026-03-22T12:10:13.964539+00:00",
+    "discovery_source": "erc8004_events",
+    "chain_id": 84532,
+    "venice": {
+      "model": "qwen3-235b-a22b-instruct-2507",
+      "reasoning": "The agent has no manifest provided, indicating missing identity information and service definitions. There are 0 endpoints declared, so no operational services can be evaluated for reliability. However, the wallet shows 583 transactions and a balance of 0.4994 ETH, suggesting meaningful on-chain activity and real usage. Despite the lack of identity and operational signals, the substantial transaction history prevents a lower score, as it indicates the wallet is actively used. The absence of reputation entries is neutral. The score reflects minimal identity and operational data but supported by legitimate on-chain behavior.",
+      "tokens_sent": 1251,
+      "tokens_received": 129,
+      "latency_ms": 19069,
+      "parse_method": "json_schema"
+    },
+    "onchain": {
+      "wallet_address": "0xf13021F02E23a8113C1bD826575a1682F6Fac927",
+      "tx_count": 583,
+      "balance_eth": 0.4994341019919508,
+      "reputation_entries": 0
+    },
+    "identity": {
+      "fields_present": [],
+      "fields_missing": [],
+      "services_declared": 0,
+      "uri_resolved": ""
+    },
+    "is_self_evaluation": false
+  },
+  {
+    "agent_id": 2659,
+    "agent_uri": "https://api.maw.finance/api/intents/WOc8LUruYQuPn_n56YpmJ/identity.json",
+    "owner_address": "0xf13021F02E23a8113C1bD826575a1682F6Fac927",
+    "composite_score": 34,
+    "confidence": 73,
+    "state": "VERIFIED",
+    "dimensions": {
+      "identity_completeness": 0,
+      "endpoint_liveness": 0,
+      "onchain_history": 87,
+      "venice_trust_analysis": 42
+    },
+    "spread": 87,
+    "endpoints": {
+      "declared": 0,
+      "live": 0,
+      "secured": 0,
+      "dead": 0
+    },
+    "tx_hash": null,
+    "attestation_uid": null,
+    "tool_calls_used": 3,
+    "timestamp": "2026-03-22T12:54:49.809956+00:00",
+    "discovery_source": "erc8004_events",
+    "chain_id": 84532,
+    "venice": {
+      "model": "qwen3-235b-a22b-instruct-2507",
+      "reasoning": "The agent manifest is empty, indicating no declared services or identity information, which severely limits identity quality. There are 0 endpoints declared, so operational reliability cannot be assessed and scores very low. On-chain, the wallet has a high transaction count (583) and a non-trivial balance (0.4994 ETH), suggesting real usage and some legitimacy, but there are no existing reputation entries. The lack of any service declaration despite significant on-chain activity is a cross-signal inconsistency, reducing confidence. Overall, weak identity and operational signals pull the score down despite on-chain activity.",
+      "tokens_sent": 1251,
+      "tokens_received": 134,
+      "latency_ms": 41397,
+      "parse_method": "json_schema"
+    },
+    "onchain": {
+      "wallet_address": "0xf13021F02E23a8113C1bD826575a1682F6Fac927",
+      "tx_count": 583,
+      "balance_eth": 0.4994341019919508,
+      "reputation_entries": 0
+    },
+    "identity": {
+      "fields_present": [],
+      "fields_missing": [],
+      "services_declared": 0,
+      "uri_resolved": ""
+    },
+    "is_self_evaluation": false
+  },
+  {
+    "agent_id": 2660,
+    "agent_uri": "https://api.maw.finance/api/intents/14pYOvlsAw1Wa4pJrdaxw/identity.json",
+    "owner_address": "0xf13021F02E23a8113C1bD826575a1682F6Fac927",
+    "composite_score": 34,
+    "confidence": 73,
+    "state": "VERIFIED",
+    "dimensions": {
+      "identity_completeness": 0,
+      "endpoint_liveness": 0,
+      "onchain_history": 87,
+      "venice_trust_analysis": 42
+    },
+    "spread": 87,
+    "endpoints": {
+      "declared": 0,
+      "live": 0,
+      "secured": 0,
+      "dead": 0
+    },
+    "tx_hash": null,
+    "attestation_uid": null,
+    "tool_calls_used": 3,
+    "timestamp": "2026-03-22T12:54:07.222813+00:00",
+    "discovery_source": "erc8004_events",
+    "chain_id": 84532,
+    "venice": {
+      "model": "qwen3-235b-a22b-instruct-2507",
+      "reasoning": "The agent manifest is empty, indicating no declared services or identity information, which severely weakens identity quality. There are 0 endpoints declared, so operational reliability cannot be assessed\u2014no live, secured, or dead endpoints exist. On-chain, the wallet has a high transaction count (583) and a non-trivial balance (0.4994 ETH), suggesting real usage and some legitimacy. However, there are no existing reputation entries, and the complete lack of manifest and endpoints creates a strong inconsistency with the active wallet\u2014typically, a legitimate agent with such on-chain activity would have at least minimal service declarations. This mismatch between active wallet and missing identity/services limits confidence.",
+      "tokens_sent": 1251,
+      "tokens_received": 152,
+      "latency_ms": 24463,
+      "parse_method": "json_schema"
+    },
+    "onchain": {
+      "wallet_address": "0xf13021F02E23a8113C1bD826575a1682F6Fac927",
+      "tx_count": 583,
+      "balance_eth": 0.4994341019919508,
+      "reputation_entries": 0
+    },
+    "identity": {
+      "fields_present": [],
+      "fields_missing": [],
+      "services_declared": 0,
+      "uri_resolved": ""
+    },
+    "is_self_evaluation": false
+  },
+  {
+    "agent_id": 2661,
+    "agent_uri": "https://example.com/e2e-test-1774127437962.json",
+    "owner_address": "0xf13021F02E23a8113C1bD826575a1682F6Fac927",
+    "composite_score": 34,
+    "confidence": 73,
+    "state": "VERIFIED",
+    "dimensions": {
+      "identity_completeness": 0,
+      "endpoint_liveness": 0,
+      "onchain_history": 87,
+      "venice_trust_analysis": 42
+    },
+    "spread": 87,
+    "endpoints": {
+      "declared": 0,
+      "live": 0,
+      "secured": 0,
+      "dead": 0
+    },
+    "tx_hash": null,
+    "attestation_uid": null,
+    "tool_calls_used": 3,
+    "timestamp": "2026-03-22T12:53:30.331487+00:00",
+    "discovery_source": "erc8004_events",
+    "chain_id": 84532,
+    "venice": {
+      "model": "qwen3-235b-a22b-instruct-2507",
+      "reasoning": "The agent manifest is empty, indicating no declared services or identity information, which severely limits identity quality. There are 0 endpoints declared or live, resulting in poor operational reliability. However, the wallet has a significant transaction count (583) and a non-trivial balance (0.4994 ETH), suggesting real on-chain activity and some legitimacy. The absence of reputation entries is neutral. The major inconsistency is the high transaction volume paired with no service declarations or endpoints, which is unusual for an active agent and suggests the on-chain activity may not be related to AI agent operations. This creates cross-signal misalignment, preventing a higher score despite the wallet activity.",
+      "tokens_sent": 1251,
+      "tokens_received": 150,
+      "latency_ms": 20353,
+      "parse_method": "json_schema"
+    },
+    "onchain": {
+      "wallet_address": "0xf13021F02E23a8113C1bD826575a1682F6Fac927",
+      "tx_count": 583,
+      "balance_eth": 0.4994341019919508,
+      "reputation_entries": 0
+    },
+    "identity": {
+      "fields_present": [],
+      "fields_missing": [],
+      "services_declared": 0,
+      "uri_resolved": ""
+    },
+    "is_self_evaluation": false
+  },
+  {
+    "agent_id": 2663,
+    "agent_uri": "https://api.maw.finance/api/intents/e2e-test-1774127453342/identity.json",
+    "owner_address": "0xf13021F02E23a8113C1bD826575a1682F6Fac927",
+    "composite_score": 34,
+    "confidence": 73,
+    "state": "VERIFIED",
+    "dimensions": {
+      "identity_completeness": 0,
+      "endpoint_liveness": 0,
+      "onchain_history": 87,
+      "venice_trust_analysis": 42
+    },
+    "spread": 87,
+    "endpoints": {
+      "declared": 0,
+      "live": 0,
+      "secured": 0,
+      "dead": 0
+    },
+    "tx_hash": null,
+    "attestation_uid": null,
+    "tool_calls_used": 3,
+    "timestamp": "2026-03-22T12:52:52.904105+00:00",
+    "discovery_source": "erc8004_events",
+    "chain_id": 84532,
+    "venice": {
+      "model": "qwen3-235b-a22b-instruct-2507",
+      "reasoning": "The agent manifest is empty, indicating no declared services or identity information, which severely limits identity quality. There are 0 endpoints declared or live, resulting in poor operational reliability. However, the wallet has a significant transaction count (583) and a non-trivial balance (0.4994 ETH), suggesting real on-chain activity and some legitimacy. The absence of reputation entries and any service declarations creates a mismatch between on-chain activity and service presence, reducing confidence. The lack of any manifest content or endpoints prevents a higher score despite the active wallet.",
+      "tokens_sent": 1251,
+      "tokens_received": 127,
+      "latency_ms": 20642,
+      "parse_method": "json_schema"
+    },
+    "onchain": {
+      "wallet_address": "0xf13021F02E23a8113C1bD826575a1682F6Fac927",
+      "tx_count": 583,
+      "balance_eth": 0.4994341019919508,
+      "reputation_entries": 0
+    },
+    "identity": {
+      "fields_present": [],
+      "fields_missing": [],
+      "services_declared": 0,
+      "uri_resolved": ""
+    },
+    "is_self_evaluation": false
+  },
+  {
+    "agent_id": 2668,
+    "agent_uri": "https://api.maw.finance/api/intents/LCMlEHCykvb9u8Wz7p-gZ/identity.json",
+    "owner_address": "0xf13021F02E23a8113C1bD826575a1682F6Fac927",
+    "composite_score": 34,
+    "confidence": 73,
+    "state": "VERIFIED",
+    "dimensions": {
+      "identity_completeness": 0,
+      "endpoint_liveness": 0,
+      "onchain_history": 87,
+      "venice_trust_analysis": 42
+    },
+    "spread": 87,
+    "endpoints": {
+      "declared": 0,
+      "live": 0,
+      "secured": 0,
+      "dead": 0
+    },
+    "tx_hash": null,
+    "attestation_uid": null,
+    "tool_calls_used": 3,
+    "timestamp": "2026-03-22T12:52:11.365379+00:00",
+    "discovery_source": "erc8004_events",
+    "chain_id": 84532,
+    "venice": {
+      "model": "qwen3-235b-a22b-instruct-2507",
+      "reasoning": "The agent has a minimal manifest with no declared services or endpoints, resulting in 0 live or secured endpoints. However, the wallet shows significant on-chain activity with 583 transactions and a non-trivial balance of 0.4994 ETH, suggesting real usage. The lack of any service declaration or endpoint information weakens identity quality and operational reliability, but the on-chain legitimacy provides moderate positive signal. The absence of reputation entries is neutral. The mismatch between high transaction count and no declared services creates some inconsistency, but not enough to classify as highly suspicious.",
+      "tokens_sent": 1251,
+      "tokens_received": 129,
+      "latency_ms": 22784,
+      "parse_method": "json_schema"
+    },
+    "onchain": {
+      "wallet_address": "0xf13021F02E23a8113C1bD826575a1682F6Fac927",
+      "tx_count": 583,
+      "balance_eth": 0.4994341019919508,
+      "reputation_entries": 0
+    },
+    "identity": {
+      "fields_present": [],
+      "fields_missing": [],
+      "services_declared": 0,
+      "uri_resolved": ""
+    },
+    "is_self_evaluation": false
+  },
+  {
+    "agent_id": 2669,
+    "agent_uri": "https://api.maw.finance/api/intents/abSNy1eopgQyYjVsNPqW7/identity.json",
+    "owner_address": "0xf13021F02E23a8113C1bD826575a1682F6Fac927",
+    "composite_score": 34,
+    "confidence": 57,
+    "state": "WITHHELD_LOW_CONFIDENCE",
+    "dimensions": {
+      "identity_completeness": 0,
+      "endpoint_liveness": 0,
+      "onchain_history": 87,
+      "venice_trust_analysis": 40
+    },
+    "spread": 87,
+    "endpoints": {
+      "declared": 0,
+      "live": 0,
+      "secured": 0,
+      "dead": 0
+    },
+    "tx_hash": null,
+    "attestation_uid": null,
+    "tool_calls_used": 3,
+    "timestamp": "2026-03-22T12:51:48.352848+00:00",
+    "discovery_source": "erc8004_events",
+    "chain_id": 84532,
+    "venice": {
+      "model": "qwen3-235b-a22b-instruct-2507",
+      "reasoning": "The agent manifest is empty, indicating no declared services or identity information, which severely weakens identity quality. There are 0 endpoints declared or live, resulting in poor operational reliability. However, the wallet has a significant transaction count (583) and a non-trivial balance (0.4994 ETH), suggesting real on-chain activity and some legitimacy. The lack of any reputation entries and declared services contradicts the high transaction volume, creating a cross-signal inconsistency. Overall, weak identity and operational signals are partially offset by on-chain activity, but the absence of any service declaration limits trust.",
+      "tokens_sent": 1251,
+      "tokens_received": 136,
+      "latency_ms": 13653,
+      "parse_method": "json_schema"
+    },
+    "onchain": {
+      "wallet_address": "0xf13021F02E23a8113C1bD826575a1682F6Fac927",
+      "tx_count": 583,
+      "balance_eth": 0.4994341019919508,
+      "reputation_entries": 0
+    },
+    "identity": {
+      "fields_present": [],
+      "fields_missing": [],
+      "services_declared": 0,
+      "uri_resolved": ""
+    },
+    "is_self_evaluation": false
+  },
+  {
+    "agent_id": 2670,
+    "agent_uri": "https://api.maw.finance/api/intents/_-EvnvQtuJhMlY75eFSEH/identity.json",
+    "owner_address": "0xf13021F02E23a8113C1bD826575a1682F6Fac927",
+    "composite_score": 34,
+    "confidence": 73,
+    "state": "VERIFIED",
+    "dimensions": {
+      "identity_completeness": 0,
+      "endpoint_liveness": 0,
+      "onchain_history": 87,
+      "venice_trust_analysis": 42
+    },
+    "spread": 87,
+    "endpoints": {
+      "declared": 0,
+      "live": 0,
+      "secured": 0,
+      "dead": 0
+    },
+    "tx_hash": null,
+    "attestation_uid": null,
+    "tool_calls_used": 3,
+    "timestamp": "2026-03-22T12:51:04.273890+00:00",
+    "discovery_source": "erc8004_events",
+    "chain_id": 84532,
+    "venice": {
+      "model": "qwen3-235b-a22b-instruct-2507",
+      "reasoning": "The agent manifest is empty, indicating no declared services or identity information, which severely weakens the Identity Quality dimension. There are 0 endpoints declared or live, resulting in poor Operational Reliability. However, the on-chain wallet has a substantial transaction count (583) and a non-trivial balance (0.4994 ETH), suggesting real usage and some legitimacy in On-chain Legitimacy. The lack of any reputation entries is neutral. The major inconsistency is between the high transaction volume and the complete absence of a manifest or services, which is suspicious and prevents a higher score. This profile shows signs of potential wallet reuse without actual agent deployment.",
+      "tokens_sent": 1251,
+      "tokens_received": 147,
+      "latency_ms": 26354,
+      "parse_method": "json_schema"
+    },
+    "onchain": {
+      "wallet_address": "0xf13021F02E23a8113C1bD826575a1682F6Fac927",
+      "tx_count": 583,
+      "balance_eth": 0.4994341019919508,
+      "reputation_entries": 0
+    },
+    "identity": {
+      "fields_present": [],
+      "fields_missing": [],
+      "services_declared": 0,
+      "uri_resolved": ""
+    },
+    "is_self_evaluation": false
+  },
+  {
+    "agent_id": 2671,
+    "agent_uri": "https://api.maw.finance/api/intents/cAGOg12E3sgcsBlHioFo9/identity.json",
+    "owner_address": "0xf13021F02E23a8113C1bD826575a1682F6Fac927",
+    "composite_score": 34,
+    "confidence": 73,
+    "state": "VERIFIED",
+    "dimensions": {
+      "identity_completeness": 0,
+      "endpoint_liveness": 0,
+      "onchain_history": 87,
+      "venice_trust_analysis": 42
+    },
+    "spread": 87,
+    "endpoints": {
+      "declared": 0,
+      "live": 0,
+      "secured": 0,
+      "dead": 0
+    },
+    "tx_hash": null,
+    "attestation_uid": null,
+    "tool_calls_used": 3,
+    "timestamp": "2026-03-22T12:50:21.982978+00:00",
+    "discovery_source": "erc8004_events",
+    "chain_id": 84532,
+    "venice": {
+      "model": "qwen3-235b-a22b-instruct-2507",
+      "reasoning": "The agent manifest is empty, indicating no declared services or identity information, which severely weakens the Identity Quality dimension. There are 0 endpoints declared or live, resulting in poor Operational Reliability. However, the on-chain wallet has a substantial transaction count (583) and a non-trivial balance (0.4994 ETH), suggesting real usage and some legitimacy in On-chain Legitimacy. The lack of any reputation entries is neutral. The major inconsistency is between the high transaction volume and the complete absence of a manifest or services, which is suspicious and prevents a higher score. This mix of a potentially active wallet with no operational footprint results in a below-average but not entirely suspicious profile.",
+      "tokens_sent": 1251,
+      "tokens_received": 156,
+      "latency_ms": 24518,
+      "parse_method": "json_schema"
+    },
+    "onchain": {
+      "wallet_address": "0xf13021F02E23a8113C1bD826575a1682F6Fac927",
+      "tx_count": 583,
+      "balance_eth": 0.4994341019919508,
+      "reputation_entries": 0
+    },
+    "identity": {
+      "fields_present": [],
+      "fields_missing": [],
+      "services_declared": 0,
+      "uri_resolved": ""
+    },
+    "is_self_evaluation": false
+  },
+  {
+    "agent_id": 2672,
+    "agent_uri": "https://api.maw.finance/api/intents/EU0D_fE_ei9b_EhgRmMvJ/identity.json",
+    "owner_address": "0xf13021F02E23a8113C1bD826575a1682F6Fac927",
+    "composite_score": 34,
+    "confidence": 57,
+    "state": "WITHHELD_LOW_CONFIDENCE",
+    "dimensions": {
+      "identity_completeness": 0,
+      "endpoint_liveness": 0,
+      "onchain_history": 87,
+      "venice_trust_analysis": 40
+    },
+    "spread": 87,
+    "endpoints": {
+      "declared": 0,
+      "live": 0,
+      "secured": 0,
+      "dead": 0
+    },
+    "tx_hash": null,
+    "attestation_uid": null,
+    "tool_calls_used": 3,
+    "timestamp": "2026-03-22T12:49:51.450160+00:00",
+    "discovery_source": "erc8004_events",
+    "chain_id": 84532,
+    "venice": {
+      "model": "qwen3-235b-a22b-instruct-2507",
+      "reasoning": "The agent manifest is empty, indicating no declared services or identity information, which severely weakens the Identity Quality dimension. There are 0 endpoints declared or live, resulting in poor Operational Reliability. However, the wallet has a significant transaction count (583) and a non-trivial balance (0.4994 ETH), suggesting real on-chain activity and some level of legitimacy in On-chain Legitimacy. Despite this, the complete lack of manifest and service declaration contradicts the high transaction volume, creating a cross-signal inconsistency. The absence of any reputation entries further limits trust. Overall, this is a weak profile with only on-chain activity as a positive signal, but insufficient to overcome the missing identity and operational data.",
+      "tokens_sent": 1251,
+      "tokens_received": 162,
+      "latency_ms": 21647,
+      "parse_method": "json_schema"
+    },
+    "onchain": {
+      "wallet_address": "0xf13021F02E23a8113C1bD826575a1682F6Fac927",
+      "tx_count": 583,
+      "balance_eth": 0.4994341019919508,
+      "reputation_entries": 0
+    },
+    "identity": {
+      "fields_present": [],
+      "fields_missing": [],
+      "services_declared": 0,
+      "uri_resolved": ""
+    },
+    "is_self_evaluation": false
+  },
+  {
+    "agent_id": 2673,
+    "agent_uri": "https://api.maw.finance/api/intents/GkXb-csdV-IJ1lhguraKR/identity.json",
+    "owner_address": "0xf13021F02E23a8113C1bD826575a1682F6Fac927",
+    "composite_score": 34,
+    "confidence": 73,
+    "state": "VERIFIED",
+    "dimensions": {
+      "identity_completeness": 0,
+      "endpoint_liveness": 0,
+      "onchain_history": 87,
+      "venice_trust_analysis": 42
+    },
+    "spread": 87,
+    "endpoints": {
+      "declared": 0,
+      "live": 0,
+      "secured": 0,
+      "dead": 0
+    },
+    "tx_hash": null,
+    "attestation_uid": null,
+    "tool_calls_used": 3,
+    "timestamp": "2026-03-22T12:49:13.858464+00:00",
+    "discovery_source": "erc8004_events",
+    "chain_id": 84532,
+    "venice": {
+      "model": "qwen3-235b-a22b-instruct-2507",
+      "reasoning": "The agent has a minimal manifest with no declared services or endpoints, resulting in 0 live or secured endpoints. However, the wallet shows significant on-chain activity with 583 transactions and a non-trivial balance of 0.4994 ETH, suggesting real usage. The lack of any service declaration or endpoint information weakens identity quality and operational reliability, but the on-chain legitimacy provides moderate positive signal. The absence of reputation entries is neutral given the overall limited manifest. Cross-signal consistency is partially maintained due to wallet activity despite missing service data.",
+      "tokens_sent": 1251,
+      "tokens_received": 127,
+      "latency_ms": 19620,
+      "parse_method": "json_schema"
+    },
+    "onchain": {
+      "wallet_address": "0xf13021F02E23a8113C1bD826575a1682F6Fac927",
+      "tx_count": 583,
+      "balance_eth": 0.4994341019919508,
+      "reputation_entries": 0
+    },
+    "identity": {
+      "fields_present": [],
+      "fields_missing": [],
+      "services_declared": 0,
+      "uri_resolved": ""
+    },
+    "is_self_evaluation": false
+  },
+  {
+    "agent_id": 2674,
+    "agent_uri": "https://api.maw.finance/api/intents/cnlokvUddHkdcWGEYtFDx/identity.json",
+    "owner_address": "0xf13021F02E23a8113C1bD826575a1682F6Fac927",
+    "composite_score": 34,
+    "confidence": 73,
+    "state": "VERIFIED",
+    "dimensions": {
+      "identity_completeness": 0,
+      "endpoint_liveness": 0,
+      "onchain_history": 87,
+      "venice_trust_analysis": 42
+    },
+    "spread": 87,
+    "endpoints": {
+      "declared": 0,
+      "live": 0,
+      "secured": 0,
+      "dead": 0
+    },
+    "tx_hash": null,
+    "attestation_uid": null,
+    "tool_calls_used": 3,
+    "timestamp": "2026-03-22T12:48:36.043802+00:00",
+    "discovery_source": "erc8004_events",
+    "chain_id": 84532,
+    "venice": {
+      "model": "qwen3-235b-a22b-instruct-2507",
+      "reasoning": "The agent manifest is empty, indicating no declared services or identity information, which severely weakens identity quality. There are 0 endpoints declared, so operational reliability cannot be assessed and scores very low. On-chain history shows a wallet with 583 transactions and a non-trivial balance of 0.4994 ETH, suggesting real usage and providing a moderate positive signal for legitimacy. However, the complete lack of manifest and service declaration contradicts the high transaction count, creating a cross-signal inconsistency. The absence of any reputation entries further limits trust. Overall, the profile is thin with one moderately strong on-chain signal offset by missing identity and operational data.",
+      "tokens_sent": 1251,
+      "tokens_received": 148,
+      "latency_ms": 20407,
+      "parse_method": "json_schema"
+    },
+    "onchain": {
+      "wallet_address": "0xf13021F02E23a8113C1bD826575a1682F6Fac927",
+      "tx_count": 583,
+      "balance_eth": 0.4994341019919508,
+      "reputation_entries": 0
+    },
+    "identity": {
+      "fields_present": [],
+      "fields_missing": [],
+      "services_declared": 0,
+      "uri_resolved": ""
+    },
+    "is_self_evaluation": false
+  },
+  {
+    "agent_id": 2675,
+    "agent_uri": "https://api.maw.finance/api/intents/AjNJMAlUmAArwBnSqMQLG/identity.json",
+    "owner_address": "0xf13021F02E23a8113C1bD826575a1682F6Fac927",
+    "composite_score": 34,
+    "confidence": 73,
+    "state": "VERIFIED",
+    "dimensions": {
+      "identity_completeness": 0,
+      "endpoint_liveness": 0,
+      "onchain_history": 87,
+      "venice_trust_analysis": 42
+    },
+    "spread": 87,
+    "endpoints": {
+      "declared": 0,
+      "live": 0,
+      "secured": 0,
+      "dead": 0
+    },
+    "tx_hash": null,
+    "attestation_uid": null,
+    "tool_calls_used": 3,
+    "timestamp": "2026-03-22T12:47:44.910983+00:00",
+    "discovery_source": "erc8004_events",
+    "chain_id": 84532,
+    "venice": {
+      "model": "qwen3-235b-a22b-instruct-2507",
+      "reasoning": "The agent manifest is empty, indicating no declared services or identity information, which severely weakens the Identity Quality dimension. There are 0 endpoints declared or live, resulting in poor Operational Reliability. However, the on-chain wallet has a substantial transaction count (583) and a non-trivial ETH balance (0.4994), suggesting real usage and some legitimacy in On-chain Legitimacy. Despite this, the lack of any service declaration or endpoint activity creates a strong cross-signal inconsistency: a wallet with significant activity should reasonably be associated with at least some declared services. The absence of existing reputation entries further limits trust. Overall, weak identity and operational signals drag down the score despite moderate on-chain activity.",
+      "tokens_sent": 1251,
+      "tokens_received": 160,
+      "latency_ms": 32359,
+      "parse_method": "json_schema"
+    },
+    "onchain": {
+      "wallet_address": "0xf13021F02E23a8113C1bD826575a1682F6Fac927",
+      "tx_count": 583,
+      "balance_eth": 0.4994341019919508,
+      "reputation_entries": 0
+    },
+    "identity": {
+      "fields_present": [],
+      "fields_missing": [],
+      "services_declared": 0,
+      "uri_resolved": ""
+    },
+    "is_self_evaluation": false
+  },
+  {
+    "agent_id": 2676,
+    "agent_uri": "https://api.maw.finance/api/intents/QuBuPQJ6X2VDFDqUXwRW0/identity.json",
+    "owner_address": "0xf13021F02E23a8113C1bD826575a1682F6Fac927",
+    "composite_score": 34,
+    "confidence": 73,
+    "state": "VERIFIED",
+    "dimensions": {
+      "identity_completeness": 0,
+      "endpoint_liveness": 0,
+      "onchain_history": 87,
+      "venice_trust_analysis": 42
+    },
+    "spread": 87,
+    "endpoints": {
+      "declared": 0,
+      "live": 0,
+      "secured": 0,
+      "dead": 0
+    },
+    "tx_hash": null,
+    "attestation_uid": null,
+    "tool_calls_used": 3,
+    "timestamp": "2026-03-22T12:47:09.429359+00:00",
+    "discovery_source": "erc8004_events",
+    "chain_id": 84532,
+    "venice": {
+      "model": "qwen3-235b-a22b-instruct-2507",
+      "reasoning": "The agent manifest is empty, indicating no declared services or identity information, which severely limits identity quality. There are 0 endpoints declared or live, resulting in poor operational reliability. However, the wallet has a significant transaction count (583) and a non-trivial balance (0.4994 ETH), suggesting real on-chain activity and some legitimacy. The absence of any reputation entries and declared services creates a mismatch with the active wallet, reducing confidence. Overall, this is a thin profile with minimal signals, but the on-chain activity prevents a lower score.",
+      "tokens_sent": 1251,
+      "tokens_received": 128,
+      "latency_ms": 17492,
+      "parse_method": "json_schema"
+    },
+    "onchain": {
+      "wallet_address": "0xf13021F02E23a8113C1bD826575a1682F6Fac927",
+      "tx_count": 583,
+      "balance_eth": 0.4994341019919508,
+      "reputation_entries": 0
+    },
+    "identity": {
+      "fields_present": [],
+      "fields_missing": [],
+      "services_declared": 0,
+      "uri_resolved": ""
+    },
+    "is_self_evaluation": false
+  },
+  {
+    "agent_id": 2677,
+    "agent_uri": "https://api.maw.finance/api/intents/AiCD5oTniSYsURF3mTjcq/identity.json",
+    "owner_address": "0xf13021F02E23a8113C1bD826575a1682F6Fac927",
+    "composite_score": 35,
+    "confidence": 73,
+    "state": "VERIFIED",
+    "dimensions": {
+      "identity_completeness": 0,
+      "endpoint_liveness": 0,
+      "onchain_history": 87,
+      "venice_trust_analysis": 45
+    },
+    "spread": 87,
+    "endpoints": {
+      "declared": 0,
+      "live": 0,
+      "secured": 0,
+      "dead": 0
+    },
+    "tx_hash": null,
+    "attestation_uid": null,
+    "tool_calls_used": 3,
+    "timestamp": "2026-03-22T12:46:31.904684+00:00",
+    "discovery_source": "erc8004_events",
+    "chain_id": 84532,
+    "venice": {
+      "model": "qwen3-235b-a22b-instruct-2507",
+      "reasoning": "The agent has no manifest declared (empty JSON), indicating no identity information, services, or endpoints are defined. There are 0 endpoints declared, so no operational reliability can be assessed. However, the wallet has a significant transaction count (583 TXs) and a non-trivial balance (0.4994 ETH), suggesting real usage and some level of on-chain legitimacy. Despite the lack of identity and service data, the on-chain activity prevents a lower score. The absence of any declared services or endpoints despite high transaction volume is a cross-signal inconsistency, limiting the score.",
+      "tokens_sent": 1251,
+      "tokens_received": 134,
+      "latency_ms": 20372,
+      "parse_method": "json_schema"
+    },
+    "onchain": {
+      "wallet_address": "0xf13021F02E23a8113C1bD826575a1682F6Fac927",
+      "tx_count": 583,
+      "balance_eth": 0.4994341019919508,
+      "reputation_entries": 0
+    },
+    "identity": {
+      "fields_present": [],
+      "fields_missing": [],
+      "services_declared": 0,
+      "uri_resolved": ""
+    },
+    "is_self_evaluation": false
+  },
+  {
+    "agent_id": 2678,
+    "agent_uri": "https://api.maw.finance/api/intents/V-9fGMV9sOVbg7sPxd_jN/identity.json",
+    "owner_address": "0xf13021F02E23a8113C1bD826575a1682F6Fac927",
+    "composite_score": 34,
+    "confidence": 73,
+    "state": "VERIFIED",
+    "dimensions": {
+      "identity_completeness": 0,
+      "endpoint_liveness": 0,
+      "onchain_history": 87,
+      "venice_trust_analysis": 42
+    },
+    "spread": 87,
+    "endpoints": {
+      "declared": 0,
+      "live": 0,
+      "secured": 0,
+      "dead": 0
+    },
+    "tx_hash": null,
+    "attestation_uid": null,
+    "tool_calls_used": 3,
+    "timestamp": "2026-03-22T12:45:56.319957+00:00",
+    "discovery_source": "erc8004_events",
+    "chain_id": 84532,
+    "venice": {
+      "model": "qwen3-235b-a22b-instruct-2507",
+      "reasoning": "The agent manifest is empty, indicating no declared services or identity information, which severely limits identity quality. There are 0 endpoints declared or live, resulting in poor operational reliability. However, the wallet has a significant transaction count (583) and a non-trivial balance (0.4994 ETH), suggesting real on-chain activity and some legitimacy. The absence of any reputation entries and declared services creates a mismatch between on-chain activity and service presence, reducing confidence. The lack of any HTTPS endpoints or declared functionality prevents a higher score despite the active wallet.",
+      "tokens_sent": 1251,
+      "tokens_received": 128,
+      "latency_ms": 16961,
+      "parse_method": "json_schema"
+    },
+    "onchain": {
+      "wallet_address": "0xf13021F02E23a8113C1bD826575a1682F6Fac927",
+      "tx_count": 583,
+      "balance_eth": 0.4994341019919508,
+      "reputation_entries": 0
+    },
+    "identity": {
+      "fields_present": [],
+      "fields_missing": [],
+      "services_declared": 0,
+      "uri_resolved": ""
+    },
+    "is_self_evaluation": false
+  },
+  {
+    "agent_id": 2681,
+    "agent_uri": "https://api.maw.finance/api/intents/hrMZX-BQQvzTnmOs0RLP9/identity.json",
+    "owner_address": "0xf13021F02E23a8113C1bD826575a1682F6Fac927",
+    "composite_score": 34,
+    "confidence": 73,
+    "state": "VERIFIED",
+    "dimensions": {
+      "identity_completeness": 0,
+      "endpoint_liveness": 0,
+      "onchain_history": 87,
+      "venice_trust_analysis": 42
+    },
+    "spread": 87,
+    "endpoints": {
+      "declared": 0,
+      "live": 0,
+      "secured": 0,
+      "dead": 0
+    },
+    "tx_hash": null,
+    "attestation_uid": null,
+    "tool_calls_used": 3,
+    "timestamp": "2026-03-22T12:45:16.483718+00:00",
+    "discovery_source": "erc8004_events",
+    "chain_id": 84532,
+    "venice": {
+      "model": "qwen3-235b-a22b-instruct-2507",
+      "reasoning": "The agent manifest is empty, indicating no declared services or identity information, which severely limits identity quality. There are 0 endpoints declared, so operational reliability cannot be assessed and scores very low. On-chain history shows a wallet with 583 transactions and a balance of 0.4994 ETH, suggesting meaningful usage and some legitimacy, but there are no existing reputation entries. The lack of any service declaration despite a moderately active wallet creates a mismatch in signals: the on-chain activity suggests potential legitimacy, but the empty manifest prevents verification of purpose or functionality. This results in a weak overall profile with one moderately positive signal (transaction volume) offset by critical missing information.",
+      "tokens_sent": 1251,
+      "tokens_received": 150,
+      "latency_ms": 22173,
+      "parse_method": "json_schema"
+    },
+    "onchain": {
+      "wallet_address": "0xf13021F02E23a8113C1bD826575a1682F6Fac927",
+      "tx_count": 583,
+      "balance_eth": 0.4994341019919508,
+      "reputation_entries": 0
+    },
+    "identity": {
+      "fields_present": [],
+      "fields_missing": [],
+      "services_declared": 0,
+      "uri_resolved": ""
+    },
+    "is_self_evaluation": false
+  },
+  {
+    "agent_id": 2682,
+    "agent_uri": "https://api.maw.finance/api/intents/1gar0sek5WNboXwyeQ3hE/identity.json",
+    "owner_address": "0xf13021F02E23a8113C1bD826575a1682F6Fac927",
+    "composite_score": 34,
+    "confidence": 73,
+    "state": "VERIFIED",
+    "dimensions": {
+      "identity_completeness": 0,
+      "endpoint_liveness": 0,
+      "onchain_history": 87,
+      "venice_trust_analysis": 42
+    },
+    "spread": 87,
+    "endpoints": {
+      "declared": 0,
+      "live": 0,
+      "secured": 0,
+      "dead": 0
+    },
+    "tx_hash": null,
+    "attestation_uid": null,
+    "tool_calls_used": 3,
+    "timestamp": "2026-03-22T12:44:37.125570+00:00",
+    "discovery_source": "erc8004_events",
+    "chain_id": 84532,
+    "venice": {
+      "model": "qwen3-235b-a22b-instruct-2507",
+      "reasoning": "The agent manifest is empty, indicating no declared services or identity information, which severely weakens identity quality. There are 0 endpoints declared or live, resulting in poor operational reliability. However, the wallet has a substantial transaction count (583) and a non-trivial balance (0.4994 ETH), suggesting real on-chain activity and some level of legitimacy. The absence of any reputation entries is neutral. The major inconsistency is the high transaction volume paired with no service declarations or endpoints, which is unusual for an active agent and suggests the wallet may be used for purposes other than agent operations. This mismatch prevents a higher score, but the on-chain activity keeps it above the lowest band.",
+      "tokens_sent": 1251,
+      "tokens_received": 155,
+      "latency_ms": 20449,
+      "parse_method": "json_schema"
+    },
+    "onchain": {
+      "wallet_address": "0xf13021F02E23a8113C1bD826575a1682F6Fac927",
+      "tx_count": 583,
+      "balance_eth": 0.4994341019919508,
+      "reputation_entries": 0
+    },
+    "identity": {
+      "fields_present": [],
+      "fields_missing": [],
+      "services_declared": 0,
+      "uri_resolved": ""
+    },
+    "is_self_evaluation": false
+  },
+  {
+    "agent_id": 2683,
+    "agent_uri": "https://api.maw.finance/api/intents/aePvpUhxKTV9ExKKHchzg/identity.json",
+    "owner_address": "0xf13021F02E23a8113C1bD826575a1682F6Fac927",
+    "composite_score": 34,
+    "confidence": 73,
+    "state": "VERIFIED",
+    "dimensions": {
+      "identity_completeness": 0,
+      "endpoint_liveness": 0,
+      "onchain_history": 87,
+      "venice_trust_analysis": 42
+    },
+    "spread": 87,
+    "endpoints": {
+      "declared": 0,
+      "live": 0,
+      "secured": 0,
+      "dead": 0
+    },
+    "tx_hash": null,
+    "attestation_uid": null,
+    "tool_calls_used": 3,
+    "timestamp": "2026-03-22T12:43:55.392187+00:00",
+    "discovery_source": "erc8004_events",
+    "chain_id": 84532,
+    "venice": {
+      "model": "qwen3-235b-a22b-instruct-2507",
+      "reasoning": "The agent manifest is empty, indicating no declared services or identity information, which severely limits identity quality. There are 0 endpoints declared or live, resulting in poor operational reliability. However, the wallet has a significant transaction count (583) and a non-trivial balance (0.4994 ETH), suggesting real on-chain activity and some legitimacy. The absence of any reputation entries and declared services contradicts the high transaction volume, creating a cross-signal inconsistency. Overall, the lack of manifest and endpoints heavily penalizes the score, but the on-chain activity prevents it from being highly suspicious.",
+      "tokens_sent": 1251,
+      "tokens_received": 136,
+      "latency_ms": 21786,
+      "parse_method": "json_schema"
+    },
+    "onchain": {
+      "wallet_address": "0xf13021F02E23a8113C1bD826575a1682F6Fac927",
+      "tx_count": 583,
+      "balance_eth": 0.4994341019919508,
+      "reputation_entries": 0
+    },
+    "identity": {
+      "fields_present": [],
+      "fields_missing": [],
+      "services_declared": 0,
+      "uri_resolved": ""
+    },
+    "is_self_evaluation": false
+  },
+  {
+    "agent_id": 2703,
+    "agent_uri": "ipfs://agentchain/lp-agent",
+    "owner_address": "0xb378619B36F027FA54289498759f914c1322479A",
+    "composite_score": 22,
+    "confidence": 57,
+    "state": "WITHHELD_LOW_CONFIDENCE",
+    "dimensions": {
+      "identity_completeness": 0,
+      "endpoint_liveness": 0,
+      "onchain_history": 71,
+      "venice_trust_analysis": 30,
+      "protocol_compliance": 0
+    },
+    "spread": 71,
+    "endpoints": {
+      "declared": 0,
+      "live": 0,
+      "secured": 0,
+      "dead": 0
+    },
+    "tx_hash": null,
+    "attestation_uid": null,
+    "tool_calls_used": 3,
+    "timestamp": "2026-03-22T15:53:51.707031+00:00",
+    "discovery_source": "erc8004_events",
+    "chain_id": 84532,
+    "venice": {
+      "model": "qwen3-235b-a22b-instruct-2507",
+      "tokens_sent": 1330,
+      "tokens_received": 215,
+      "latency_ms": 34363,
+      "parse_method": "json_schema"
+    },
+    "onchain": {
+      "wallet_address": "0xb378619B36F027FA54289498759f914c1322479A",
+      "tx_count": 1,
+      "balance_eth": 0.01999105862,
+      "has_contract_code": true,
+      "reputation_entries": 0
+    },
+    "identity": {
+      "fields_present": [],
+      "fields_missing": [],
+      "services_declared": 0,
+      "uri_resolved": ""
+    },
+    "is_self_evaluation": false,
+    "input_hash": "94b45d41ae6b011f879ce37400d1c8ab420f57b92cc8b077e15e8740bccf6b3a"
+  },
+  {
+    "agent_id": 2706,
+    "agent_uri": "ipfs://agentchain/swap-agent",
+    "owner_address": "0x086d25AA4Ce248e1Ca493232D02a5eec768fB0d7",
+    "composite_score": 22,
+    "confidence": 57,
+    "state": "WITHHELD_LOW_CONFIDENCE",
+    "dimensions": {
+      "identity_completeness": 0,
+      "endpoint_liveness": 0,
+      "onchain_history": 71,
+      "venice_trust_analysis": 30,
+      "protocol_compliance": 0
+    },
+    "spread": 71,
+    "endpoints": {
+      "declared": 0,
+      "live": 0,
+      "secured": 0,
+      "dead": 0
+    },
+    "tx_hash": null,
+    "attestation_uid": null,
+    "tool_calls_used": 3,
+    "timestamp": "2026-03-22T15:53:01.120090+00:00",
+    "discovery_source": "erc8004_events",
+    "chain_id": 84532,
+    "venice": {
+      "model": "qwen3-235b-a22b-instruct-2507",
+      "tokens_sent": 1327,
+      "tokens_received": 219,
+      "latency_ms": 27645,
+      "parse_method": "json_schema"
+    },
+    "onchain": {
+      "wallet_address": "0x086d25AA4Ce248e1Ca493232D02a5eec768fB0d7",
+      "tx_count": 1,
+      "balance_eth": 0.019990034695,
+      "has_contract_code": true,
+      "reputation_entries": 0
+    },
+    "identity": {
+      "fields_present": [],
+      "fields_missing": [],
+      "services_declared": 0,
+      "uri_resolved": ""
+    },
+    "is_self_evaluation": false,
+    "input_hash": "756654180b42c5d98d90a6a52d388136adffd40629903dc1e63a4f2556c9b7f3"
+  },
+  {
+    "agent_id": 2730,
+    "agent_uri": "https://api.maw.finance/api/intents/wRa2wEjf9D-oDKAHWrRwF/identity.json",
+    "owner_address": "0xf13021F02E23a8113C1bD826575a1682F6Fac927",
+    "composite_score": 82,
+    "confidence": 100,
+    "state": "VERIFIED",
+    "dimensions": {
+      "identity_completeness": 90,
+      "endpoint_liveness": 100,
+      "onchain_history": 87,
+      "venice_trust_analysis": 76,
+      "protocol_compliance": 50
+    },
+    "spread": 50,
+    "endpoints": {
+      "declared": 1,
+      "live": 1,
+      "secured": 0,
+      "dead": 0
+    },
+    "tx_hash": null,
+    "attestation_uid": null,
+    "tool_calls_used": 4,
+    "timestamp": "2026-03-22T15:51:25.958980+00:00",
+    "discovery_source": "erc8004_events",
+    "chain_id": 84532,
+    "venice": {
+      "model": "qwen3-235b-a22b-instruct-2507",
+      "tokens_sent": 2162,
+      "tokens_received": 398,
+      "latency_ms": 80376,
+      "parse_method": "json_schema"
+    },
+    "onchain": {
+      "wallet_address": "0xf13021F02E23a8113C1bD826575a1682F6Fac927",
+      "tx_count": 613,
+      "balance_eth": 0.49940170599042577,
+      "has_contract_code": false,
+      "reputation_entries": 0
+    },
+    "identity": {
+      "fields_present": [
+        "name",
+        "description",
+        "services",
+        "image",
+        "x402Support",
+        "active",
+        "registrations",
+        "supportedTrust"
+      ],
+      "fields_missing": [],
+      "services_declared": 1,
+      "uri_resolved": "https://api.maw.finance/api/intents/wRa2wEjf9D-oDKAHWrRwF/identity.json"
+    },
+    "is_self_evaluation": false,
+    "input_hash": "8910d32546f39de2e3a1f21384bdbcb87fd829436e34add8be6069019206f666"
+  },
+  {
+    "agent_id": 2731,
+    "agent_uri": "https://api.maw.finance/api/intents/im8T7p6PM5vlJVNxg1WgD/identity.json",
+    "owner_address": "0xf13021F02E23a8113C1bD826575a1682F6Fac927",
+    "composite_score": 79,
+    "confidence": 100,
+    "state": "VERIFIED",
+    "dimensions": {
+      "identity_completeness": 90,
+      "endpoint_liveness": 90,
+      "onchain_history": 87,
+      "venice_trust_analysis": 72,
+      "protocol_compliance": 50
+    },
+    "spread": 40,
+    "endpoints": {
+      "declared": 1,
+      "live": 1,
+      "secured": 0,
+      "dead": 0
+    },
+    "tx_hash": null,
+    "attestation_uid": null,
+    "tool_calls_used": 5,
+    "timestamp": "2026-03-22T15:50:09.008493+00:00",
+    "discovery_source": "erc8004_events",
+    "chain_id": 84532,
+    "venice": {
+      "model": "qwen3-235b-a22b-instruct-2507",
+      "tokens_sent": 2152,
+      "tokens_received": 308,
+      "latency_ms": 59590,
+      "parse_method": "json_schema"
+    },
+    "onchain": {
+      "wallet_address": "0xf13021F02E23a8113C1bD826575a1682F6Fac927",
+      "tx_count": 613,
+      "balance_eth": 0.49940170599042577,
+      "has_contract_code": false,
+      "reputation_entries": 0
+    },
+    "identity": {
+      "fields_present": [
+        "name",
+        "description",
+        "services",
+        "image",
+        "x402Support",
+        "active",
+        "registrations",
+        "supportedTrust"
+      ],
+      "fields_missing": [],
+      "services_declared": 1,
+      "uri_resolved": "https://api.maw.finance/api/intents/im8T7p6PM5vlJVNxg1WgD/identity.json"
+    },
+    "is_self_evaluation": false,
+    "input_hash": "975ca313f2e19b2c0e7f8a31a57ced8e5ddcc65d358e1b1b7ee21304eefe834b"
+  },
+  {
     "agent_id": 5000,
     "agent_uri": "",
     "owner_address": "0x203a9E19e412Cb1DEC2a8Bb70B3e4d44e7F9B5EE",
@@ -739,40 +4273,41 @@
     "agent_id": 33465,
     "agent_uri": "https://raw.githubusercontent.com/geeythree/sentinel-trust-oracle/main/agent.json",
     "owner_address": "0xA8E23950073B9ee31433F327Ee63798939EAB0c3",
-    "composite_score": 67,
-    "confidence": 85,
-    "state": "PUBLISHED",
+    "composite_score": 69,
+    "confidence": 91,
+    "state": "VERIFIED",
     "dimensions": {
-      "identity_completeness": 90,
-      "endpoint_liveness": 50,
-      "onchain_history": 55,
-      "venice_trust_analysis": 76
+      "identity_completeness": 87,
+      "endpoint_liveness": 70,
+      "onchain_history": 62,
+      "venice_trust_analysis": 42,
+      "protocol_compliance": 100
     },
-    "spread": 40,
+    "spread": 58,
     "endpoints": {
-      "declared": 1,
-      "live": 1,
+      "declared": 2,
+      "live": 2,
       "secured": 0,
       "dead": 0
     },
-    "tx_hash": "a431bc1485bba639c453a24c9278bbdf10621c1dcca83a70ce07d78dfab40b7f",
-    "attestation_uid": "0xf42423d41887d755a596d1362f9c35f30aa389ad877475048e867cd8e2746a78",
+    "tx_hash": null,
+    "attestation_uid": null,
     "tool_calls_used": 4,
-    "timestamp": "2026-03-22T09:44:19.383804+00:00",
+    "timestamp": "2026-03-22T17:34:04.731655+00:00",
     "discovery_source": "manual_id",
     "chain_id": 8453,
     "venice": {
       "model": "qwen3-235b-a22b-instruct-2507",
-      "reasoning": "The agent manifest is complete and professional, with clear documentation of services, tools, and evaluation rubric. The endpoint is live, indicating operational functionality. Onchain history shows a valid wallet with minimal transaction activity and no prior reputation entries, which is neutral\u2014not suspicious but not established. The operator has a registered ERC-8004 agent ID and the agent is active on Base, supporting legitimacy. The Venice AI integration with qwen3-235b-a22b-instruct-2507 indicates modern LLM support. The lack of secured endpoint (HTTPS/WSS) and low transaction count slightly reduce confidence, but no red flags are present. Weighted score reflects strong identity and evaluation framework, decent liveness, average onchain history, and trusted LLM backend.",
-      "tokens_sent": 1930,
-      "tokens_received": 179,
-      "latency_ms": 39183,
+      "tokens_sent": 2468,
+      "tokens_received": 419,
+      "latency_ms": 93311,
       "parse_method": "json_schema"
     },
     "onchain": {
       "wallet_address": "0xA8E23950073B9ee31433F327Ee63798939EAB0c3",
-      "tx_count": 5,
-      "balance_eth": 0.005038431971649471,
+      "tx_count": 6,
+      "balance_eth": 5.861288083e-09,
+      "has_contract_code": false,
       "reputation_entries": 0
     },
     "identity": {
@@ -785,8 +4320,338 @@
         "active"
       ],
       "fields_missing": [],
-      "services_declared": 1,
+      "services_declared": 2,
       "uri_resolved": "https://raw.githubusercontent.com/geeythree/sentinel-trust-oracle/main/agent.json"
-    }
+    },
+    "is_self_evaluation": false,
+    "input_hash": "0c8f1557aa9135307b0aad4c529e317ebf19ea85887f12f107aea42ebe934ef5"
+  },
+  {
+    "agent_id": 35620,
+    "agent_uri": "https://nft-advisor-superrare.lever-labs.com/.well-known/agent-registration.json",
+    "owner_address": "0x999A8DBc672A0DA86471e67b9A22eA2B1c91e101",
+    "composite_score": 74,
+    "confidence": 100,
+    "state": "PUBLISHED",
+    "dimensions": {
+      "identity_completeness": 79,
+      "endpoint_liveness": 82,
+      "onchain_history": 79,
+      "venice_trust_analysis": 72,
+      "protocol_compliance": 50
+    },
+    "spread": 32,
+    "endpoints": {
+      "declared": 4,
+      "live": 4,
+      "secured": 0,
+      "dead": 0
+    },
+    "tx_hash": "6f42bb61517dbdfbc50acfd86ce114c3fb2459899e23c7ba74cec1e7bc3b570b",
+    "attestation_uid": "0x59610eee984afc280645ee8a9894a417cebabdc81a68d2d7b7864a2a0be40c5b",
+    "tool_calls_used": 4,
+    "timestamp": "2026-03-22T15:42:42.913173+00:00",
+    "discovery_source": "erc8004_events",
+    "chain_id": 8453,
+    "venice": {
+      "model": "qwen3-235b-a22b-instruct-2507",
+      "tokens_sent": 1596,
+      "tokens_received": 279,
+      "latency_ms": 103134,
+      "parse_method": "json_schema"
+    },
+    "onchain": {
+      "wallet_address": "0x999A8DBc672A0DA86471e67b9A22eA2B1c91e101",
+      "tx_count": 145,
+      "balance_eth": 0.003982491028463821,
+      "has_contract_code": false,
+      "reputation_entries": 0
+    },
+    "identity": {
+      "fields_present": [
+        "name",
+        "description",
+        "services",
+        "image"
+      ],
+      "fields_missing": [],
+      "services_declared": 4,
+      "uri_resolved": "https://nft-advisor-superrare.lever-labs.com/.well-known/agent-registration.json"
+    },
+    "is_self_evaluation": false,
+    "input_hash": "18f33a1136fec33eea0c4b03a54d3ef95c37401e19a7a4a907f7be0d6fe0a735"
+  },
+  {
+    "agent_id": 35626,
+    "agent_uri": "https://execution.market/workers/0x52e05c8e45a32eee169639f6d2ca40f8887b5a15",
+    "owner_address": "0x103040545AC5031A11E8C03dd11324C7333a13C7",
+    "composite_score": 21,
+    "confidence": 25,
+    "state": "WITHHELD_LOW_CONFIDENCE",
+    "dimensions": {
+      "identity_completeness": 0,
+      "endpoint_liveness": 0,
+      "onchain_history": 66,
+      "venice_trust_analysis": 30,
+      "protocol_compliance": 0
+    },
+    "spread": 66,
+    "endpoints": {
+      "declared": 0,
+      "live": 0,
+      "secured": 0,
+      "dead": 0
+    },
+    "tx_hash": null,
+    "attestation_uid": null,
+    "tool_calls_used": 3,
+    "timestamp": "2026-03-22T15:41:07.597480+00:00",
+    "discovery_source": "erc8004_events",
+    "chain_id": 8453,
+    "venice": {
+      "model": "qwen3-235b-a22b-instruct-2507",
+      "tokens_sent": 1332,
+      "tokens_received": 214,
+      "latency_ms": 86418,
+      "parse_method": "json_schema"
+    },
+    "onchain": {
+      "wallet_address": "0x52E05C8e45a32eeE169639F6d2cA40f8887b5A15",
+      "tx_count": 15,
+      "balance_eth": 0.00034569930852087,
+      "has_contract_code": false,
+      "reputation_entries": 0
+    },
+    "identity": {
+      "fields_present": [],
+      "fields_missing": [],
+      "services_declared": 0,
+      "uri_resolved": ""
+    },
+    "is_self_evaluation": false,
+    "input_hash": "03d120f7f67c6fd568bf8a6af97fb01b6e5caf9d7a9bdd3a52c4d4122e0a6f8f"
+  },
+  {
+    "agent_id": 35627,
+    "agent_uri": "https://execution.market/agents/0x52e05c8e45a32eee169639f6d2ca40f8887b5a15",
+    "owner_address": "0x103040545AC5031A11E8C03dd11324C7333a13C7",
+    "composite_score": 21,
+    "confidence": 25,
+    "state": "WITHHELD_LOW_CONFIDENCE",
+    "dimensions": {
+      "identity_completeness": 0,
+      "endpoint_liveness": 0,
+      "onchain_history": 66,
+      "venice_trust_analysis": 30,
+      "protocol_compliance": 0
+    },
+    "spread": 66,
+    "endpoints": {
+      "declared": 0,
+      "live": 0,
+      "secured": 0,
+      "dead": 0
+    },
+    "tx_hash": null,
+    "attestation_uid": null,
+    "tool_calls_used": 3,
+    "timestamp": "2026-03-22T15:39:01.284122+00:00",
+    "discovery_source": "erc8004_events",
+    "chain_id": 8453,
+    "venice": {
+      "model": "qwen3-235b-a22b-instruct-2507",
+      "tokens_sent": 1332,
+      "tokens_received": 215,
+      "latency_ms": 114893,
+      "parse_method": "json_schema"
+    },
+    "onchain": {
+      "wallet_address": "0x52E05C8e45a32eeE169639F6d2cA40f8887b5A15",
+      "tx_count": 15,
+      "balance_eth": 0.00034569930852087,
+      "has_contract_code": false,
+      "reputation_entries": 0
+    },
+    "identity": {
+      "fields_present": [],
+      "fields_missing": [],
+      "services_declared": 0,
+      "uri_resolved": ""
+    },
+    "is_self_evaluation": false,
+    "input_hash": "03d120f7f67c6fd568bf8a6af97fb01b6e5caf9d7a9bdd3a52c4d4122e0a6f8f"
+  },
+  {
+    "agent_id": 35635,
+    "agent_uri": "https://jina-ai-model.vercel.app/_aixyz/erc-8004.json",
+    "owner_address": "0x506D7198e44F16E28ef81A6f5b7167F7D112Ff11",
+    "composite_score": 46,
+    "confidence": 25,
+    "state": "WITHHELD_LOW_CONFIDENCE",
+    "dimensions": {
+      "identity_completeness": 86,
+      "endpoint_liveness": 0,
+      "onchain_history": 63,
+      "venice_trust_analysis": 35,
+      "protocol_compliance": 50
+    },
+    "spread": 86,
+    "endpoints": {
+      "declared": 1,
+      "live": 0,
+      "secured": 0,
+      "dead": 1
+    },
+    "tx_hash": null,
+    "attestation_uid": null,
+    "tool_calls_used": 4,
+    "timestamp": "2026-03-22T15:37:27.819641+00:00",
+    "discovery_source": "erc8004_events",
+    "chain_id": 8453,
+    "venice": {
+      "model": "qwen3-235b-a22b-instruct-2507",
+      "tokens_sent": 1598,
+      "tokens_received": 339,
+      "latency_ms": 86121,
+      "parse_method": "json_schema"
+    },
+    "onchain": {
+      "wallet_address": "0x506D7198e44F16E28ef81A6f5b7167F7D112Ff11",
+      "tx_count": 1,
+      "balance_eth": 0.0,
+      "has_contract_code": true,
+      "reputation_entries": 0
+    },
+    "identity": {
+      "fields_present": [
+        "name",
+        "description",
+        "services",
+        "image",
+        "active",
+        "registrations",
+        "supportedTrust"
+      ],
+      "fields_missing": [],
+      "services_declared": 1,
+      "uri_resolved": "https://jina-ai-model.vercel.app/_aixyz/erc-8004.json"
+    },
+    "is_self_evaluation": false,
+    "input_hash": "92cd4160296d54a48f7f9934f3dbca62e02e90d9ea1693b39137f2229fc9e9a3"
+  },
+  {
+    "agent_id": 35683,
+    "agent_uri": "https://sentinel-trust-oracle-production.up.railway.app/agent.json",
+    "owner_address": "0xC32a21ec6d714D5Dd95a1Bc0b60ba8FA9dCABfDd",
+    "composite_score": 76,
+    "confidence": 98,
+    "state": "PUBLISHED",
+    "dimensions": {
+      "identity_completeness": 87,
+      "endpoint_liveness": 65,
+      "onchain_history": 61,
+      "venice_trust_analysis": 72,
+      "protocol_compliance": 100
+    },
+    "spread": 39,
+    "endpoints": {
+      "declared": 2,
+      "live": 2,
+      "secured": 0,
+      "dead": 0
+    },
+    "tx_hash": "b446d1115ab55c29c86f419821402a8a17cf827ca2e02c72257ad0970b566957",
+    "attestation_uid": "0x8f42622fb150c161ac1b7578b5ae74ae28796777427609ed7269b89c3c2ae7a9",
+    "tool_calls_used": 4,
+    "timestamp": "2026-03-22T18:28:06.880412+00:00",
+    "discovery_source": "manual_id",
+    "chain_id": 8453,
+    "venice": {
+      "model": "qwen3-235b-a22b-instruct-2507",
+      "tokens_sent": 2466,
+      "tokens_received": 320,
+      "latency_ms": 55920,
+      "parse_method": "json_schema"
+    },
+    "onchain": {
+      "wallet_address": "0xC32a21ec6d714D5Dd95a1Bc0b60ba8FA9dCABfDd",
+      "tx_count": 2,
+      "balance_eth": 0.010130757203656584,
+      "has_contract_code": false,
+      "reputation_entries": 0
+    },
+    "identity": {
+      "fields_present": [
+        "name",
+        "description",
+        "services",
+        "image",
+        "x402Support",
+        "active"
+      ],
+      "fields_missing": [],
+      "services_declared": 2,
+      "uri_resolved": "https://sentinel-trust-oracle-production.up.railway.app/agent.json"
+    },
+    "is_self_evaluation": false,
+    "input_hash": "6e184a0c71d35fda34c984c4e6ebdcad584e4206c0a691602154c444114d737c"
+  },
+  {
+    "agent_id": 35691,
+    "agent_uri": "https://microlink-io.vercel.app/_aixyz/erc-8004.json",
+    "owner_address": "0x506D7198e44F16E28ef81A6f5b7167F7D112Ff11",
+    "composite_score": 45,
+    "confidence": 8,
+    "state": "WITHHELD_LOW_CONFIDENCE",
+    "dimensions": {
+      "identity_completeness": 91,
+      "endpoint_liveness": 0,
+      "onchain_history": 63,
+      "venice_trust_analysis": 25,
+      "protocol_compliance": 50
+    },
+    "spread": 91,
+    "endpoints": {
+      "declared": 2,
+      "live": 0,
+      "secured": 0,
+      "dead": 2
+    },
+    "tx_hash": null,
+    "attestation_uid": null,
+    "tool_calls_used": 4,
+    "timestamp": "2026-03-22T17:59:48.040126+00:00",
+    "discovery_source": "erc8004_events",
+    "chain_id": 8453,
+    "venice": {
+      "model": "qwen3-235b-a22b-instruct-2507",
+      "tokens_sent": 1642,
+      "tokens_received": 287,
+      "latency_ms": 212385,
+      "parse_method": "json_schema"
+    },
+    "onchain": {
+      "wallet_address": "0x506D7198e44F16E28ef81A6f5b7167F7D112Ff11",
+      "tx_count": 1,
+      "balance_eth": 0.0,
+      "has_contract_code": true,
+      "reputation_entries": 0
+    },
+    "identity": {
+      "fields_present": [
+        "name",
+        "description",
+        "services",
+        "image",
+        "active",
+        "registrations",
+        "supportedTrust"
+      ],
+      "fields_missing": [],
+      "services_declared": 2,
+      "uri_resolved": "https://microlink-io.vercel.app/_aixyz/erc-8004.json"
+    },
+    "is_self_evaluation": false,
+    "input_hash": "a4a14c28b4f534a0792a0ddb193ba09cb421a12ba944eb274846a168c487a6cd"
   }
 ]

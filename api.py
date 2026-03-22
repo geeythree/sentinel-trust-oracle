@@ -175,6 +175,74 @@ async def get_reputation(agent_id: int):
         raise HTTPException(status_code=500, detail="Reputation lookup failed.")
 
 
+@app.get("/api/trust-chain/{agent_id}")
+async def get_trust_chain(agent_id: int):
+    """Get an agent's trust chain: score, confidence, timestamp, attestation UID."""
+    results_path = DASHBOARD_DIR / "results.json"
+    if results_path.exists():
+        try:
+            with open(results_path) as f:
+                results = json.load(f)
+            for r in results:
+                if r.get("agent_id") == agent_id:
+                    return {
+                        "agent_id": agent_id,
+                        "trust_score": r.get("composite_score"),
+                        "confidence": r.get("confidence"),
+                        "timestamp": r.get("timestamp"),
+                        "attestation_uid": r.get("attestation_uid"),
+                        "tx_hash": r.get("tx_hash"),
+                        "dimensions": r.get("dimensions"),
+                        "input_hash": r.get("input_hash"),
+                        "chain_id": r.get("chain_id"),
+                        "state": r.get("state"),
+                    }
+        except (json.JSONDecodeError, ValueError):
+            pass
+    raise HTTPException(status_code=404, detail=f"No evaluation found for agent {agent_id}")
+
+
+class TransitiveTrustRequest(BaseModel):
+    requester_agent_id: int
+    target_agent_id: int
+
+
+@app.post("/api/transitive-trust")
+async def compute_transitive_trust(req: TransitiveTrustRequest):
+    """Compute transitive trust: requester_confidence * target_score / 100."""
+    results_path = DASHBOARD_DIR / "results.json"
+    req_data = tgt_data = None
+    if results_path.exists():
+        try:
+            with open(results_path) as f:
+                results = json.load(f)
+            for r in results:
+                if r.get("agent_id") == req.requester_agent_id:
+                    req_data = r
+                if r.get("agent_id") == req.target_agent_id:
+                    tgt_data = r
+        except (json.JSONDecodeError, ValueError):
+            pass
+
+    if req_data is None:
+        raise HTTPException(status_code=404, detail=f"No evaluation found for requester agent {req.requester_agent_id}")
+    if tgt_data is None:
+        raise HTTPException(status_code=404, detail=f"No evaluation found for target agent {req.target_agent_id}")
+
+    req_confidence = (req_data.get("confidence") or 0) / 100.0
+    tgt_score = tgt_data.get("composite_score") or 0
+    derived = round(req_confidence * tgt_score, 1)
+
+    return {
+        "requester_agent_id": req.requester_agent_id,
+        "requester_confidence": req_data.get("confidence"),
+        "target_agent_id": req.target_agent_id,
+        "target_score": tgt_score,
+        "derived_trust": derived,
+        "interpretation": "TRUSTED" if derived >= 70 else "MODERATE" if derived >= 50 else "LOW_TRUST",
+    }
+
+
 @app.get("/api/results")
 async def get_results():
     """Return current results.json contents."""

@@ -67,6 +67,18 @@ class BlockchainClient:
             abi=self._eas_abi,
         )
 
+        # Validation Registry (conditionally loaded — not yet deployed)
+        self._validation_registry = None
+        if config.validation_registry:
+            try:
+                self._validation_abi = self._load_abi("ValidationRegistry.json")
+                self._validation_registry = self._w3.eth.contract(
+                    address=Web3.to_checksum_address(config.validation_registry),
+                    abi=self._validation_abi,
+                )
+            except Exception:
+                _log.warning("Validation Registry init failed", exc_info=True)
+
     def _load_abi(self, filename: str) -> list:
         abi_path = config.ABI_DIR / filename
         with open(abi_path, "r") as f:
@@ -99,14 +111,14 @@ class BlockchainClient:
         return "", owner
 
     def get_agent_wallet(self, agent_id: int) -> Optional[str]:
-        """Read agentWallet from Identity Registry (may be zero address)."""
+        """Read wallet for an agent — uses ownerOf() (ERC-8004 owner is the wallet)."""
         try:
-            wallet = self._identity_registry.functions.getAgentWallet(agent_id).call()
-            if wallet == "0x0000000000000000000000000000000000000000":
+            owner = self._identity_registry.functions.ownerOf(agent_id).call()
+            if owner == "0x0000000000000000000000000000000000000000":
                 return None
-            return wallet
+            return owner
         except Exception:
-            _log.warning("getAgentWallet(%d) call failed", agent_id, exc_info=True)
+            _log.warning("ownerOf(%d) call failed", agent_id, exc_info=True)
             return None
 
     def get_registered_events(self, from_block: int, to_block: int) -> list[dict]:
@@ -374,7 +386,7 @@ class BlockchainClient:
     )
     def submit_self_feedback(
         self,
-        aqe_agent_id: int,
+        sentinel_agent_id: int,
         value: int,
         tag1: str = "evaluation_accuracy",
         tag2: str = "",
@@ -390,7 +402,7 @@ class BlockchainClient:
         ).decode()
 
         fn_call = self._reputation_registry.functions.giveFeedback(
-            aqe_agent_id,
+            sentinel_agent_id,
             value,
             0,
             tag1,
@@ -560,6 +572,150 @@ class BlockchainClient:
         except Exception:
             _log.warning("Failed to parse Attested event, falling back to tx hash", exc_info=True)
         return tx_hash.hex()
+
+    # --- Validation Registry (ERC-8004, gated behind deployment) ---
+
+    @property
+    def has_validation_registry(self) -> bool:
+        return self._validation_registry is not None
+
+    @retry(
+        stop=stop_after_attempt(3),
+        wait=wait_exponential(multiplier=1, max=30),
+    )
+    def submit_validation_request(
+        self, agent_id: int, request_uri: str
+    ) -> tuple[str, bytes]:
+        """Submit a validation request via OPERATOR wallet (agent owner initiates).
+
+        The contract requires msg.sender == ownerOf(agentId). OPERATOR owns Sentinel's
+        agent and calls validationRequest(evaluatorAddress, agentId, ...) to designate
+        the EVALUATOR as the responder. Only works for agents Sentinel owns.
+
+        Returns (tx_hash, request_hash).
+        """
+        if not self._validation_registry:
+            raise BlockchainError("Validation Registry not available")
+        if not self._operator_account:
+            raise BlockchainError("OPERATOR_PRIVATE_KEY not configured")
+        if not self._evaluator_account:
+            raise BlockchainError("EVALUATOR_PRIVATE_KEY not configured")
+
+        request_hash = Web3.keccak(text=request_uri)
+
+        fn_call = self._validation_registry.functions.validationRequest(
+            self._evaluator_account.address,  # validator who will respond
+            agent_id,
+            request_uri,
+            request_hash,
+        )
+        estimate_tx = {
+            "from": self._operator_account.address,
+            "to": self._validation_registry.address,
+            "data": fn_call._encode_transaction_data(),
+        }
+        tx = fn_call.build_transaction(
+            self._build_tx_params(self._operator_account, estimate_tx)
+        )
+
+        tx_hash = self._sign_and_send(tx, self._operator_account)
+        receipt = self._w3.eth.wait_for_transaction_receipt(tx_hash, timeout=120)
+
+        if receipt["status"] != 1:
+            raise BlockchainError(f"validationRequest reverted. Tx: {tx_hash.hex()}")
+
+        return tx_hash.hex(), request_hash
+
+    @retry(
+        stop=stop_after_attempt(3),
+        wait=wait_exponential(multiplier=1, max=30),
+    )
+    def submit_validation_response(
+        self,
+        request_hash: bytes,
+        score: int,
+        response_uri: str,
+        tag: str = "trust-score",
+    ) -> str:
+        """Submit a validation response via EVALUATOR wallet. Returns tx_hash."""
+        if not self._validation_registry:
+            raise BlockchainError("Validation Registry not available")
+        if not self._evaluator_account:
+            raise BlockchainError("EVALUATOR_PRIVATE_KEY not configured")
+
+        response_hash = Web3.keccak(text=response_uri)
+        response_val = min(255, max(0, score))  # uint8
+
+        fn_call = self._validation_registry.functions.validationResponse(
+            request_hash,
+            response_val,
+            response_uri,
+            response_hash,
+            tag,
+        )
+        estimate_tx = {
+            "to": self._validation_registry.address,
+            "data": fn_call._encode_transaction_data(),
+        }
+        tx = fn_call.build_transaction(
+            self._build_tx_params(self._evaluator_account, estimate_tx)
+        )
+
+        tx_hash = self._sign_and_send(tx, self._evaluator_account)
+        receipt = self._w3.eth.wait_for_transaction_receipt(tx_hash, timeout=120)
+
+        if receipt["status"] != 1:
+            raise BlockchainError(f"validationResponse reverted. Tx: {tx_hash.hex()}")
+
+        return tx_hash.hex()
+
+    def get_validation_summary(
+        self, agent_id: int, tag: str = "trust-score"
+    ) -> tuple[int, int]:
+        """Read validation summary. Returns (count, avgResponse)."""
+        if not self._validation_registry:
+            return (0, 0)
+        try:
+            validators = [self._evaluator_account.address] if self._evaluator_account else []
+            count, avg = self._validation_registry.functions.getSummary(
+                agent_id, validators, tag
+            ).call()
+            return (count, avg)
+        except Exception:
+            _log.warning("getValidationSummary(%d) failed", agent_id, exc_info=True)
+            return (0, 0)
+
+    def get_validation_status(self, request_hash: bytes) -> dict:
+        """Read validation status for a request hash."""
+        if not self._validation_registry:
+            return {}
+        try:
+            result = self._validation_registry.functions.getValidationStatus(
+                request_hash
+            ).call()
+            return {
+                "validator": result[0],
+                "agent_id": result[1],
+                "response": result[2],
+                "response_hash": result[3].hex() if isinstance(result[3], bytes) else result[3],
+                "tag": result[4],
+                "timestamp": result[5],
+            }
+        except Exception:
+            _log.warning("getValidationStatus failed", exc_info=True)
+            return {}
+
+    def get_agent_validations(self, agent_id: int) -> list[bytes]:
+        """Read all validation request hashes for an agent."""
+        if not self._validation_registry:
+            return []
+        try:
+            return self._validation_registry.functions.getAgentValidations(
+                agent_id
+            ).call()
+        except Exception:
+            _log.warning("getAgentValidations(%d) failed", agent_id, exc_info=True)
+            return []
 
     # --- Utilities ---
 

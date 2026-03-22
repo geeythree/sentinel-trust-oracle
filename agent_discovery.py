@@ -38,7 +38,7 @@ class AgentDiscovery:
             raise DiscoveryError(f"Failed to query Registered events: {e}") from e
 
         agents = []
-        for entry in entries[:max_agents]:
+        for entry in entries:
             args = entry.get("args", {})
             agent_id = args.get("agentId", 0)
             agent_uri = args.get("agentURI", "") or args.get("uri", "")
@@ -56,7 +56,21 @@ class AgentDiscovery:
                 discovery_source="erc8004_events",
             ))
 
-        return agents
+        # Sort by URI quality: fetchable URIs first, then by recency.
+        # Truncation to max_agents happens AFTER sorting so we evaluate
+        # the most interesting agents, not just the first N events.
+        def _uri_priority(a: DiscoveredAgent) -> tuple:
+            uri = (a.agent_uri or "").lower()
+            if uri.startswith("https://") or uri.startswith("ipfs://"):
+                tier = 0
+            elif uri.startswith("data:"):
+                tier = 1
+            else:
+                tier = 2
+            return (tier, -(a.block_number or 0), a.agent_id)
+
+        agents.sort(key=_uri_priority)
+        return agents[:max_agents]
 
     def discover_agent_by_id(self, agent_id: int) -> DiscoveredAgent:
         """Manual mode: look up by ERC-8004 agent ID (tokenId)."""

@@ -9,6 +9,7 @@ from typing import Optional
 
 import requests
 from tenacity import (
+    RetryError,
     retry,
     retry_if_exception_type,
     stop_after_attempt,
@@ -44,15 +45,49 @@ EVALUATION_SCHEMA = {
     },
 }
 
-TRUST_ANALYSIS_SYSTEM_PROMPT = """You are an AI agent trust evaluator.
-Analyze the provided agent metadata, endpoint status, and onchain history to assess trustworthiness.
-Consider: Is the agent manifest complete and professional? Are services functioning?
-Does the onchain history suggest legitimacy? Are there any red flags?
+TRUST_ANALYSIS_SYSTEM_PROMPT = """You are an AI agent trust evaluator performing private risk-categorized analysis. Evaluate the provided agent metadata, endpoint status, and on-chain history across specific risk categories.
+
+## Risk Categories (evaluate each independently)
+
+### 1. Identity Fraud Risk
+- Is the manifest professional or placeholder/copied?
+- Is the name generic ("test", "agent", "bot") or distinctive?
+- Is the description substantive (>20 words, specific) or filler?
+- Do services list real, distinct endpoints or filler domains (example.com, localhost)?
+
+### 2. Endpoint Manipulation Risk
+- Are endpoints actually responding or returning fake 200s?
+- Do secured endpoints (401/403) suggest real auth infrastructure?
+- Are there multiple distinct hostnames or all the same domain?
+- Are response times consistent with real services (<2s) or suspicious?
+
+### 3. On-chain Gaming Risk (Wash Trading Signals)
+- Does tx count match the agent's apparent maturity?
+- Is the balance proportional to activity (many txs but dust balance is suspicious)?
+- Does existing reputation data corroborate or contradict other signals?
+- Is there evidence of contract deployment (strong developer signal)?
+
+### 4. Cross-Signal Consistency
+- Do identity, liveness, and on-chain signals tell a coherent story?
+- Flag specific contradictions (e.g. "500 txs but broken manifest", "polished manifest but 0 live endpoints")
+- A new wallet with a polished manifest is unproven but not suspicious
+- All signals weak but consistent → low score, not fraud
+
+## Scoring Bands
+- **85-100**: Low risk across all categories — professional, live, established, consistent
+- **70-84**: Low-to-moderate risk — minor gaps in 1 category
+- **55-69**: Moderate risk — mixed signals across categories
+- **40-54**: Elevated risk — multiple weak categories
+- **20-39**: High risk — placeholder/gaming indicators, dead endpoints, contradictions
+- **0-19**: Critical risk — clear gaming attempt, all categories flagged
+
+## Rules
+- Do NOT default to 50. Use 30-45 for thin profiles with no red flags.
+- Your reasoning MUST cite specific data points from each risk category you evaluated.
+- Flag the highest-risk category explicitly.
 
 You MUST respond with ONLY a JSON object in this exact format:
-{"score": <integer 0-100>, "reasoning": "<explanation>"}
-
-Score guide: 0 = highly suspicious, 50 = insufficient data to judge, 100 = strongly trustworthy.
+{"score": <integer 0-100>, "reasoning": "<risk-categorized explanation citing specific signals>"}
 Do NOT include any text outside the JSON object."""
 
 CORRECTION_PROMPT = """Your previous response was not valid JSON.
@@ -98,7 +133,7 @@ class VeniceClient:
         resp = self._session.post(
             f"{self._base_url}/chat/completions",
             json=body,
-            timeout=(10, 120),  # (connect, read)
+            timeout=(10, 180),  # (connect, read)
         )
         resp.raise_for_status()
         return resp.json()
@@ -160,12 +195,13 @@ class VeniceClient:
             )
         except (json.JSONDecodeError, KeyError, ValueError, TypeError, IndexError) as e:
             _log.info("Layer 1 (json_schema) failed: %s — trying regex", e)
-        except requests.RequestException as e:
-            # API call itself failed after retries
+        except (requests.RequestException, RetryError) as e:
+            # API unreachable or timed out after all retries — use neutral fallback
             latency = int((time.monotonic() - start_ms) * 1000)
+            _log.warning("Venice API unavailable after retries (%s) — neutral score assigned", type(e).__name__)
             return VeniceEvaluation(
                 dimension=dimension, score=50,
-                reasoning=f"Venice API call failed: {e}",
+                reasoning=f"Venice API timed out after retries; neutral score assigned",
                 parse_method=VeniceParseMethod.FALLBACK_NEUTRAL,
                 venice_parse_failed=True, latency_ms=latency,
             )

@@ -13,5 +13,10 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - run: pip install -r requirements.txt
-      - run: python3 -m pytest tests/ -v --tb=short -k "not integration"
+      - run: pip install -r requirements-dev.txt
+      - name: Lint
+        run: ruff check .
+      - name: Type check
+        run: mypy --ignore-missing-imports *.py
+      - name: Tests with coverage
+        run: python3 -m pytest tests/ -v --tb=short -k "not integration" --cov=. --cov-report=term-missing --cov-config=pyproject.toml

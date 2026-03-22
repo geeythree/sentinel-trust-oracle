@@ -1,0 +1,34 @@
+Network: Base Mainnet
+Identity Registry: 0x8004A169FB4a3325136EB29fA0ceB6D2e539a432
+Reputation Registry: 0x8004BAa17C55a88189AE136b182e5fdA19dE9b63
+[INFO] liveness_checker: Protocol compliance: score=0 mcp_transport=False mcp_meta=False http=False
+[INFO] scorer: Dimensions: identity=77 liveness=50 onchain=60 venice=58 protocol=0 spread=77
+[INFO] scorer: Composite: raw=51.90 clamped=52
+[INFO] scorer: Protocol compliance abstained (no MCP endpoints)
+[INFO] scorer: Confidence: log_odds=1.386 posterior=0.8000 confidence=80 (observed=4 dims)
+[INFO] scorer: State determination: confidence=80 -> VERIFIED
+
+Sentinel SELF-EVALUATION — Agent #33465
+============================================================
+Sentinel is evaluating its own identity, liveness, and trust.
+This demonstrates a circular trust model: a trust oracle that
+practices what it preaches.
+
+DISCLAIMER: Self-evaluation has an inherent circular trust limitation.
+The evaluator and the evaluated entity are the same system. This score
+should be interpreted as a demonstration of pipeline functionality, not
+as an independent trust assessment. Third-party evaluators should be
+used for authoritative trust scores.
+
+
+================================================================================
+SENTINEL TRUST EVALUATION SUMMARY
+================================================================================
+Agent ID   Score  Conf    I    L    O    V    P State                     TX
+-------------------------------------------------------------------------------------
+#33465        52    80   77   50   60   58    0 PUBLISHED                 842cd45582...
+================================================================================
+Total: 1 agents evaluated
+
+Self-evaluation published via EVALUATOR wallet.
+Self-feedback skipped (AUDITOR not configured or error): RetryError[<Future at 0x10832ebe0 state=finished raised Web3RPCError>]

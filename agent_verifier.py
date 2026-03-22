@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import base64
 import ipaddress
+import hashlib
 import json
 import logging
 import socket
@@ -22,6 +23,10 @@ _log = logging.getLogger(__name__)
 REQUIRED_FIELDS = ["name", "description", "services"]
 OPTIONAL_FIELDS = ["image", "x402Support", "active", "registrations", "supportedTrust"]
 
+# Anti-gaming: detect placeholder names and filler domains
+PLACEHOLDER_NAMES = {"test", "agent", "trust me", "bot", "my agent", "untitled", "default", "placeholder"}
+FILLER_DOMAINS = {"google.com", "example.com", "localhost", "test.com", "foo.com", "bar.com", "httpbin.org"}
+
 
 class AgentVerifier:
     """Fetch agent.json from URI, resolve IPFS, validate structure, score identity completeness."""
@@ -29,6 +34,23 @@ class AgentVerifier:
     def __init__(self, logger: AgentLogger) -> None:
         self._logger = logger
         self._session = requests.Session()
+        self._manifest_hashes: dict[str, int] = {}  # hash -> first seen agent_id
+
+    def _compute_manifest_hash(self, manifest: dict) -> str:
+        """Hash manifest content for duplicate detection."""
+        # Normalize: sort keys, strip whitespace-only values
+        normalized = json.dumps(manifest, sort_keys=True, separators=(',', ':'))
+        return hashlib.sha256(normalized.encode()).hexdigest()
+
+    def check_duplicate(self, manifest: dict, agent_id: int) -> tuple[bool, int | None]:
+        """Check if manifest is a duplicate. Returns (is_duplicate, original_agent_id)."""
+        h = self._compute_manifest_hash(manifest)
+        if h in self._manifest_hashes:
+            original = self._manifest_hashes[h]
+            if original != agent_id:
+                return (True, original)
+        self._manifest_hashes[h] = agent_id
+        return (False, None)
 
     def close(self) -> None:
         """Close the HTTP session."""
@@ -230,24 +252,87 @@ class AgentVerifier:
             services_valid=services_valid,
         )
 
+    @staticmethod
+    def _is_filler_endpoint(endpoint: str) -> bool:
+        """Check if an endpoint URL uses a known filler/placeholder domain."""
+        try:
+            parsed = urlparse(endpoint)
+            hostname = (parsed.hostname or "").lower()
+            return hostname in FILLER_DOMAINS
+        except Exception:
+            return False
+
     def _compute_identity_score(self, manifest: dict, validation: ManifestValidation) -> int:
-        """Score 0-100 based on manifest completeness."""
+        """Score 0-100 based on manifest quality (not just field presence).
+
+        Components:
+        - Name quality: 0-10 (present + not placeholder)
+        - Description quality: 0-20 (present + length + word diversity)
+        - Services quality: 0-30 (endpoints, HTTPS, non-filler, multiple services)
+        - Optional fields: 0-20 (4 pts per optional field, capped)
+        - Structural completeness: 0-20 (all required fields + valid services)
+        """
         score = 0
 
-        # Required fields: 20 points each (3 fields = 60 max)
-        score += len([f for f in REQUIRED_FIELDS if f in manifest]) * 20
+        # --- Name quality (0-10) ---
+        name = manifest.get("name", "")
+        if name:
+            score += 5
+            name_lower = name.strip().lower()
+            if len(name_lower) >= 3 and name_lower not in PLACEHOLDER_NAMES:
+                score += 5
 
-        # Optional fields with bonus: 5 points each (max 25)
-        score += min(25, len([f for f in OPTIONAL_FIELDS if f in manifest]) * 5)
+        # --- Description quality (0-20) ---
+        desc = manifest.get("description", "")
+        if desc:
+            score += 5
+            if len(desc) >= 20:
+                score += 5
+            if len(desc) >= 50:
+                score += 5
+            distinct_words = set(desc.lower().split())
+            if len(distinct_words) >= 3:
+                score += 5
 
-        # Services have endpoints: 15 points
-        # Fix #6: require ALL items to be dicts with endpoints — no free pass for non-dicts
+        # --- Services quality (0-30) ---
         services = manifest.get("services", [])
-        if (
-            services
-            and isinstance(services, list)
-            and all(isinstance(s, dict) and "endpoint" in s for s in services)
-        ):
-            score += 15
+        if services and isinstance(services, list):
+            valid_services = [s for s in services if isinstance(s, dict)]
+            if valid_services:
+                score += 5  # non-empty valid services
+
+                has_endpoints = all("endpoint" in s for s in valid_services)
+                if has_endpoints:
+                    score += 5  # all have endpoint field
+
+                    endpoints = [s["endpoint"] for s in valid_services]
+                    if all(str(e).startswith("https://") for e in endpoints):
+                        score += 5  # all HTTPS
+
+                    if not any(self._is_filler_endpoint(str(e)) for e in endpoints):
+                        score += 5  # no filler domains
+
+                    if len(valid_services) > 1:
+                        score += 5  # multiple services
+
+                    # Distinct hostnames
+                    hostnames = set()
+                    for e in endpoints:
+                        try:
+                            hostnames.add(urlparse(str(e)).hostname)
+                        except Exception:
+                            pass
+                    if len(hostnames) > 1:
+                        score += 5
+
+        # --- Optional fields (0-20, 4 pts each, capped) ---
+        optional_count = len([f for f in OPTIONAL_FIELDS if f in manifest])
+        score += min(20, optional_count * 4)
+
+        # --- Structural completeness (0-20) ---
+        if not validation.fields_missing:
+            score += 10  # all required fields present
+        if validation.services_valid:
+            score += 10  # services array valid
 
         return min(100, score)

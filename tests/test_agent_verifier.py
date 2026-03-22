@@ -24,14 +24,18 @@ def verifier(tmp_path):
     return AgentVerifier(logger)
 
 
-# --- _compute_identity_score ---
+# --- _compute_identity_score (quality-based) ---
 
 class TestIdentityScore:
-    def test_complete_manifest_max_score(self, verifier):
+    def test_complete_quality_manifest_high_score(self, verifier):
+        """A well-crafted manifest with real services should score 90+."""
         manifest = {
-            "name": "TestAgent",
-            "description": "A test agent",
-            "services": [{"endpoint": "https://api.test.com"}],
+            "name": "Sentinel Trust Oracle",
+            "description": "Autonomous agent trust verification service that evaluates ERC-8004 registered agents across multiple dimensions",
+            "services": [
+                {"endpoint": "https://api.sentinel.example.com/verify"},
+                {"endpoint": "https://mcp.sentinel.example.com/tools"},
+            ],
             "image": "https://img.com/logo.png",
             "x402Support": False,
             "active": True,
@@ -40,13 +44,26 @@ class TestIdentityScore:
         }
         validation = verifier._validate_manifest(manifest)
         score = verifier._compute_identity_score(manifest, validation)
-        assert score == 100
+        assert score >= 90, f"Quality manifest should score >=90, got {score}"
+
+    def test_gaming_manifest_low_score(self, verifier):
+        """A manifest designed to game field-counting should score low."""
+        manifest = {
+            "name": "trust me",
+            "description": "legit",
+            "services": [{"endpoint": "https://google.com"}],
+        }
+        validation = verifier._validate_manifest(manifest)
+        score = verifier._compute_identity_score(manifest, validation)
+        # Placeholder name, short description, filler domain
+        assert score <= 45, f"Gaming manifest should score <=45, got {score}"
 
     def test_minimal_manifest(self, verifier):
+        """A manifest with only name should score very low."""
         manifest = {"name": "TestAgent"}
         validation = verifier._validate_manifest(manifest)
         score = verifier._compute_identity_score(manifest, validation)
-        assert score == 20
+        assert score <= 15, f"Minimal manifest should score <=15, got {score}"
 
     def test_empty_manifest(self, verifier):
         manifest = {}
@@ -54,31 +71,34 @@ class TestIdentityScore:
         score = verifier._compute_identity_score(manifest, validation)
         assert score == 0
 
-    def test_services_without_endpoints_no_bonus(self, verifier):
+    def test_services_without_endpoints_no_full_bonus(self, verifier):
         manifest = {
-            "name": "Test",
-            "description": "Test",
+            "name": "Real Agent Service",
+            "description": "A production agent that processes natural language queries for data analysis",
             "services": [{"name": "mcp"}],
         }
         validation = verifier._validate_manifest(manifest)
         score = verifier._compute_identity_score(manifest, validation)
-        assert score == 60
+        # Has name quality + description quality but services lack endpoints
+        assert 25 <= score <= 50, f"Expected 25-50, got {score}"
 
-    def test_mixed_services_no_bonus(self, verifier):
+    def test_mixed_services_partial_score(self, verifier):
         manifest = {
-            "name": "Test",
-            "description": "Test",
+            "name": "Real Agent",
+            "description": "A proper agent with mixed service declarations for testing purposes",
             "services": [{"endpoint": "https://api.test.com"}, "invalid_string"],
         }
         validation = verifier._validate_manifest(manifest)
         score = verifier._compute_identity_score(manifest, validation)
-        assert score == 60
+        # services_valid is False because of invalid string entry
+        assert 20 <= score <= 65, f"Expected 20-65, got {score}"
 
-    def test_optional_fields_capped_at_25(self, verifier):
+    def test_optional_fields_contribute(self, verifier):
+        """Optional fields add up to 20 points (4 each, capped)."""
         manifest = {
-            "name": "Test",
-            "description": "Test",
-            "services": [],
+            "name": "Production Agent",
+            "description": "A fully featured agent with all optional metadata for maximum completeness scoring",
+            "services": [{"endpoint": "https://api.production.io/v1"}],
             "image": "img",
             "x402Support": True,
             "active": True,
@@ -87,7 +107,44 @@ class TestIdentityScore:
         }
         validation = verifier._validate_manifest(manifest)
         score = verifier._compute_identity_score(manifest, validation)
-        assert score == 85
+        # Good name + good description + single HTTPS service + optional fields + structural
+        assert score >= 75, f"Expected >=75 with optional fields, got {score}"
+
+    def test_placeholder_name_detected(self, verifier):
+        """Placeholder names like 'test', 'agent' get penalized."""
+        manifest_placeholder = {
+            "name": "test",
+            "description": "A real agent that does important things in the ecosystem",
+            "services": [{"endpoint": "https://api.real.io"}],
+        }
+        manifest_real = {
+            "name": "DataAnalyzer Pro",
+            "description": "A real agent that does important things in the ecosystem",
+            "services": [{"endpoint": "https://api.real.io"}],
+        }
+        v1 = verifier._validate_manifest(manifest_placeholder)
+        v2 = verifier._validate_manifest(manifest_real)
+        score_placeholder = verifier._compute_identity_score(manifest_placeholder, v1)
+        score_real = verifier._compute_identity_score(manifest_real, v2)
+        assert score_real > score_placeholder, "Real name should score higher than placeholder"
+
+    def test_filler_domain_detected(self, verifier):
+        """Filler domains like google.com, example.com get penalized."""
+        manifest_filler = {
+            "name": "My Agent",
+            "description": "Agent that provides data analysis services to other agents in the network",
+            "services": [{"endpoint": "https://example.com/api"}],
+        }
+        manifest_real = {
+            "name": "My Agent",
+            "description": "Agent that provides data analysis services to other agents in the network",
+            "services": [{"endpoint": "https://api.myagent.io/v1"}],
+        }
+        v1 = verifier._validate_manifest(manifest_filler)
+        v2 = verifier._validate_manifest(manifest_real)
+        score_filler = verifier._compute_identity_score(manifest_filler, v1)
+        score_real = verifier._compute_identity_score(manifest_real, v2)
+        assert score_real > score_filler, "Real domain should score higher than filler"
 
 
 # --- _validate_manifest ---

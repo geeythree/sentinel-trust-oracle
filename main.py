@@ -43,7 +43,7 @@ def parse_args() -> argparse.Namespace:
 
     # Self-evaluation mode
     self_eval = subparsers.add_parser("self-eval", help="Sentinel evaluates itself (circular trust demo)")
-    self_eval.add_argument("--agent-id", type=int, default=33465, help="Sentinel's own ERC-8004 agent ID")
+    self_eval.add_argument("--agent-id", type=int, default=35683, help="Sentinel's own ERC-8004 agent ID")
 
     # MCP server mode
     subparsers.add_parser("mcp-server", help="Start MCP server (stdio transport)")
@@ -294,7 +294,7 @@ def _run_self_evaluation(orchestrator, blockchain, args) -> None:
                       f"identity={result.dimensions.identity_completeness}, "
                       f"liveness={result.dimensions.endpoint_liveness}")
             self_tx = blockchain.submit_self_feedback(
-                aqe_agent_id=sentinel_id,
+                sentinel_agent_id=sentinel_id,
                 value=result.composite_score,
                 tag1="self_assessment",
                 tag2=f"conf_{result.evaluation_confidence}",

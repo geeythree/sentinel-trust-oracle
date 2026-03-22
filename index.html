@@ -306,12 +306,17 @@
         <div class="glass-card p-6 mb-6 animate-fade-in-up">
             <div class="flex items-center justify-between">
                 <div>
-                    <h1 class="text-2xl font-bold gradient-text">Sentinel — Agent Trust Oracle</h1>
+                    <div class="flex items-center gap-3">
+                        <h1 class="text-2xl font-bold gradient-text">Sentinel — Agent Trust Oracle</h1>
+                        <span id="mainnet-badge" class="hidden px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-900/40 text-emerald-400 border border-emerald-500/40 pulse-glow-green">● Base Mainnet</span>
+                    </div>
                     <p class="text-gray-500 mt-1 text-sm">Autonomous agent trust verification with on-chain reputation</p>
+                    <div id="mainnet-tx-link" class="hidden mt-1 text-xs"></div>
                 </div>
                 <div class="text-right text-sm text-gray-500">
                     <div class="text-cyan-400 font-semibold">ERC-8004 on Base</div>
                     <div id="agent-id" class="font-mono text-gray-400"></div>
+                    <div id="last-eval-time" class="text-xs text-gray-600 mt-1"></div>
                 </div>
             </div>
             <div class="mt-4 grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm">
@@ -402,7 +407,7 @@
                 </div>
                 <div>
                     <div class="text-emerald-500 text-xs">State Machine</div>
-                    <div class="text-lg font-bold text-emerald-400">13 states</div>
+                    <div class="text-lg font-bold text-emerald-400">12 states</div>
                 </div>
                 <div>
                     <div class="text-emerald-500 text-xs">Tool Budget</div>
@@ -418,7 +423,7 @@
                 </div>
             </div>
             <div class="mt-2 text-[10px] text-emerald-700">
-                discover → verify identity → check liveness → on-chain analysis → Venice trust → score → verify → publish. Confidence ≥70 auto-publishes. &lt;70 auto-withholds or flags for human review.
+                discover → verify identity → check liveness → on-chain analysis → Venice trust → score → verify → publish. Confidence ≥70 auto-publishes. &lt;70 auto-withholds.
             </div>
         </div>
 
@@ -441,7 +446,7 @@
                     <div id="verify-eas-links" class="flex flex-wrap gap-1.5"></div>
                 </div>
             </div>
-            <div class="mt-3 grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div class="mt-3 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
                 <div class="bg-slate-900/60 rounded-lg p-3 border border-amber-800/20">
                     <div class="text-xs text-amber-500 mb-1">Evaluator Wallet</div>
                     <div class="text-[11px] text-amber-400/70 mb-1">All reputation TXs are signed by this wallet — proving a single autonomous agent evaluated all agents.</div>
@@ -449,8 +454,13 @@
                 </div>
                 <div class="bg-slate-900/60 rounded-lg p-3 border border-amber-800/20">
                     <div class="text-xs text-amber-500 mb-1">Reputation Registry Contract</div>
-                    <div class="text-[11px] text-amber-400/70 mb-1">ERC-8004 Reputation Registry — read the contract source and verify <code class="bg-slate-800 px-1 rounded text-amber-300">giveFeedback()</code> events.</div>
+                    <div class="text-[11px] text-amber-400/70 mb-1">ERC-8004 Reputation Registry — verify <code class="bg-slate-800 px-1 rounded text-amber-300">giveFeedback()</code> events.</div>
                     <a id="verify-rep-contract" href="#" target="_blank" rel="noopener noreferrer" class="text-amber-400 hover:text-amber-300 font-mono text-[10px] break-all"></a>
+                </div>
+                <div class="bg-slate-900/60 rounded-lg p-3 border border-amber-800/20">
+                    <div class="text-xs text-amber-500 mb-1">Input Hashes (Tamper-Proof)</div>
+                    <div class="text-[11px] text-amber-400/70 mb-1">SHA-256 of evaluation inputs. Recompute from raw data to verify scores weren't tampered with.</div>
+                    <div id="verify-input-hashes" class="flex flex-wrap gap-1"></div>
                 </div>
                 <div class="bg-slate-900/60 rounded-lg p-3 border border-amber-800/20">
                     <div class="text-xs text-amber-500 mb-1">GitHub Repository</div>
@@ -548,12 +558,14 @@
     let _radarId = 0;
     function createRadarChart(dimensions, size = 200) {
         if (!dimensions) return '<div class="text-gray-600 text-xs p-4">No dimension data</div>';
-        const labels = ['Identity', 'Liveness', 'On-chain', 'Venice'];
+        const labels = ['Identity', 'Liveness', 'On-chain', 'Venice', 'Protocol'];
+        const n = 5;
         const values = [
             dimensions.identity_completeness ?? 0,
             dimensions.endpoint_liveness ?? 0,
             dimensions.onchain_history ?? 0,
-            dimensions.venice_trust_analysis ?? 0
+            dimensions.venice_trust_analysis ?? 0,
+            dimensions.protocol_compliance ?? 0
         ];
         const cx = size / 2, cy = size / 2;
         const maxR = size / 2 - 30;
@@ -574,31 +586,30 @@
         for (let i = 1; i <= levels; i++) {
             const r = (maxR / levels) * i;
             const points = [];
-            for (let j = 0; j < 4; j++) {
-                const angle = (Math.PI * 2 * j) / 4 - Math.PI / 2;
+            for (let j = 0; j < n; j++) {
+                const angle = (Math.PI * 2 * j) / n - Math.PI / 2;
                 points.push(`${cx + r * Math.cos(angle)},${cy + r * Math.sin(angle)}`);
             }
             svg += `<polygon points="${points.join(' ')}" class="radar-grid"/>`;
         }
 
-        // Axes
-        for (let j = 0; j < 4; j++) {
-            const angle = (Math.PI * 2 * j) / 4 - Math.PI / 2;
+        // Axes + Labels
+        for (let j = 0; j < n; j++) {
+            const angle = (Math.PI * 2 * j) / n - Math.PI / 2;
             const x = cx + maxR * Math.cos(angle);
             const y = cy + maxR * Math.sin(angle);
             svg += `<line x1="${cx}" y1="${cy}" x2="${x}" y2="${y}" class="radar-axis"/>`;
 
-            // Labels
-            const lx = cx + (maxR + 18) * Math.cos(angle);
-            const ly = cy + (maxR + 18) * Math.sin(angle);
-            const anchor = j === 0 ? 'middle' : j === 2 ? 'middle' : j === 1 ? 'start' : 'end';
+            const lx = cx + (maxR + 20) * Math.cos(angle);
+            const ly = cy + (maxR + 20) * Math.sin(angle);
+            const anchor = Math.abs(Math.cos(angle)) < 0.3 ? 'middle' : Math.cos(angle) > 0 ? 'start' : 'end';
             svg += `<text x="${lx}" y="${ly}" text-anchor="${anchor}" dominant-baseline="middle" class="radar-label">${labels[j]}</text>`;
         }
 
         // Data polygon with glow
         const dataPoints = [];
-        for (let j = 0; j < 4; j++) {
-            const angle = (Math.PI * 2 * j) / 4 - Math.PI / 2;
+        for (let j = 0; j < n; j++) {
+            const angle = (Math.PI * 2 * j) / n - Math.PI / 2;
             const r = (values[j] / 100) * maxR;
             const x = cx + r * Math.cos(angle);
             const y = cy + r * Math.sin(angle);
@@ -607,8 +618,8 @@
         svg += `<polygon points="${dataPoints.join(' ')}" class="radar-fill" filter="url(#${filterId})"/>`;
 
         // Data points
-        for (let j = 0; j < 4; j++) {
-            const angle = (Math.PI * 2 * j) / 4 - Math.PI / 2;
+        for (let j = 0; j < n; j++) {
+            const angle = (Math.PI * 2 * j) / n - Math.PI / 2;
             const r = (values[j] / 100) * maxR;
             const x = cx + r * Math.cos(angle);
             const y = cy + r * Math.sin(angle);
@@ -701,10 +712,7 @@
                     <span class="px-1.5 py-0.5 rounded bg-violet-900/30 text-violet-400 font-mono text-[10px] border border-violet-700/30">${esc(v.model || 'qwen3-235b')}</span>
                     <span class="px-1.5 py-0.5 rounded bg-violet-900/30 text-violet-400 font-mono text-[10px] border border-violet-700/30">${esc(v.parse_method || 'json_schema')}</span>
                 </div>
-                <details class="mt-1">
-                    <summary class="text-xs text-violet-400 italic cursor-pointer hover:text-violet-300">"${esc((v.reasoning || '').slice(0, 120))}..." <span class="text-violet-500 underline">expand</span></summary>
-                    <div class="mt-1 text-xs text-violet-400 italic">"${esc(v.reasoning || '')}"</div>
-                </details>
+                <div class="mt-1 text-xs text-violet-500 italic">Reasoning is private — only the score is published on-chain.</div>
                 <div class="mt-1 flex gap-3 text-[10px] text-violet-500 font-mono">
                     <span>${(Number(v.tokens_sent) || 0) + (Number(v.tokens_received) || 0)} tokens</span>
                     <span>${((Number(v.latency_ms) || 0) / 1000).toFixed(1)}s latency</span>
@@ -747,6 +755,7 @@
                         <tr class="border-b border-slate-700/50"><td class="py-2 text-gray-400">Endpoint Liveness</td><td class="py-2 text-right font-semibold ${scoreClass(d.endpoint_liveness ?? 0)}">${d.endpoint_liveness ?? 0}</td></tr>
                         <tr class="border-b border-slate-700/50"><td class="py-2 text-gray-400">On-chain History</td><td class="py-2 text-right font-semibold ${scoreClass(d.onchain_history ?? 0)}">${d.onchain_history ?? 0}</td></tr>
                         <tr class="border-b border-slate-700/50"><td class="py-2 text-gray-400">Venice Trust Analysis</td><td class="py-2 text-right font-semibold ${scoreClass(d.venice_trust_analysis ?? 0)}">${d.venice_trust_analysis ?? 0}</td></tr>
+                        <tr class="border-b border-slate-700/50"><td class="py-2 text-gray-400">Protocol Declaration</td><td class="py-2 text-right font-semibold ${scoreClass(d.protocol_compliance ?? 0)}">${d.protocol_compliance ?? 0}</td></tr>
                         <tr><td class="py-2 text-gray-400">Spread</td><td class="py-2 text-right text-gray-300">${eval_data.spread ?? 0}</td></tr>
                     </table>
                     <div class="mt-3 space-y-1">
@@ -762,6 +771,7 @@
                             <div>Source: ${esc(eval_data.discovery_source)} | Tools: ${eval_data.tool_calls_used || 0}/15</div>
                             <div>Reputation TX: ${txLink}</div>
                             <div>EAS Attestation: ${attestLink}</div>
+                            ${eval_data.input_hash ? `<div>Input Hash: <span class="font-mono text-gray-500" title="${esc(eval_data.input_hash)}">${esc(eval_data.input_hash.slice(0, 16))}...</span></div>` : ''}
                             <div>${esc(eval_data.timestamp)}</div>
                         </div>
                     </div>
@@ -773,7 +783,7 @@
     // ========== State ==========
     let allData = [];
     let currentFilter = 'all';
-    const stateOrder = { 'PUBLISHED': 0, 'VERIFIED': 1, 'PENDING_HUMAN_REVIEW': 2, 'WITHHELD_LOW_CONFIDENCE': 3, 'FAILED': 4 };
+    const stateOrder = { 'PUBLISHED': 0, 'VERIFIED': 1, 'WITHHELD_LOW_CONFIDENCE': 2, 'FAILED': 3 };
 
     // ========== Filters ==========
     function setFilter(filter) {
@@ -1019,7 +1029,29 @@
                 }
             }, 200);
 
-            successEl.innerHTML = `Agent <span class="text-cyan-400 font-mono">#${parseInt(agentId, 10)}</span> evaluated! Trust score: <span class="font-bold ${scoreClass(result.composite_score ?? 0)}">${result.composite_score ?? 0}</span>, State: ${esc(result.state)}`;
+            // Build score explanation
+            const dims = result.dimensions || {};
+            const ep = result.endpoints || {};
+            let explanation = '';
+            const score = result.composite_score ?? 0;
+            if (score >= 70) {
+                explanation = `Score ${score}: Strong trust signals across dimensions. Verdict: trusted and published on-chain.`;
+            } else if (score >= 40) {
+                const weak = [];
+                if ((dims.identity_completeness ?? 0) < 40) weak.push('weak identity');
+                if ((dims.endpoint_liveness ?? 0) < 40) weak.push('low endpoint liveness');
+                if ((dims.onchain_history ?? 0) < 40) weak.push('sparse on-chain history');
+                if ((dims.venice_trust_analysis ?? 0) < 40) weak.push('low Venice trust score');
+                explanation = `Score ${score}: Mixed signals${weak.length ? ' — ' + weak.join(', ') : ''}. Verdict: not confident enough to publish.`;
+            } else {
+                const problems = [];
+                if ((dims.identity_completeness ?? 0) < 30) problems.push('identity verification failed or very weak');
+                if ((ep.live ?? 0) === 0 && (ep.declared ?? 0) > 0) problems.push('no live endpoints detected');
+                if ((dims.onchain_history ?? 0) < 40) problems.push('sparse on-chain history');
+                if (problems.length === 0) problems.push('weak signals across all dimensions');
+                explanation = `Score ${score}: ${problems.join(', ')}. Verdict: not trustworthy enough to publish.`;
+            }
+            successEl.innerHTML = `Agent <span class="text-cyan-400 font-mono">#${parseInt(agentId, 10)}</span> evaluated! Trust score: <span class="font-bold ${scoreClass(score)}">${score}</span>, State: ${esc(result.state)}<br><span class="text-gray-400 text-xs">${esc(explanation)}</span>`;
             successEl.style.display = 'block';
 
             // Scroll to the new card
@@ -1084,6 +1116,32 @@
             document.getElementById('autonomy-published').textContent = published;
             document.getElementById('autonomy-withheld').textContent = withheld;
 
+            // Show mainnet badge if any mainnet evaluations exist
+            const mainnetEvals = data.filter(e => e.chain_id === 8453);
+            if (mainnetEvals.length > 0) {
+                document.getElementById('mainnet-badge').classList.remove('hidden');
+                const firstMainnet = mainnetEvals.find(e => e.tx_hash);
+                if (firstMainnet) {
+                    const h = (firstMainnet.tx_hash || '').replace(/[^0-9a-fA-Fx]/g, '');
+                    document.getElementById('mainnet-tx-link').classList.remove('hidden');
+                    document.getElementById('mainnet-tx-link').innerHTML = `Live on mainnet: <a href="https://basescan.org/tx/${h}" target="_blank" rel="noopener noreferrer" class="text-emerald-400 hover:text-emerald-300 font-mono">${h.slice(0, 18)}...</a>`;
+                }
+            }
+
+            // Show last evaluation time + total count
+            const timestamps = data.map(e => e.timestamp).filter(Boolean).sort().reverse();
+            if (timestamps.length > 0) {
+                const lastEval = new Date(timestamps[0]);
+                const now = new Date();
+                const diffMin = Math.round((now - lastEval) / 60000);
+                let ago;
+                if (diffMin < 1) ago = 'just now';
+                else if (diffMin < 60) ago = `${diffMin}m ago`;
+                else if (diffMin < 1440) ago = `${Math.round(diffMin/60)}h ago`;
+                else ago = `${Math.round(diffMin/1440)}d ago`;
+                document.getElementById('last-eval-time').textContent = `${data.length} agents evaluated · last: ${ago}`;
+            }
+
             // Populate Verify On-Chain section
             const publishedEvals = data.filter(e => (e.state === 'PUBLISHED' || e.state === 'VERIFIED') && (e.tx_hash || e.attestation_uid));
             if (publishedEvals.length > 0) {
@@ -1111,6 +1169,16 @@
                         return `<a href="${easBase}/attestation/view/0x${uid}" target="_blank" rel="noopener noreferrer" class="px-2 py-1 rounded bg-amber-900/30 text-amber-400 hover:text-amber-300 font-mono text-[10px] border border-amber-700/20">#${parseInt(e.agent_id,10)} → 0x${uid.slice(0,8)}...</a>`;
                     }).join('');
                 if (!easContainer.innerHTML) easContainer.innerHTML = '<span class="text-amber-600 text-[10px]">No EAS attestations yet</span>';
+
+                // Input hashes
+                const hashContainer = document.getElementById('verify-input-hashes');
+                if (hashContainer) {
+                    hashContainer.innerHTML = publishedEvals
+                        .filter(e => e.input_hash)
+                        .map(e => `<span class="px-2 py-1 rounded bg-amber-900/30 text-amber-400 font-mono text-[10px] border border-amber-700/20" title="${esc(e.input_hash)}">#${parseInt(e.agent_id,10)} → ${esc(e.input_hash.slice(0, 12))}...</span>`)
+                        .join('');
+                    if (!hashContainer.innerHTML) hashContainer.innerHTML = '<span class="text-amber-600 text-[10px]">No input hashes yet</span>';
+                }
 
                 // Evaluator wallet link
                 const evalWallet = document.getElementById('evaluator-wallet')?.textContent || '';

@@ -172,8 +172,44 @@ class TestVeniceSummaryGuard:
         assert "TX count" not in summary
 
 
+class TestFullyAutonomousPipeline:
+    """Verify the pipeline is fully autonomous — no PENDING_HUMAN_REVIEW anywhere."""
+
+    def test_evaluate_single_has_no_pending_human_review(self):
+        """evaluate_single must not reference PENDING_HUMAN_REVIEW."""
+        import inspect
+        import orchestrator
+        source = inspect.getsource(orchestrator.Orchestrator.evaluate_single)
+        assert "PENDING_HUMAN_REVIEW" not in source
+
+    def test_determine_state_only_verified_or_withheld(self):
+        """determine_state() returns VERIFIED or WITHHELD_LOW_CONFIDENCE only."""
+        from scorer import Scorer
+        from models import TrustDimensions, EvaluationState
+        scorer = Scorer()
+        dims = TrustDimensions(100, 0, 50, 100, 50)
+        state = scorer.determine_state(50, dims)
+        assert state == EvaluationState.WITHHELD_LOW_CONFIDENCE
+
+        state2 = scorer.determine_state(80, dims)
+        assert state2 == EvaluationState.VERIFIED
+
+    def test_no_human_review_method(self):
+        """_request_human_review and _autonomous_review are removed (dead code)."""
+        import orchestrator
+        assert not hasattr(orchestrator.Orchestrator, '_request_human_review')
+        assert not hasattr(orchestrator.Orchestrator, '_autonomous_review')
+
+    def test_autonomous_mode_config_exists(self):
+        """Config must have AUTONOMOUS_MODE field."""
+        from config import Config
+        assert hasattr(Config, 'AUTONOMOUS_MODE')
+        import config as cm
+        assert cm.config.AUTONOMOUS_MODE is True
+
+
 class TestOrchestratorImports:
-    """Verify orchestrator no longer uses signal.SIGALRM."""
+    """Verify orchestrator uses clean imports."""
 
     def test_no_signal_import(self):
         import inspect
@@ -181,3 +217,4 @@ class TestOrchestratorImports:
         source = inspect.getsource(orchestrator)
         assert "signal.SIGALRM" not in source
         assert "signal.alarm" not in source
+        assert "import select" not in source

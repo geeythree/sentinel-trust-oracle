@@ -1,7 +1,9 @@
-"""4-dimension trust scoring engine, confidence calculation, and state determination."""
+"""4-dimension trust scoring engine with Bayesian confidence and CV-based disagreement penalty."""
 from __future__ import annotations
 
 import logging
+import math
+import statistics
 
 from config import config
 from models import (
@@ -16,9 +18,18 @@ from models import (
 
 logger = logging.getLogger(__name__)
 
+# Likelihood ratios encode a 2-bit information model:
+#   strong evidence FOR trust, neutral (no update), strong evidence AGAINST.
+_LR_STRONG = 4.0    # score > 70
+_LR_NEUTRAL = 1.0   # score 30–70
+_LR_WEAK = 0.25     # score < 30
+
+# Venice parse-quality degradation factor for non-JSON_SCHEMA parse methods.
+_VENICE_DEGRADATION = 0.75
+
 
 class Scorer:
-    """Compute composite trust scores and evaluation confidence."""
+    """Compute composite trust scores and Bayesian confidence."""
 
     def compute_dimensions(
         self,
@@ -33,25 +44,49 @@ class Scorer:
             endpoint_liveness=liveness.liveness_score,
             onchain_history=onchain.onchain_score,
             venice_trust_analysis=venice.score,
+            protocol_compliance=liveness.protocol_compliance_score,
         )
         logger.info(
-            "Dimensions: identity=%d liveness=%d onchain=%d venice=%d spread=%d",
+            "Dimensions: identity=%d liveness=%d onchain=%d venice=%d protocol=%d spread=%d",
             dims.identity_completeness, dims.endpoint_liveness,
-            dims.onchain_history, dims.venice_trust_analysis, dims.spread,
+            dims.onchain_history, dims.venice_trust_analysis,
+            dims.protocol_compliance, dims.spread,
         )
         return dims
 
     def compute_composite(self, dimensions: TrustDimensions) -> int:
-        """Weighted composite: 20/25/25/30. Clamped 0-100."""
+        """Weighted composite score across 5 dimensions, clamped 0-100.
+
+        Weight rationale (env-configurable via WEIGHT_* vars):
+        - Identity 20%: Most gameable — anyone can fill manifest fields.
+        - Liveness 20%: Requires real infrastructure to sustain.
+        - On-chain 20%: Historical transaction record is expensive to forge.
+        - Venice 25%: Cross-references ALL signals and detects inconsistencies.
+          Highest weight because it synthesizes rather than measures a single axis.
+        - Protocol 15%: MCP handshake compliance — verifies agent actually speaks
+          the protocol, not just serves HTTP. Lowest weight as it's binary.
+        """
         raw = (
             dimensions.identity_completeness * config.WEIGHT_IDENTITY       # 0.20
-            + dimensions.endpoint_liveness * config.WEIGHT_LIVENESS         # 0.25
-            + dimensions.onchain_history * config.WEIGHT_ONCHAIN            # 0.25
-            + dimensions.venice_trust_analysis * config.WEIGHT_VENICE_TRUST # 0.30
+            + dimensions.endpoint_liveness * config.WEIGHT_LIVENESS         # 0.20
+            + dimensions.onchain_history * config.WEIGHT_ONCHAIN            # 0.20
+            + dimensions.venice_trust_analysis * config.WEIGHT_VENICE_TRUST # 0.25
+            + dimensions.protocol_compliance * config.WEIGHT_PROTOCOL       # 0.15
         )
         composite = max(0, min(100, round(raw)))
         logger.info("Composite: raw=%.2f clamped=%d", raw, composite)
         return composite
+
+    # --- Bayesian log-odds confidence model ---
+
+    @staticmethod
+    def _score_to_lr(score: int) -> float:
+        """Map a dimension score (0-100) to a likelihood ratio."""
+        if score > 70:
+            return _LR_STRONG
+        if score < 30:
+            return _LR_WEAK
+        return _LR_NEUTRAL
 
     def compute_confidence(
         self,
@@ -61,56 +96,85 @@ class Scorer:
         venice: VeniceEvaluation,
         dimensions: TrustDimensions,
     ) -> int:
-        """Compute evaluation_confidence (0-100)."""
-        conf = 0
+        """Bayesian log-odds confidence (0-100).
 
-        # Identity verified (manifest fetched and valid)
-        if identity.success and not identity.fields_missing:
-            conf += 25
-        elif identity.success:
-            conf += 15  # partial manifest
+        Starts at log-odds 0 (50% prior). Each dimension with data updates the
+        log-odds via its likelihood ratio. Missing data abstains (LR=1 → no update).
+        A coefficient-of-variation penalty is applied for disagreeing dimensions.
+        """
+        log_odds = 0.0
+        observed_scores: list[int] = []
 
-        # Liveness check completed
-        if liveness.success and liveness.endpoints_declared > 0:
-            if liveness.endpoints_dead == 0:
-                conf += 25  # all endpoints respond
-            else:
-                conf += 15  # some endpoints dead
-
-        # Venice analysis
-        conf += self._venice_confidence_contribution(venice)
-
-        # On-chain data available
-        if onchain.success and onchain.transaction_count > 0:
-            conf += 25
-        elif onchain.success:
-            conf += 15  # wallet exists but no history
+        # --- Identity ---
+        if identity.success:
+            lr = self._score_to_lr(dimensions.identity_completeness)
+            log_odds += math.log(lr)
+            observed_scores.append(dimensions.identity_completeness)
         else:
-            logger.info("On-chain analysis failed — 0 confidence contribution")
+            logger.info("Identity abstained (fetch failed)")
 
-        # Spread penalties
-        spread = dimensions.spread
-        if spread > config.SPREAD_HUMAN_REVIEW_THRESHOLD:  # > 50
-            conf -= 30
-            logger.info("Spread penalty: -30 (spread=%d > %d)", spread, config.SPREAD_HUMAN_REVIEW_THRESHOLD)
-        elif spread > config.SPREAD_PENALTY_THRESHOLD:  # > 30
-            conf -= 15
-            logger.info("Spread penalty: -15 (spread=%d > %d)", spread, config.SPREAD_PENALTY_THRESHOLD)
+        # --- Liveness ---
+        if liveness.endpoints_declared > 0:
+            lr = self._score_to_lr(dimensions.endpoint_liveness)
+            log_odds += math.log(lr)
+            observed_scores.append(dimensions.endpoint_liveness)
+        else:
+            logger.info("Liveness abstained (0 endpoints declared)")
 
-        confidence = max(0, min(100, conf))
-        logger.info("Confidence: %d", confidence)
+        # --- On-chain ---
+        if onchain.success:
+            lr = self._score_to_lr(dimensions.onchain_history)
+            log_odds += math.log(lr)
+            observed_scores.append(dimensions.onchain_history)
+        else:
+            logger.info("On-chain abstained (analysis failed)")
+
+        # --- Venice ---
+        if venice.venice_parse_failed:
+            logger.info("Venice abstained (parse failed)")
+        else:
+            effective_score = venice.score
+            if venice.parse_method != VeniceParseMethod.JSON_SCHEMA:
+                effective_score = round(venice.score * _VENICE_DEGRADATION)
+                logger.info(
+                    "Venice degraded: raw=%d effective=%d (parse_method=%s)",
+                    venice.score, effective_score, venice.parse_method.value,
+                )
+            lr = self._score_to_lr(effective_score)
+            log_odds += math.log(lr)
+            observed_scores.append(dimensions.venice_trust_analysis)
+
+        # --- Protocol Declaration ---
+        if dimensions.protocol_compliance > 0:
+            lr = self._score_to_lr(dimensions.protocol_compliance)
+            log_odds += math.log(lr)
+            observed_scores.append(dimensions.protocol_compliance)
+        else:
+            logger.info("Protocol compliance abstained (no MCP endpoints)")
+
+        # --- CV penalty (only if ≥2 observed dimensions) ---
+        if len(observed_scores) >= 2:
+            mean = statistics.mean(observed_scores)
+            if mean > 0:
+                stdev = statistics.stdev(observed_scores)
+                cv = stdev / mean
+                if cv > 0.5:
+                    penalty = math.log(3)
+                    log_odds -= penalty
+                    logger.info("CV penalty: -log(3) (CV=%.3f > 0.5)", cv)
+                elif cv > 0.3:
+                    penalty = math.log(1.5)
+                    log_odds -= penalty
+                    logger.info("CV penalty: -log(1.5) (CV=%.3f > 0.3)", cv)
+
+        # --- Convert to posterior probability ---
+        posterior = 1.0 / (1.0 + math.exp(-log_odds))
+        confidence = max(0, min(100, round(posterior * 100)))
+        logger.info(
+            "Confidence: log_odds=%.3f posterior=%.4f confidence=%d (observed=%d dims)",
+            log_odds, posterior, confidence, len(observed_scores),
+        )
         return confidence
-
-    def _venice_confidence_contribution(self, v: VeniceEvaluation) -> int:
-        """Compute confidence contribution from a Venice evaluation."""
-        if v.venice_parse_failed:
-            return 0
-        if v.parse_method == VeniceParseMethod.JSON_SCHEMA:
-            return 25
-        if v.parse_method in (VeniceParseMethod.REGEX_EXTRACTION,
-                              VeniceParseMethod.RETRY_CORRECTION):
-            return 15
-        return 0
 
     def determine_state(
         self,
@@ -119,19 +183,16 @@ class Scorer:
     ) -> EvaluationState:
         """Determine evaluation lifecycle state.
 
-        Decision logic:
-        - confidence >= 70 -> VERIFIED (auto-publish)
-        - confidence < 70 AND spread <= 50 -> WITHHELD_LOW_CONFIDENCE
-        - confidence < 70 AND spread > 50 -> PENDING_HUMAN_REVIEW
+        Fully autonomous: uncertain verdicts are withheld, never delegated.
+        - confidence >= 70 → VERIFIED (auto-publish)
+        - confidence <  70 → WITHHELD_LOW_CONFIDENCE
         """
         if confidence >= config.CONFIDENCE_THRESHOLD:
             state = EvaluationState.VERIFIED
-        elif dimensions.spread > config.SPREAD_HUMAN_REVIEW_THRESHOLD:
-            state = EvaluationState.PENDING_HUMAN_REVIEW
         else:
             state = EvaluationState.WITHHELD_LOW_CONFIDENCE
         logger.info(
-            "State determination: confidence=%d spread=%d -> %s",
-            confidence, dimensions.spread, state.value,
+            "State determination: confidence=%d -> %s",
+            confidence, state.value,
         )
         return state

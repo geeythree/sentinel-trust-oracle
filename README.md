@@ -22,7 +22,7 @@ Sentinel's trust evaluation is designed for **privacy-preserving trust scoring**
 
 | Principle | How |
 |-----------|-----|
-| **Private Inference** | All LLM evaluation runs through [Venice](https://venice.ai)'s no-data-retention inference. Agent manifests, endpoints, and wallet data are never stored by the LLM provider. |
+| **Private Inference** | All LLM evaluation runs through [Venice](https://venice.ai)'s policy-based no-data-retention inference. Agent manifests, endpoints, and wallet data are not stored by the LLM provider per Venice's data retention policy (not cryptographically enforced). |
 | **No Data Logging** | Venice operates with zero data retention — prompts and completions are discarded after response generation. Sentinel never sends agent data to any other third-party API. |
 | **On-chain Transparency** | Trust scores are published as EAS attestations on Base — publicly verifiable, but the raw evaluation inputs remain private. Only the final score, confidence, and dimension breakdown are on-chain. |
 | **Local Processing** | Identity verification, liveness checking, and on-chain analysis all run locally. Only the trust synthesis step uses Venice's private LLM. |
@@ -47,7 +47,7 @@ Other approaches to agent trust exist, but each has a gap Sentinel fills:
 
 | Approach | Limitation | Sentinel's Answer |
 |----------|-----------|------------------|
-| **Manual curation** (allowlists, directories) | Doesn't scale. 20,000+ ERC-8004 agents can't be hand-reviewed. | Fully autonomous — discovers, evaluates, and publishes without human intervention. |
+| **Manual curation** (allowlists, directories) | Doesn't scale. 20,000+ ERC-8004 agents can't be hand-reviewed. | Fully autonomous by default — discovers, evaluates, and publishes without human intervention. Human review available via `--interactive` flag for opt-in oversight. |
 | **Single-signal scoring** (just check if endpoint responds) | Trivially gameable. A static server returning 200 passes. | 4-dimensional scoring — identity, liveness, on-chain history, and LLM-interpreted trust. Spoofing one dimension doesn't produce a high composite score. |
 | **Centralized reputation APIs** | Single point of failure. Provider can censor, manipulate, or go offline. | Scores are published as EAS attestations on Base — immutable, verifiable, and queryable by anyone. |
 | **LLM-only evaluation** | Prompt-injectable. Agent manifests could contain adversarial instructions. | Venice input is capped at 4KB and sanitized. LLM score is 30% of composite, not 100% — mechanical checks anchor the evaluation. |
@@ -90,11 +90,16 @@ Other approaches to agent trust exist, but each has a gap Sentinel fills:
 | Dimension | Weight | What it measures |
 |-----------|--------|-----------------|
 | Identity Completeness | 20% | Manifest fields, services declared, URI resolvable |
-| Endpoint Liveness | 25% | Service endpoints responding (200, 401, 403 = alive) |
-| On-chain History | 25% | Transaction count, balance, existing reputation |
-| Venice Trust Analysis | 30% | Private LLM evaluation of overall trustworthiness |
+| Endpoint Liveness | 20% | Service endpoints responding (200, 401, 403 = alive) |
+| On-chain History | 20% | Transaction count, balance, existing reputation, contract code |
+| Venice Trust Analysis | 25% | Private risk-categorized LLM evaluation |
+| Protocol Declaration | 15% | MCP transport/metadata compliance |
 
-Composite score: 0–100. Confidence score determines auto-publish vs human review.
+Composite score: 0–100. Bayesian confidence determines auto-publish vs withhold. Weights are env-configurable (`WEIGHT_IDENTITY`, `WEIGHT_LIVENESS`, `WEIGHT_ONCHAIN`, `WEIGHT_VENICE_TRUST`, `WEIGHT_PROTOCOL`).
+
+**Weight Rationale:** Identity (20%) is most gameable. Liveness and on-chain (20% each) require real infrastructure. Venice (25%) is highest because it synthesizes all signals and performs risk-categorized analysis. Protocol compliance (15%) is binary — lowest weight.
+
+See [`SCORING_METHODOLOGY.md`](SCORING_METHODOLOGY.md) for the full mathematical derivation.
 
 ## Quick Start
 
@@ -153,16 +158,19 @@ python3 main.py mcp-server
 python3 main.py discover --mainnet
 ```
 
-### MCP Integration
+### Agent-to-Agent Verification
 
-Sentinel exposes two tools via [MCP](https://modelcontextprotocol.io) (stdio transport):
+Sentinel exposes trust tools via two transports:
 
-| Tool | Description |
-|------|-------------|
-| `verify_agent` | Full trust verification pipeline — returns score, confidence, attestation |
-| `check_reputation` | Read existing reputation from ERC-8004 Reputation Registry |
+**MCP (stdio)** — for local agent-to-agent verification:
 
-Other agents can verify trust before interacting:
+| MCP Tool | Description |
+|----------|-------------|
+| `verify_agent` | Full trust verification pipeline |
+| `check_reputation` | Read reputation from ERC-8004 Reputation Registry |
+| `check_validation` | Check Validation Registry status |
+| `get_trust_chain` | Score, confidence, timestamp, attestation UID |
+| `compute_transitive_trust` | Derived trust when one agent vouches for another |
 
 ```python
 from mcp import ClientSession, StdioServerParameters
@@ -176,18 +184,29 @@ async with stdio_client(StdioServerParameters(
         result = await session.call_tool("verify_agent", {"agent_id": 42})
 ```
 
-A complete demo client is included — run `python3 dummy_client_agent.py --agent-id 1`.
+**HTTP API** — for remote access (deployed on Railway):
+
+| HTTP Endpoint | MCP Equivalent |
+|---------------|----------------|
+| `POST /api/evaluate` | `verify_agent` |
+| `GET /api/reputation/{id}` | `check_reputation` |
+| `GET /api/trust-chain/{id}` | `get_trust_chain` |
+| `POST /api/transitive-trust` | `compute_transitive_trust` |
+
+MCP requires stdio transport (local execution). The HTTP API provides the same functionality for remote agents and the interactive dashboard.
+
+A trust-gated demo client is included — run `python3 dummy_client_agent.py --agent-id 1`.
 
 ### Example Output
 
 ```
 SENTINEL TRUST EVALUATION SUMMARY
-================================================================================
-Agent ID    Score  Conf    I    L    O    V  State                     TX
---------------------------------------------------------------------------------
-#42            77    80   80  100   60   70  PUBLISHED                 0xabc123...
-#43            45    55   60    0   50   40  WITHHELD_LOW_CONFIDENCE   N/A
-================================================================================
+=====================================================================================
+Agent ID    Score  Conf    I    L    O    V    P  State                     TX
+-------------------------------------------------------------------------------------
+#42            77    80   80  100   60   70   50  PUBLISHED                 0xabc123...
+#43            45    55   60    0   50   40    0  WITHHELD_LOW_CONFIDENCE   N/A
+=====================================================================================
 Total: 2 agents evaluated
 ```
 
@@ -217,10 +236,10 @@ DISCOVERED → PLANNING → FETCH_IDENTITY → CHECK_LIVENESS
   → ON_CHAIN_ANALYSIS → VENICE_TRUST → SCORING → VERIFYING
   → PUBLISHING → PUBLISHED
 
-Terminal: WITHHELD_LOW_CONFIDENCE | PENDING_HUMAN_REVIEW | FAILED
+Terminal: WITHHELD_LOW_CONFIDENCE | FAILED
 ```
 
-**Auto-publish** when confidence ≥ 70. **Human review** when confidence < 70 and dimension spread > 50.
+**Auto-publish** when confidence ≥ 70. Below that threshold: `WITHHELD_LOW_CONFIDENCE` (no publish).
 
 ## Contracts
 
@@ -228,6 +247,11 @@ Terminal: WITHHELD_LOW_CONFIDENCE | PENDING_HUMAN_REVIEW | FAILED
 |---------|-------------------|---------------------|-----|
 | Base Mainnet | [`0x8004...9432`](https://basescan.org/address/0x8004A169FB4a3325136EB29fA0ceB6D2e539a432) | [`0x8004...9B63`](https://basescan.org/address/0x8004BAa17C55a88189AE136b182e5fdA19dE9b63) | [`0x4200...0021`](https://basescan.org/address/0x4200000000000000000000000000000000000021) |
 | Base Sepolia | [`0x8004...BD9e`](https://sepolia.basescan.org/address/0x8004A818BFB912233c491871b3d84c89A494BD9e) | [`0x8004...8713`](https://sepolia.basescan.org/address/0x8004B663056A597Dffe9eCcC1965A193B7388713) | [`0x4200...0021`](https://sepolia.basescan.org/address/0x4200000000000000000000000000000000000021) |
+
+| Network | Validation Registry | Status |
+|---------|---------------------|--------|
+| Base Mainnet | — | Code ready, pending ERC-8004 team deployment |
+| Base Sepolia | — | Code ready, pending ERC-8004 team deployment |
 
 ## Known Limitations & Future Work
 

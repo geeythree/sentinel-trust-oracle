@@ -1,10 +1,10 @@
 """Pipeline coordinator: discover -> plan -> verify identity -> check liveness -> analyze onchain -> venice trust -> score -> publish."""
 from __future__ import annotations
 
+import base64
 import json
 import logging
 import os
-import select
 import sys
 import tempfile
 import threading
@@ -26,7 +26,6 @@ from models import (
     AgentRole,
     DiscoveredAgent,
     EvaluationState,
-    HumanDecision,
     IdentityVerification,
     LivenessResult,
     OnchainAnalysis,
@@ -158,6 +157,7 @@ class Orchestrator:
                 result = self._evaluate_with_timeout(agent)
                 results.append(result)
                 self._update_dashboard(results)
+                self._generate_trust_report(result)
                 print(f"  Trust Score: {result.composite_score} | Confidence: {result.evaluation_confidence} | State: {result.state.value}")
             except BudgetExhaustedError:
                 print(f"  Budget exhausted after {self._logger.tool_calls_used} tool calls. Stopping.")
@@ -182,9 +182,14 @@ class Orchestrator:
         def priority_key(a: DiscoveredAgent):
             # Higher block = more recent = higher priority (negate for descending)
             block_score = -(a.block_number or 0)
-            # Prefer IPFS/HTTPS URIs over data: URIs
+            # Prefer fetchable URIs: https/ipfs best, data: next, others last
             uri = a.agent_uri.lower() if a.agent_uri else ""
-            uri_score = 0 if (uri.startswith("https://") or uri.startswith("ipfs://")) else 1
+            if uri.startswith("https://") or uri.startswith("ipfs://"):
+                uri_score = 0
+            elif uri.startswith("data:"):
+                uri_score = 1
+            else:
+                uri_score = 2
             return (uri_score, block_score, a.agent_id)
 
         return sorted(agents, key=priority_key)
@@ -201,6 +206,7 @@ class Orchestrator:
                 result = self._evaluate_with_timeout(agent)
                 results.append(result)
                 self._update_dashboard(results)
+                self._generate_trust_report(result)
                 print(f"  Trust Score: {result.composite_score} | Confidence: {result.evaluation_confidence} | State: {result.state.value}")
                 if result.tx_hash:
                     print(f"  TX: {self._blockchain.get_explorer_url(result.tx_hash)}")
@@ -309,23 +315,10 @@ class Orchestrator:
             tool_calls_budget=config.TOOL_CALL_BUDGET,
         )
 
-        # === STAGE 7: HUMAN REVIEW (if needed) ===
-        if state == EvaluationState.PENDING_HUMAN_REVIEW:
-            decision = self._request_human_review(verdict)
-            verdict.human_decision = decision
-            if decision == HumanDecision.PUBLISH:
-                verdict.state = EvaluationState.VERIFIED
-                state = EvaluationState.VERIFIED
-            elif decision == HumanDecision.RE_EVALUATE:
-                if _retry_count >= 2:  # FIX: cap recursion
-                    verdict.state = EvaluationState.WITHHELD_LOW_CONFIDENCE
-                    return verdict
-                return self.evaluate_single(agent, _retry_count=_retry_count + 1)
-            else:  # DISCARD
-                verdict.state = EvaluationState.WITHHELD_LOW_CONFIDENCE
-                return verdict
+        # Compute input hash for tamper-proof attestation
+        verdict.input_hash = verdict.compute_input_hash()
 
-        # === STAGE 8: PUBLISH (if VERIFIED) ===
+        # === STAGE 7: PUBLISH (if VERIFIED) ===
         if state == EvaluationState.VERIFIED:
             self._check_budget()
             self._logger.consume_budget(1)
@@ -358,10 +351,23 @@ class Orchestrator:
             {"agent_id": agent.agent_id, "agent_uri": agent.agent_uri},
         ) as result:
             verification = self._agent_verifier.verify(agent.agent_uri)
+            if verification.success and verification.manifest:
+                is_dup, dup_of = self._agent_verifier.check_duplicate(
+                    verification.manifest, agent.agent_id
+                )
+                if is_dup:
+                    verification.is_duplicate_manifest = True
+                    verification.duplicate_of_agent_id = dup_of
+                    _log.warning(
+                        "Agent #%d has duplicate manifest of Agent #%d",
+                        agent.agent_id, dup_of,
+                    )
             result["status"] = "success" if verification.success else "failed"
             result["identity_score"] = verification.identity_score
             result["fields_present"] = verification.fields_present
             result["fields_missing"] = verification.fields_missing
+            result["is_duplicate_manifest"] = verification.is_duplicate_manifest
+            result["duplicate_of_agent_id"] = verification.duplicate_of_agent_id
         return verification
 
     def _step_check_liveness(self, manifest: dict) -> LivenessResult:
@@ -457,68 +463,32 @@ class Orchestrator:
                 self._logger.consume_budget(1)
                 eas_tx = self._blockchain.create_trust_attestation(verdict)
                 verdict.attestation_uid = eas_tx
+                _log.info("EAS attestation created: %s", eas_tx)
         except Exception as e:
-            _log.warning("EAS attestation failed: %s", e)
+            _log.warning("EAS attestation failed: %s", e, exc_info=True)
+
+        # Attempt Validation Registry write (non-blocking, like EAS)
+        # Only works for agents owned by OPERATOR (contract requires owner to initiate request)
+        try:
+            if self._blockchain.has_validation_registry and self._logger.budget_remaining > 0 and verdict.is_self_evaluation:
+                report_json = verdict.to_report_json()
+                request_uri = "data:application/json;base64," + base64.b64encode(report_json.encode()).decode()
+                self._logger.consume_budget(1)
+                vtx, request_hash = self._blockchain.submit_validation_request(
+                    verdict.agent.agent_id, request_uri
+                )
+                response_uri = request_uri
+                self._blockchain.submit_validation_response(
+                    request_hash, verdict.composite_score, response_uri, "trust-score"
+                )
+                verdict.validation_tx_hash = vtx
+                _log.info("Validation Registry written: %s", vtx)
+        except Exception as e:
+            _log.warning("Validation Registry write failed: %s", e)
 
         return tx_hash
 
     # --- Support Methods ---
-
-    def _request_human_review(self, verdict: TrustVerdict) -> HumanDecision:
-        """Present evaluation to operator for manual decision.
-
-        In headless (non-TTY) environments, defaults to DISCARD immediately
-        instead of blocking on stdin.
-        """
-        print("\n" + "=" * 60)
-        print("HUMAN REVIEW REQUIRED")
-        print("=" * 60)
-        print(f"Agent: #{verdict.agent.agent_id} (Owner: {verdict.agent.owner_address[:20]}...)")
-        print(f"Trust Score: {verdict.composite_score}")
-        print(f"Confidence: {verdict.evaluation_confidence}")
-        print(f"Dimensions: I={verdict.dimensions.identity_completeness} "
-              f"L={verdict.dimensions.endpoint_liveness} "
-              f"O={verdict.dimensions.onchain_history} "
-              f"V={verdict.dimensions.venice_trust_analysis}")
-        print(f"Spread: {verdict.dimensions.spread}")
-        print(f"Endpoints: {verdict.liveness_result.endpoints_live}/{verdict.liveness_result.endpoints_declared} live")
-
-        # Headless detection: skip stdin prompt in non-TTY environments
-        if not sys.stdin.isatty():
-            print("Non-TTY detected -- defaulting to DISCARD")
-            decision = HumanDecision.DISCARD
-        else:
-            print("\n[P]ublish / [D]iscard / [R]e-evaluate?")
-            try:
-                ready, _, _ = select.select([sys.stdin], [], [], config.HUMAN_REVIEW_TIMEOUT_SECONDS)
-                if ready:
-                    choice = sys.stdin.readline().strip().lower()
-                    mapping = {
-                        "p": HumanDecision.PUBLISH,
-                        "d": HumanDecision.DISCARD,
-                        "r": HumanDecision.RE_EVALUATE,
-                    }
-                    decision = mapping.get(choice, HumanDecision.DISCARD)
-                else:
-                    print("Timeout -- defaulting to DISCARD")
-                    decision = HumanDecision.DISCARD
-            except Exception:
-                decision = HumanDecision.DISCARD
-
-        # Log human intervention
-        self._logger.log_action(
-            agent_role=AgentRole.VERIFIER,
-            action_type=ActionType.HUMAN_INTERVENTION,
-            tool=None,
-            payload={
-                "evaluation_id": verdict.evaluation_id,
-                "spread": verdict.dimensions.spread,
-                "confidence": verdict.evaluation_confidence,
-            },
-            result={"decision": decision.value},
-            latency_ms=0,
-        )
-        return decision
 
     def _check_budget(self) -> None:
         """Raise BudgetExhaustedError if budget is depleted."""
@@ -537,6 +507,89 @@ class Orchestrator:
             result={"status": "passed"},
             latency_ms=0,
         )
+
+    def _generate_trust_report(self, verdict: TrustVerdict) -> None:
+        """Generate a markdown trust report for the evaluated agent."""
+        try:
+            report_dir = config.PROJECT_ROOT / "trust_reports"
+            report_dir.mkdir(exist_ok=True)
+            report_path = report_dir / f"trust_report_agent_{verdict.agent.agent_id}.md"
+
+            network = "Base Sepolia" if config.USE_TESTNET else "Base Mainnet"
+            basescan = "https://sepolia.basescan.org" if config.USE_TESTNET else "https://basescan.org"
+
+            lines = [
+                f"# Trust Report — Agent #{verdict.agent.agent_id}",
+                "",
+                f"**Evaluation ID:** `{verdict.evaluation_id}`",
+                f"**Timestamp:** {verdict.timestamp}",
+                f"**Network:** {network}",
+                f"**Owner:** `{verdict.agent.owner_address}`",
+                f"**Agent URI:** `{verdict.agent.agent_uri}`",
+                "",
+                "## Verdict",
+                "",
+                f"| Metric | Value |",
+                f"|--------|-------|",
+                f"| **Composite Score** | {verdict.composite_score}/100 |",
+                f"| **Confidence** | {verdict.evaluation_confidence}% |",
+                f"| **State** | {verdict.state.value} |",
+                f"| **Input Hash** | `{verdict.input_hash or 'N/A'}` |",
+                "",
+                "## Dimension Breakdown",
+                "",
+                "| Dimension | Score | Weight |",
+                "|-----------|-------|--------|",
+                f"| Identity Completeness | {verdict.dimensions.identity_completeness} | {config.WEIGHT_IDENTITY:.0%} |",
+                f"| Endpoint Liveness | {verdict.dimensions.endpoint_liveness} | {config.WEIGHT_LIVENESS:.0%} |",
+                f"| On-chain History | {verdict.dimensions.onchain_history} | {config.WEIGHT_ONCHAIN:.0%} |",
+                f"| Venice Trust Analysis | {verdict.dimensions.venice_trust_analysis} | {config.WEIGHT_VENICE_TRUST:.0%} |",
+                f"| Protocol Declaration | {verdict.dimensions.protocol_compliance} | {config.WEIGHT_PROTOCOL:.0%} |",
+                f"| **Spread** | {verdict.dimensions.spread} | — |",
+                "",
+                "## Evidence",
+                "",
+                "### Identity",
+                f"- Fields present: {', '.join(verdict.identity_verification.fields_present) or 'none'}",
+                f"- Fields missing: {', '.join(verdict.identity_verification.fields_missing) or 'none'}",
+                f"- Services declared: {verdict.identity_verification.services_declared}",
+                f"- URI resolved: `{verdict.identity_verification.uri_resolved}`",
+                "",
+                "### Liveness",
+                f"- Endpoints declared: {verdict.liveness_result.endpoints_declared}",
+                f"- Live: {verdict.liveness_result.endpoints_live}",
+                f"- Secured (401/403): {verdict.liveness_result.endpoints_secured}",
+                f"- Dead: {verdict.liveness_result.endpoints_dead}",
+                "",
+                "### On-chain",
+                f"- Wallet: `{verdict.onchain_analysis.wallet_address}`",
+                f"- Transaction count: {verdict.onchain_analysis.transaction_count}",
+                f"- Balance: {verdict.onchain_analysis.balance_eth:.6f} ETH",
+                f"- Existing reputation entries: {verdict.onchain_analysis.existing_reputation.feedback_count}",
+                "",
+                "## On-chain Proof",
+                "",
+            ]
+
+            if verdict.tx_hash:
+                lines.append(f"- **Reputation TX:** [{verdict.tx_hash}]({basescan}/tx/{verdict.tx_hash})")
+            if verdict.attestation_uid:
+                lines.append(f"- **EAS Attestation:** `{verdict.attestation_uid}`")
+            if not verdict.tx_hash and not verdict.attestation_uid:
+                lines.append("_No on-chain proof (evaluation withheld or publish failed)_")
+
+            lines.extend([
+                "",
+                "---",
+                f"*Generated by Sentinel Trust Oracle — {verdict.timestamp}*",
+            ])
+
+            with open(report_path, "w") as f:
+                f.write("\n".join(lines))
+
+            _log.info("Trust report written: %s", report_path)
+        except Exception as e:
+            _log.warning("Failed to generate trust report: %s", e)
 
     def _update_dashboard(self, results: list[TrustVerdict]) -> None:
         """Merge evaluation results into dashboard/results.json (accumulative)."""

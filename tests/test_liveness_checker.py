@@ -97,7 +97,8 @@ class TestRealHTTP:
         """httpbin.org/status/200 should return alive."""
         result = checker._check_endpoint("https://httpbin.org/status/200")
         assert result.status == "alive"
-        assert result.score == 100
+        assert result.score >= 70  # response-time gradient may reduce from 100
+        assert result.response_time_ms > 0
 
     @pytest.mark.skipif(
         os.environ.get("SKIP_NETWORK_TESTS") == "1",

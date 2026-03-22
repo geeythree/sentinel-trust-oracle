@@ -95,6 +95,62 @@ async def list_tools():
                 "required": ["agent_id"],
             },
         ),
+        Tool(
+            name="check_validation",
+            description=(
+                "Check validation status for an agent from the "
+                "ERC-8004 Validation Registry."
+            ),
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "agent_id": {
+                        "type": "integer",
+                        "description": "ERC-8004 agent ID",
+                    },
+                },
+                "required": ["agent_id"],
+            },
+        ),
+        Tool(
+            name="get_trust_chain",
+            description=(
+                "Get an agent's trust chain: score, confidence, evaluation timestamp, "
+                "and EAS attestation UID for independent on-chain verification."
+            ),
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "agent_id": {
+                        "type": "integer",
+                        "description": "ERC-8004 agent ID",
+                    },
+                },
+                "required": ["agent_id"],
+            },
+        ),
+        Tool(
+            name="compute_transitive_trust",
+            description=(
+                "Compute transitive trust: if a requesting agent (with known score/confidence) "
+                "vouches for a target agent, returns the derived trust score. "
+                "Derived trust = requester_confidence × target_score / 100."
+            ),
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "requester_agent_id": {
+                        "type": "integer",
+                        "description": "Agent ID of the requester (vouching agent)",
+                    },
+                    "target_agent_id": {
+                        "type": "integer",
+                        "description": "Agent ID of the target being vouched for",
+                    },
+                },
+                "required": ["requester_agent_id", "target_agent_id"],
+            },
+        ),
     ]
 
 
@@ -138,6 +194,129 @@ async def call_tool(name: str, arguments: dict) -> list[TextContent]:
                 "agent_id": agent_id,
                 "error": "Reputation lookup failed. Please try again.",
             }))]
+
+    elif name == "check_validation":
+        agent_id = arguments.get("agent_id")
+        if agent_id is None or not isinstance(agent_id, int) or agent_id < 0:
+            return [TextContent(type="text", text=json.dumps({"error": "agent_id must be a non-negative integer"}))]
+        if not blockchain.has_validation_registry:
+            return [TextContent(type="text", text=json.dumps({
+                "agent_id": agent_id,
+                "status": "Validation Registry not deployed",
+                "validation_count": 0,
+            }))]
+        try:
+            count, avg = await loop.run_in_executor(
+                None, blockchain.get_validation_summary, agent_id
+            )
+            return [TextContent(type="text", text=json.dumps({
+                "agent_id": agent_id,
+                "validation_count": count,
+                "avg_response": avg,
+            }))]
+        except Exception as e:
+            _log.exception("check_validation failed for agent %s", agent_id)
+            return [TextContent(type="text", text=json.dumps({
+                "agent_id": agent_id,
+                "error": "Validation lookup failed. Please try again.",
+            }))]
+
+    elif name == "get_trust_chain":
+        agent_id = arguments.get("agent_id")
+        if agent_id is None or not isinstance(agent_id, int) or agent_id < 0:
+            return [TextContent(type="text", text=json.dumps({"error": "agent_id must be a non-negative integer"}))]
+        try:
+            # Read from cached results
+            from config import config
+            import os
+            results_path = config.DASHBOARD_RESULTS_PATH
+            if results_path.exists():
+                with open(results_path) as f:
+                    results = json.load(f)
+                for r in results:
+                    if r.get("agent_id") == agent_id:
+                        return [TextContent(type="text", text=json.dumps({
+                            "agent_id": agent_id,
+                            "trust_score": r.get("composite_score"),
+                            "confidence": r.get("confidence"),
+                            "timestamp": r.get("timestamp"),
+                            "attestation_uid": r.get("attestation_uid"),
+                            "tx_hash": r.get("tx_hash"),
+                            "dimensions": r.get("dimensions"),
+                            "input_hash": r.get("input_hash"),
+                            "chain_id": r.get("chain_id"),
+                            "state": r.get("state"),
+                        }))]
+            # Not found in cache — try live evaluation
+            agent = await loop.run_in_executor(None, discovery.discover_agent_by_id, agent_id)
+            result = await loop.run_in_executor(None, orchestrator.evaluate_single, agent)
+            return [TextContent(type="text", text=json.dumps({
+                "agent_id": agent_id,
+                "trust_score": result.composite_score,
+                "confidence": result.evaluation_confidence,
+                "timestamp": result.timestamp,
+                "attestation_uid": result.attestation_uid,
+                "tx_hash": result.tx_hash,
+                "dimensions": {
+                    "identity_completeness": result.dimensions.identity_completeness,
+                    "endpoint_liveness": result.dimensions.endpoint_liveness,
+                    "onchain_history": result.dimensions.onchain_history,
+                    "venice_trust_analysis": result.dimensions.venice_trust_analysis,
+                },
+                "input_hash": result.input_hash,
+                "state": result.state.value,
+            }))]
+        except Exception as e:
+            _log.exception("get_trust_chain failed for agent %s", agent_id)
+            return [TextContent(type="text", text=json.dumps({"agent_id": agent_id, "error": "Trust chain lookup failed."}))]
+
+    elif name == "compute_transitive_trust":
+        req_id = arguments.get("requester_agent_id")
+        tgt_id = arguments.get("target_agent_id")
+        if not all(isinstance(x, int) and x >= 0 for x in [req_id, tgt_id] if x is not None):
+            return [TextContent(type="text", text=json.dumps({"error": "Both agent IDs must be non-negative integers"}))]
+        try:
+            from config import config
+            results_path = config.DASHBOARD_RESULTS_PATH
+            req_data = tgt_data = None
+            if results_path.exists():
+                with open(results_path) as f:
+                    results = json.load(f)
+                for r in results:
+                    if r.get("agent_id") == req_id:
+                        req_data = r
+                    if r.get("agent_id") == tgt_id:
+                        tgt_data = r
+
+            # If either agent not in cache, evaluate them
+            if req_data is None:
+                agent = await loop.run_in_executor(None, discovery.discover_agent_by_id, req_id)
+                result = await loop.run_in_executor(None, orchestrator.evaluate_single, agent)
+                req_data = {"composite_score": result.composite_score, "confidence": result.evaluation_confidence}
+            if tgt_data is None:
+                agent = await loop.run_in_executor(None, discovery.discover_agent_by_id, tgt_id)
+                result = await loop.run_in_executor(None, orchestrator.evaluate_single, agent)
+                tgt_data = {"composite_score": result.composite_score, "confidence": result.evaluation_confidence}
+
+            req_confidence = req_data.get("confidence", 0) / 100.0
+            tgt_score = tgt_data.get("composite_score", 0)
+            derived_trust = round(req_confidence * tgt_score, 1)
+
+            return [TextContent(type="text", text=json.dumps({
+                "requester_agent_id": req_id,
+                "requester_confidence": req_data.get("confidence"),
+                "target_agent_id": tgt_id,
+                "target_score": tgt_score,
+                "derived_trust": derived_trust,
+                "interpretation": (
+                    "TRUSTED" if derived_trust >= 70 else
+                    "MODERATE" if derived_trust >= 50 else
+                    "LOW_TRUST"
+                ),
+            }))]
+        except Exception as e:
+            _log.exception("compute_transitive_trust failed")
+            return [TextContent(type="text", text=json.dumps({"error": "Transitive trust computation failed."}))]
 
     return [TextContent(type="text", text=json.dumps({"error": f"Unknown tool: {name}"}))]
 

@@ -36,6 +36,10 @@ class Config:
     IDENTITY_REGISTRY_SEPOLIA: str = "0x8004A818BFB912233c491871b3d84c89A494BD9e"
     REPUTATION_REGISTRY_SEPOLIA: str = "0x8004B663056A597Dffe9eCcC1965A193B7388713"
 
+    # --- ERC-8004 Validation Registry (not yet deployed) ---
+    VALIDATION_REGISTRY_MAINNET: str = ""
+    VALIDATION_REGISTRY_SEPOLIA: str = ""
+
     # --- EAS (protocol-level predeploy on Base) ---
     EAS_CONTRACT: str = "0x4200000000000000000000000000000000000021"
     EAS_SCHEMA_REGISTRY: str = "0x4200000000000000000000000000000000000020"
@@ -47,15 +51,16 @@ class Config:
     VENICE_MAX_TOKENS: int = 2048
     VENICE_TEMPERATURE: float = 0.0
 
-    # --- Trust Scoring Weights (Sentinel) ---
+    # --- Trust Scoring Weights (Sentinel, 5 dimensions) ---
     WEIGHT_IDENTITY: float = 0.20
-    WEIGHT_LIVENESS: float = 0.25
-    WEIGHT_ONCHAIN: float = 0.25
-    WEIGHT_VENICE_TRUST: float = 0.30
+    WEIGHT_LIVENESS: float = 0.20
+    WEIGHT_ONCHAIN: float = 0.20
+    WEIGHT_VENICE_TRUST: float = 0.25
+    WEIGHT_PROTOCOL: float = 0.15
 
     # --- Agent Discovery ---
-    DISCOVERY_BLOCK_RANGE: int = 5000
-    MAX_AGENTS_PER_RUN: int = 10
+    DISCOVERY_BLOCK_RANGE: int = 50000
+    MAX_AGENTS_PER_RUN: int = 50
 
     # --- IPFS Gateways ---
     IPFS_GATEWAYS: tuple = (
@@ -70,6 +75,9 @@ class Config:
 
     # --- Manifest Guardrails ---
     MAX_MANIFEST_BYTES: int = 102_400  # 100 KB — rejects oversized manifests before parsing
+
+    # --- Autonomy ---
+    AUTONOMOUS_MODE: bool = True  # Default: fully autonomous (no human review)
 
     # --- Pipeline ---
     TOOL_CALL_BUDGET: int = 15
@@ -101,6 +109,11 @@ class Config:
     def reputation_registry(self) -> str:
         return self.REPUTATION_REGISTRY_SEPOLIA if self.USE_TESTNET else self.REPUTATION_REGISTRY_MAINNET
 
+    @property
+    def validation_registry(self) -> str:
+        addr = self.VALIDATION_REGISTRY_SEPOLIA if self.USE_TESTNET else self.VALIDATION_REGISTRY_MAINNET
+        return addr if addr else ""
+
     def validate(self) -> list[str]:
         """Return list of missing or invalid configuration keys."""
         errors = []
@@ -119,7 +132,8 @@ class Config:
 
         # Weight sum validation
         weight_sum = (self.WEIGHT_IDENTITY + self.WEIGHT_LIVENESS
-                      + self.WEIGHT_ONCHAIN + self.WEIGHT_VENICE_TRUST)
+                      + self.WEIGHT_ONCHAIN + self.WEIGHT_VENICE_TRUST
+                      + self.WEIGHT_PROTOCOL)
         if abs(weight_sum - 1.0) > 0.001:
             errors.append(
                 f"Trust weights must sum to 1.0 (got {weight_sum:.4f})"
@@ -154,7 +168,17 @@ def create_config() -> Config:
         AUDITOR_PRIVATE_KEY=os.getenv("AUDITOR_PRIVATE_KEY", ""),
         BASESCAN_API_KEY=os.getenv("BASESCAN_API_KEY", ""),
         VENICE_API_KEY=os.getenv("VENICE_API_KEY", ""),
+        VENICE_MODEL=os.getenv("VENICE_MODEL", "qwen3-235b-a22b-instruct-2507"),
         EAS_SCHEMA_UID=os.getenv("EAS_SCHEMA_UID", ""),
+        VALIDATION_REGISTRY_MAINNET=os.getenv("VALIDATION_REGISTRY_MAINNET", ""),
+        VALIDATION_REGISTRY_SEPOLIA=os.getenv("VALIDATION_REGISTRY_SEPOLIA", ""),
+        AUTONOMOUS_MODE=os.getenv("AUTONOMOUS_MODE", "true").lower() == "true",
+        WEIGHT_IDENTITY=float(os.getenv("WEIGHT_IDENTITY", "0.20")),
+        WEIGHT_LIVENESS=float(os.getenv("WEIGHT_LIVENESS", "0.20")),
+        WEIGHT_ONCHAIN=float(os.getenv("WEIGHT_ONCHAIN", "0.20")),
+        WEIGHT_VENICE_TRUST=float(os.getenv("WEIGHT_VENICE_TRUST", "0.25")),
+        WEIGHT_PROTOCOL=float(os.getenv("WEIGHT_PROTOCOL", "0.15")),
+        DISCOVERY_BLOCK_RANGE=int(os.getenv("DISCOVERY_BLOCK_RANGE", "50000")),
     )
 
 

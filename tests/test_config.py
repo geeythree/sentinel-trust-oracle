@@ -89,9 +89,10 @@ class TestConfigValidate:
             EVALUATOR_PRIVATE_KEY="0x" + "cd" * 32,
             VENICE_API_KEY="test-key",
             WEIGHT_IDENTITY=0.20,
-            WEIGHT_LIVENESS=0.25,
-            WEIGHT_ONCHAIN=0.25,
-            WEIGHT_VENICE_TRUST=0.30,
+            WEIGHT_LIVENESS=0.20,
+            WEIGHT_ONCHAIN=0.20,
+            WEIGHT_VENICE_TRUST=0.25,
+            WEIGHT_PROTOCOL=0.15,
         )
         errors = cfg.validate()
         assert not any("weights" in e for e in errors)

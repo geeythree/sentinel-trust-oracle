@@ -34,17 +34,21 @@ class OnchainAnalyzer:
             )
             balance_eth = float(Web3.from_wei(balance_wei, "ether"))
 
-            # 3. Check existing reputation in ERC-8004
+            # 3. Check if address has deployed code (contract)
+            has_code = len(w3.eth.get_code(Web3.to_checksum_address(agent_wallet))) > 0
+
+            # 4. Check existing reputation in ERC-8004
             existing_rep = self._check_existing_reputation(agent_id)
 
-            # 4. Score (no penalty for new wallets)
-            score = self._compute_onchain_score(tx_count, balance_eth, existing_rep)
+            # 5. Score (no penalty for new wallets)
+            score = self._compute_onchain_score(tx_count, balance_eth, existing_rep, has_code)
 
             return OnchainAnalysis(
                 success=True,
                 wallet_address=agent_wallet,
                 transaction_count=tx_count,
                 balance_eth=balance_eth,
+                has_contract_code=has_code,
                 existing_reputation=existing_rep,
                 onchain_score=score,
             )
@@ -73,27 +77,61 @@ class OnchainAnalyzer:
         tx_count: int,
         balance: float,
         rep: ExistingReputation,
+        has_code: bool = False,
     ) -> int:
-        """Score 0-100. Neutral for new wallets, bonus for established ones."""
-        score = 50  # NEUTRAL baseline for new wallets
+        """Score 0-100. Finer granularity for better score discrimination.
 
-        # Transaction count bonus (no penalty below 5)
-        if tx_count > 50:
-            score += 30
+        Components:
+        - Transaction count: 0-25 (7 buckets)
+        - Balance: 0-12 (5 tiers)
+        - Reputation: 0-13 (3 tiers)
+        - Contract code: 0-10 (binary)
+        - Baseline: 50 for successful analysis
+
+        Total range: 50-100 for active wallets, 50 for empty new wallets.
+        Clamped to min(100, score).
+        """
+        score = 50  # baseline for successful analysis
+
+        # Transaction count (7 buckets, max +25)
+        if tx_count > 100:
+            score += 25
+        elif tx_count > 50:
+            score += 22
+        elif tx_count > 20:
+            score += 18
         elif tx_count > 10:
-            score += 20
+            score += 14
         elif tx_count > 5:
             score += 10
-        # 0-5 txs: stay at 50 (neutral)
+        elif tx_count > 2:
+            score += 6
+        elif tx_count > 0:
+            score += 3
+        # 0 txs: +0
 
-        # Balance bonus (has gas money = probably real)
-        if balance > 0.01:
-            score += 10
+        # Balance gradient (max +12)
+        if balance > 0.1:
+            score += 12
+        elif balance > 0.01:
+            score += 8
         elif balance > 0.001:
-            score += 5
+            score += 4
+        elif balance > 0:
+            score += 2
+        # 0 balance: +0
 
-        # Existing positive reputation bonus
-        if rep.feedback_count > 0 and rep.summary_value > 0:
-            score += 10
+        # Existing reputation (max +13)
+        if rep.feedback_count > 5 and rep.summary_value > 0:
+            score += 13
+        elif rep.feedback_count > 0 and rep.summary_value > 0:
+            score += 8
+        elif rep.feedback_count > 0:
+            score += 3
+        # no reputation: +0
+
+        # Contract code detection (max +10)
+        if has_code:
+            score += 10  # address has deployed contract code — strong dev signal
 
         return min(100, score)
