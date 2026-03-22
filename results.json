@@ -60,34 +60,34 @@
     "agent_id": 5,
     "agent_uri": "https://marketplace.olas.network/erc8004/base/ai-agents/3",
     "owner_address": "0x67722c823010CEb4BED5325fE109196C0f67D053",
-    "composite_score": 72,
-    "confidence": 85,
+    "composite_score": 71,
+    "confidence": 70,
     "state": "PUBLISHED",
     "dimensions": {
       "identity_completeness": 100,
       "endpoint_liveness": 100,
       "onchain_history": 50,
-      "venice_trust_analysis": 50
+      "venice_trust_analysis": 45
     },
-    "spread": 50,
+    "spread": 55,
     "endpoints": {
       "declared": 1,
       "live": 1,
       "secured": 0,
       "dead": 0
     },
-    "tx_hash": "db331c0d54e54ef20fa9fe768ef5fbc7302ec8db85c72c65d93b0dfab8b1df20",
-    "attestation_uid": "f1131fc0fbd563e2aaa7c025bd0b4f96907e2eb4061c869ae5de3c8d061802a7",
+    "tx_hash": "1f9e22dafeff4eb79ed8b413b76c158f9c57b530508d961812c0858b5fe200e1",
+    "attestation_uid": "0x1c1f8b52884cd769872c0f21654678fa006092ae4abc4038650c05bdb0d16b7f",
     "tool_calls_used": 4,
-    "timestamp": "2026-03-18T08:46:49.430891+00:00",
+    "timestamp": "2026-03-22T07:35:28.234809+00:00",
     "discovery_source": "manual_id",
-    "chain_id": 84532,
+    "chain_id": 8453,
     "venice": {
       "model": "qwen3-235b-a22b-instruct-2507",
-      "reasoning": "Well-structured manifest from Olas marketplace with complete fields. Single endpoint is live and responsive. Wallet shows moderate on-chain activity. Overall assessment: legitimate agent with standard identity completeness.",
-      "tokens_sent": 869,
-      "tokens_received": 434,
-      "latency_ms": 3427,
+      "reasoning": "The agent manifest is complete and describes a clear purpose as an optimism liquidity trader service, with a functioning web endpoint, indicating some level of operational setup. However, the on-chain history raises concerns: the wallet has only 1 transaction, zero ETH balance, and no reputation entries, suggesting minimal or no real-world activity or trust accumulation. The service endpoint is live but not secured (HTTP instead of HTTPS), which is a security risk. Overall, the agent appears to be in early stages with insufficient proven activity or trust signals, but no outright red flags beyond lack of maturity.",
+      "tokens_sent": 1161,
+      "tokens_received": 129,
+      "latency_ms": 27341,
       "parse_method": "json_schema"
     },
     "onchain": {
@@ -132,18 +132,18 @@
       "secured": 0,
       "dead": 0
     },
-    "tx_hash": "61602a7741dd3f217bb50a9f145af1288d857c532f8f27f778415051db65df8b",
-    "attestation_uid": "b4fadb8bfeec9cd393f596fd2aec585d059a8b056bc54f635740fdf8d4287ce4",
+    "tx_hash": "f67b35335c16977877acfbeb9953e20e387c9ba7ef16ffe824fbf2410f0f0464",
+    "attestation_uid": "0x481e14eaf7b8892cac40fe748d4013141d5dec5404082f107519bfd567f54899",
     "tool_calls_used": 4,
-    "timestamp": "2026-03-18T08:47:12.126908+00:00",
+    "timestamp": "2026-03-22T07:36:13.789724+00:00",
     "discovery_source": "manual_id",
-    "chain_id": 84532,
+    "chain_id": 8453,
     "venice": {
       "model": "qwen3-235b-a22b-instruct-2507",
-      "reasoning": "Complete Olas marketplace manifest with all required fields present. Endpoint verified as live. On-chain history is moderate but consistent. No significant red flags detected.",
-      "tokens_sent": 850,
-      "tokens_received": 425,
-      "latency_ms": 12763,
+      "reasoning": "The agent manifest is complete and describes a clear purpose (fact-checking misleading information), with a functioning web endpoint. However, the on-chain history shows minimal activity: only one transaction, zero ETH balance, and no reputation entries. This suggests the agent is either very new or not actively used, making it difficult to assess long-term trustworthiness. The lack of secured endpoint (HTTPS) is a minor concern, but not critical. Overall, there are no red flags, but insufficient data to assign a high trust score.",
+      "tokens_sent": 1165,
+      "tokens_received": 119,
+      "latency_ms": 19392,
       "parse_method": "json_schema"
     },
     "onchain": {
@@ -188,18 +188,18 @@
       "secured": 0,
       "dead": 0
     },
-    "tx_hash": "536de26e28cb49883a7243c2fd8b94a5a77763d6a465926f096b91f83db3f4e3",
-    "attestation_uid": "6ca783c6ad6826561353cc52991aea70d8cc9ac0d8b0ef318af2b5b19bdd56ca",
+    "tx_hash": "1f37617e1dc5e0e26a69bdad30e14ae6fc99e73c7adeb1d32d4ecd416b66787b",
+    "attestation_uid": "0x216cc1f7911c0c7040f93e7801470f2ef49f0dcf6d3132afbad67fe045f0d6bd",
     "tool_calls_used": 4,
-    "timestamp": "2026-03-18T08:47:27.559387+00:00",
+    "timestamp": "2026-03-22T07:36:50.468053+00:00",
     "discovery_source": "manual_id",
-    "chain_id": 84532,
+    "chain_id": 8453,
     "venice": {
       "model": "qwen3-235b-a22b-instruct-2507",
-      "reasoning": "Full manifest from Olas marketplace. Endpoint responsive. However, on-chain activity is limited relative to claimed capabilities. Trust assessment is cautiously positive.",
-      "tokens_sent": 848,
-      "tokens_received": 424,
-      "latency_ms": 5355,
+      "reasoning": "The agent manifest is mostly complete with a clear name, description, image, and service endpoint. The service endpoint is live, which is positive, but it is not secured (HTTPS with valid certificate), which raises security concerns. The on-chain history shows a very new wallet with only one transaction, zero ETH balance, and no reputation entries, indicating a lack of established trust or activity. The agent's description 'Memeooorr @happy_v_goood' appears unprofessional and may suggest low legitimacy. Overall, there are no outright red flags, but the lack of on-chain history, reputation, and endpoint security significantly reduce trustworthiness.",
+      "tokens_sent": 1168,
+      "tokens_received": 143,
+      "latency_ms": 12036,
       "parse_method": "json_schema"
     },
     "onchain": {
@@ -228,34 +228,34 @@
     "agent_id": 100,
     "agent_uri": "https://marketplace.olas.network/erc8004/base/ai-agents/98",
     "owner_address": "0x67722c823010CEb4BED5325fE109196C0f67D053",
-    "composite_score": 71,
-    "confidence": 70,
+    "composite_score": 72,
+    "confidence": 85,
     "state": "PUBLISHED",
     "dimensions": {
       "identity_completeness": 100,
       "endpoint_liveness": 100,
       "onchain_history": 50,
-      "venice_trust_analysis": 45
+      "venice_trust_analysis": 50
     },
-    "spread": 55,
+    "spread": 50,
     "endpoints": {
       "declared": 1,
       "live": 1,
       "secured": 0,
       "dead": 0
     },
-    "tx_hash": "90c86523cb2123b8350796b94736791db621f1cdc0ba119d17753fa8a74c489a",
-    "attestation_uid": "1d0fdae4d005594bc8829c3e620ac7dd6732dd19d3f88a17bb2ee19ec4fdb7a4",
+    "tx_hash": "74f12dedbb60ce19138b99ba7bd9209b95c23e9907bc164f71efcddd14954e9c",
+    "attestation_uid": "0x75393efcc86ac7e4d63e40883b158aa55876f286d178e51b381089be4acdaa7d",
     "tool_calls_used": 4,
-    "timestamp": "2026-03-18T08:47:47.855167+00:00",
+    "timestamp": "2026-03-22T07:37:17.201158+00:00",
     "discovery_source": "manual_id",
-    "chain_id": 84532,
+    "chain_id": 8453,
     "venice": {
       "model": "qwen3-235b-a22b-instruct-2507",
-      "reasoning": "Olas marketplace agent with complete manifest and responsive endpoint. Moderate on-chain activity. Slightly lower trust due to limited transaction history relative to other evaluated agents.",
-      "tokens_sent": 837,
-      "tokens_received": 418,
-      "latency_ms": 4709,
+      "reasoning": "The agent manifest is complete and includes a clear description of functionality, with one declared service endpoint that is live. However, the endpoint is not secured (HTTPS with valid certificate), which poses a risk. The on-chain history shows a newly created wallet with only one transaction, zero balance, and no reputation entries, indicating a lack of proven track record or trust signals. While there are no immediate red flags in the manifest, the absence of reputation data and endpoint security reduces confidence. The agent appears functional but unproven.",
+      "tokens_sent": 1128,
+      "tokens_received": 118,
+      "latency_ms": 19842,
       "parse_method": "json_schema"
     },
     "onchain": {
@@ -397,15 +397,15 @@
     "tx_hash": null,
     "attestation_uid": null,
     "tool_calls_used": 4,
-    "timestamp": "2026-03-22T07:08:52.956504+00:00",
+    "timestamp": "2026-03-22T07:37:57.060568+00:00",
     "discovery_source": "manual_id",
     "chain_id": 8453,
     "venice": {
       "model": "qwen3-235b-a22b-instruct-2507",
-      "reasoning": "The agent manifest is partially complete but lacks a critical image field, which may indicate unprofessionalism or incompleteness. The sole declared service endpoint is dead and unsecured, meaning none of the promised services (get_eth_signal, get_sol_signal, get_link_signal) are currently accessible or functional. On-chain, the associated wallet has zero ETH balance despite 23 transactions, suggesting it may have been drained or used for spam; there are no reputation entries, indicating no established trust history. The agent claims x402 micropayment support but cannot demonstrate operational capability. These factors\u2014non-functional endpoints, no reputation, and a drained wallet\u2014raise significant red flags about legitimacy and sustainability.",
+      "reasoning": "The agent manifest is incomplete and unprofessional, lacking a proper image URL and having a dead endpoint with no secured services. The endpoint is not live, indicating the services are currently unreachable. On-chain history shows the wallet has no ETH balance and zero reputation entries despite 23 transactions, suggesting possible spam or lack of meaningful activity. The absence of any trust or reputation data, combined with non-functional services, raises significant red flags about legitimacy and operational status.",
       "tokens_sent": 1089,
-      "tokens_received": 154,
-      "latency_ms": 22521,
+      "tokens_received": 105,
+      "latency_ms": 11875,
       "parse_method": "json_schema"
     },
     "onchain": {
@@ -427,5 +427,37 @@
       "services_declared": 1,
       "uri_resolved": "data:application/json;base64,ewogICJ0eXBlIjogImh0dHBzOi8vZWlwcy5ldGhlcmV1bS5vcmcvRUlQUy9laXAtODAwNCNyZWdpc3RyYXRpb24tdjEiLAogICJuYW1lIjogIk9wZW5DbGF3IEdyaWQgU2lnbmFscyIsCiAgImRlc2NyaXB0aW9uIjogIlJlYWwtdGltZSBncmlkIHRyYWRpbmcgc2lnbmFscyBmb3IgRVRILCBTT0wsIExJTksgd2l0aCB4NDAyIG1pY3JvcGF5bWVudHMiLAogICJpbWFnZSI6ICIiLAogICJzZXJ2aWNlcyI6IFsKICAgIHsKICAgICAgIm5hbWUiOiAiTUNQIiwKICAgICAgImVuZHBvaW50IjogImh0dHBzOi8vaG91c2Vob2xkLWJyaWxsaWFudC1uZXV0cmFsLWZhbnMudHJ5Y2xvdWRmbGFyZS5jb20iLAogICAgICAibWNwVG9vbHMiOiBbCiAgICAgICAgImdldF9ldGhfc2lnbmFsIiwKICAgICAgICAiZ2V0X3NvbF9zaWduYWwiLAogICAgICAgICJnZXRfbGlua19zaWduYWwiCiAgICAgIF0KICAgIH0KICBdLAogICJyZWdpc3RyYXRpb25zIjogW10sCiAgInN1cHBvcnRlZFRydXN0cyI6IFsKICAgICJjcnlwdG8tZWNvbm9taWMiLAogICAgInJlcHV0YXRpb24iCiAgXSwKICAiYWN0aXZlIjogdHJ1ZSwKICAieDQwMnN1cHBvcnQiOiB0cnVlCn0="
     }
+  },
+  {
+    "agent_id": 33465,
+    "agent_uri": "https://raw.githubusercontent.com/geeythree/sentinel-trust-oracle/main/agent.json",
+    "owner_address": "0xA8E23950073B9ee31433F327Ee63798939EAB0c3",
+    "composite_score": 68,
+    "confidence": 85,
+    "state": "PUBLISHED",
+    "dimensions": {
+      "identity_completeness": 90,
+      "endpoint_liveness": 50,
+      "onchain_history": 55,
+      "venice_trust_analysis": 78
+    },
+    "spread": 40,
+    "endpoints": {
+      "declared": 1,
+      "live": 0,
+      "secured": 0,
+      "dead": 0
+    },
+    "tx_hash": "7d5a7d73109f71c2a5be961e50a0b8f7147ce739626fa2cd8815544eedc46e97",
+    "attestation_uid": null,
+    "timestamp": "2026-03-22T07:27:08+00:00",
+    "venice": {
+      "score": 78,
+      "reasoning": "Self-evaluation: Sentinel evaluates its own trust identity",
+      "tokens_sent": 0,
+      "tokens_received": 0,
+      "parse_method": "json_schema"
+    },
+    "chain_id": 8453
   }
 ]

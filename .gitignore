@@ -16,7 +16,6 @@ sentinel.log
 # Project-local docs (keep locally, not in repo)
 CLAUDE.md
 PLAN.md
-CONVERSATION_LOG.md
 hackathon_context.md
 
 # Builder artifacts

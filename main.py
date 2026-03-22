@@ -282,6 +282,7 @@ def _run_self_evaluation(orchestrator, blockchain, args) -> None:
 
     # Run full evaluation pipeline
     result = orchestrator.evaluate_single(sentinel)
+    orchestrator._update_dashboard([result])
     _print_summary([result])
 
     # Submit self-feedback via AUDITOR wallet

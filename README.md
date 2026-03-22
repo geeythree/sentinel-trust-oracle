@@ -18,7 +18,7 @@ Sentinel fixes this by acting as an autonomous trust oracle — discovering agen
 
 ## Privacy-First Architecture
 
-Sentinel's trust evaluation is designed for **zero-knowledge trust scoring** — the oracle produces verifiable on-chain scores without exposing any agent metadata to third parties.
+Sentinel's trust evaluation is designed for **privacy-preserving trust scoring** — the oracle produces verifiable on-chain scores without exposing any agent metadata to third parties.
 
 | Principle | How |
 |-----------|-----|
@@ -40,6 +40,18 @@ Venice isn't a convenience — it's the only component that can synthesize trust
 | Agent has secured endpoints (401/403) + partial manifest | Score: 50, ambiguous | Score: 71 — Venice understands that auth-protected APIs are a positive signal |
 
 Removing Venice drops trust scoring to mechanical heuristics that can't distinguish a legitimate new agent from a dormant scam wallet. Venice provides the **interpretive layer** that makes trust scores meaningful — and it does so with zero data retention, ensuring agent privacy is never compromised.
+
+## Why Sentinel Over Alternatives
+
+Other approaches to agent trust exist, but each has a gap Sentinel fills:
+
+| Approach | Limitation | Sentinel's Answer |
+|----------|-----------|------------------|
+| **Manual curation** (allowlists, directories) | Doesn't scale. 20,000+ ERC-8004 agents can't be hand-reviewed. | Fully autonomous — discovers, evaluates, and publishes without human intervention. |
+| **Single-signal scoring** (just check if endpoint responds) | Trivially gameable. A static server returning 200 passes. | 4-dimensional scoring — identity, liveness, on-chain history, and LLM-interpreted trust. Spoofing one dimension doesn't produce a high composite score. |
+| **Centralized reputation APIs** | Single point of failure. Provider can censor, manipulate, or go offline. | Scores are published as EAS attestations on Base — immutable, verifiable, and queryable by anyone. |
+| **LLM-only evaluation** | Prompt-injectable. Agent manifests could contain adversarial instructions. | Venice input is capped at 4KB and sanitized. LLM score is 30% of composite, not 100% — mechanical checks anchor the evaluation. |
+| **Self-reported trust** (agents claim their own scores) | Obvious conflict of interest. | Evaluator wallet is separate from agent owner wallet. Sentinel uses a 3-wallet model to prevent self-scoring. |
 
 ## How It Works
 
@@ -216,6 +228,15 @@ Terminal: WITHHELD_LOW_CONFIDENCE | PENDING_HUMAN_REVIEW | FAILED
 |---------|-------------------|---------------------|-----|
 | Base Mainnet | [`0x8004...9432`](https://basescan.org/address/0x8004A169FB4a3325136EB29fA0ceB6D2e539a432) | [`0x8004...9B63`](https://basescan.org/address/0x8004BAa17C55a88189AE136b182e5fdA19dE9b63) | [`0x4200...0021`](https://basescan.org/address/0x4200000000000000000000000000000000000021) |
 | Base Sepolia | [`0x8004...BD9e`](https://sepolia.basescan.org/address/0x8004A818BFB912233c491871b3d84c89A494BD9e) | [`0x8004...8713`](https://sepolia.basescan.org/address/0x8004B663056A597Dffe9eCcC1965A193B7388713) | [`0x4200...0021`](https://sepolia.basescan.org/address/0x4200000000000000000000000000000000000021) |
+
+## Known Limitations & Future Work
+
+| Area | Current State | Next Step |
+|------|--------------|-----------|
+| **Liveness checking** | HTTP HEAD/GET per endpoint — verifies reachability and auth status. | Add TLS certificate validation, response schema checks, and semantic verification (does the endpoint behave like an AI agent or just return 200?). |
+| **Sybil resistance** | Separate evaluator wallet prevents self-scoring, but a determined attacker could register many agents. | Weight reputation by evaluator stake or use attestation graphs to detect evaluation rings. |
+| **Discovery scale** | Scans `Registered` events via `eth_getLogs` — O(n blocks). | Migrate to a Graph Protocol subgraph for instant historical queries. |
+| **Venice model dependency** | Tied to Qwen3-235B via Venice. | Abstract the LLM layer to support model rotation and multi-model consensus scoring. |
 
 ## Built With
 

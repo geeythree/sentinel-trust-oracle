@@ -149,8 +149,10 @@ class AgentVerifier:
                 f"Refused to fetch from private/internal address: {hostname}"
             )
 
-        # Pin resolved IP in URL to prevent TOCTOU DNS rebinding
-        if resolved_ip:
+        # SSRF note: IP pinning breaks HTTPS (TLS cert mismatch on CDNs).
+        # HTTPS is already safe against DNS rebinding (TLS verifies hostname).
+        # For HTTP, pin the resolved IP to prevent TOCTOU rebinding.
+        if resolved_ip and parsed.scheme == "http":
             pinned = parsed._replace(netloc=f"{resolved_ip}:{parsed.port}" if parsed.port else resolved_ip)
             pinned_url = urlunparse(pinned)
             headers = {"Host": hostname}
