@@ -8,19 +8,45 @@
     {
       "name": "mcp",
       "endpoint": "stdio://sentinel-trust-oracle",
+      "transport": "stdio",
       "version": "1.0",
-      "skills": ["verify_agent", "check_reputation"],
-      "domains": ["trust", "identity", "security"]
+      "skills": [
+        "verify_agent",
+        "check_reputation",
+        "get_trust_chain",
+        "compute_transitive_trust"
+      ],
+      "domains": [
+        "trust",
+        "identity",
+        "security"
+      ]
+    },
+    {
+      "name": "trust-oracle-api",
+      "endpoint": "https://sentinel-trust-oracle-production.up.railway.app",
+      "type": "http",
+      "version": "1.0",
+      "skills": [
+        "verify_agent",
+        "check_reputation",
+        "get_trust_chain",
+        "compute_transitive_trust"
+      ],
+      "domains": [
+        "trust",
+        "identity",
+        "security"
+      ]
     }
   ],
   "active": true,
   "x402Support": false,
   "operator": {
-    "wallet": "0xA8E23950073B9ee31433F327Ee63798939EAB0c3",
-    "erc8004_agent_id": 33465
+    "wallet": "0xC32a21ec6d714D5Dd95a1Bc0b60ba8FA9dCABfDd"
   },
   "evaluator": {
-    "wallet": "0xb85f6995E093411DfEB88c484D3A318a78A9f106"
+    "wallet": "0x3CE2637B630c8caB992d0C15Ba94d4b144099Fd9"
   },
   "chain": {
     "network": "base",
@@ -38,12 +64,31 @@
     }
   },
   "tools": [
-    {"name": "erc8004_identity_read", "type": "blockchain"},
-    {"name": "erc8004_reputation_read", "type": "blockchain"},
-    {"name": "erc8004_reputation_write", "type": "blockchain"},
-    {"name": "eas_attestation", "type": "blockchain"},
-    {"name": "http_liveness_check", "type": "api"},
-    {"name": "venice_api", "type": "llm", "model": "qwen3-235b-a22b-instruct-2507"}
+    {
+      "name": "erc8004_identity_read",
+      "type": "blockchain"
+    },
+    {
+      "name": "erc8004_reputation_read",
+      "type": "blockchain"
+    },
+    {
+      "name": "erc8004_reputation_write",
+      "type": "blockchain"
+    },
+    {
+      "name": "eas_attestation",
+      "type": "blockchain"
+    },
+    {
+      "name": "http_liveness_check",
+      "type": "api"
+    },
+    {
+      "name": "venice_api",
+      "type": "llm",
+      "model": "qwen3-235b-a22b-instruct-2507"
+    }
   ],
   "task_categories": [
     "agent_trust_verification",
@@ -55,13 +100,15 @@
       "identity_completeness",
       "endpoint_liveness",
       "onchain_history",
-      "venice_trust_analysis"
+      "venice_trust_analysis",
+      "protocol_compliance"
     ],
     "weights": {
       "identity_completeness": 0.20,
-      "endpoint_liveness": 0.25,
-      "onchain_history": 0.25,
-      "venice_trust_analysis": 0.30
+      "endpoint_liveness": 0.20,
+      "onchain_history": 0.20,
+      "venice_trust_analysis": 0.25,
+      "protocol_compliance": 0.15
     },
     "scale": "0-100 per dimension"
   },
