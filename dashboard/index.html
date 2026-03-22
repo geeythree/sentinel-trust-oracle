@@ -129,8 +129,9 @@
     <!-- EVALUATE -->
     <div class="crd p-8 mb-14 an" style="animation-delay:0.1s">
         <div class="flex items-center gap-3 flex-wrap">
-            <input id="eval-input" type="number" min="0" placeholder="Agent ID" class="ev-in"/>
+            <input id="eval-input" type="number" min="0" placeholder="Agent ID  (e.g. 35642)" class="ev-in" style="width:240px"/>
             <button id="eval-btn" onclick="runLiveEval()" class="ev-btn">Evaluate</button>
+            <span class="text-[11px] text-[#7a7f96]">or click any agent ID below ↓</span>
             <div id="api-status" class="flex items-center gap-1.5 ml-auto">
                 <span id="api-dot" class="inline-block w-[6px] h-[6px] rounded-full bg-[#1c1d27]"></span>
                 <span id="api-label" class="text-[10px] text-[#9498ad] mono"></span>
@@ -347,7 +348,7 @@ function renderCard(e) {
     <div class="crd ${cls} p-6 eval-card">
         <div class="flex flex-col sm:flex-row justify-between items-start gap-4">
             <div class="min-w-0">
-                <h3 class="text-lg font-semibold text-white">Agent <span class="text-[#6fa5be]">#${parseInt(e.agent_id,10)||0}</span></h3>
+                <h3 class="text-lg font-semibold text-white">Agent <span class="text-[#6fa5be] cursor-pointer hover:underline" title="Click to evaluate" onclick="document.getElementById('eval-input').value=${parseInt(e.agent_id,10)||0};document.getElementById('eval-input').scrollIntoView({behavior:'smooth',block:'center'})">#${parseInt(e.agent_id,10)||0}</span></h3>
                 <div class="mt-1 text-xs text-[#9498ad] truncate max-w-md mono" title="${esc(e.agent_uri)}">${esc(e.agent_uri)}</div>
                 <div class="mt-1 text-xs">Owner: ${ownerLink}</div>
                 <div class="mt-2 flex items-center gap-2">
