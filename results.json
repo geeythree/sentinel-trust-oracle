@@ -376,42 +376,42 @@
   },
   {
     "agent_id": 2094,
-    "agent_uri": "data:application/json;base64,eyJuYW1lIjoiTEFJREEgLSBMaW5ndWlzdGljIEFJIERldGVybWluYXRpb24gQWdlbnQiLCJkZXNjcmlwdGlvbiI6IlZlcmlmaWVzIGh1bWFuIGlkZW50aXR5IHRocm91Z2ggQUktcG93ZXJlZCBjb252ZXJzYXRpb24gYW5kIGdlbmVyYXRlcyBaSyBwcm9vZnMgb2YgdGhlIHJlc3VsdCB3aXRob3V0IHJldmVhbGluZyBjb252ZXJzYXRpb24gY29udGVudCIsInNlcnZpY2VzIjpbeyJuYW1lIjoiaHVtYW5pdHktdmVyaWZpY2F0aW9uIiwiZW5kcG9pbnQiOiJodHRwczovL2xhaWRhLXByb2R1Y3Rpb24udXAucmFpbHdheS5hcHAvYXBpL2NoYWxsZW5nZSIsInZlcnNpb24iOiIwLjEuMCIsInNraWxscyI6WyJodW1hbml0eS12ZXJpZmljYXRpb24iLCJwcm9vZi1vZi1odW1hbml0eSIsInN5YmlsLXJlc2lzdGFuY2UiXSwiZG9tYWlucyI6WyJpZGVudGl0eSIsInZlcmlmaWNhdGlvbiIsIndlYjMiXX1dLCJzdXBwb3J0ZWRUcnVzdCI6WyJ6a1ZlcmlmeS1ncm90aDE2Il0sIm1ldGFkYXRhIjp7InByb29mU3lzdGVtIjoiZ3JvdGgxNiIsImxpYnJhcnkiOiJzbmFya2pzIiwiY3VydmUiOiJibjEyOCIsInZlcmlmaWNhdGlvbk1ldGhvZCI6ImNvbnZlcnNhdGlvbmFsLWFpIiwibW9kZWwiOiJjbGF1ZGUtc29ubmV0LTQiLCJtYXhUdXJucyI6MSwiY2lyY3VpdCI6Imh1bWFuaXR5X3Byb29mIn19",
-    "owner_address": "0x5e500fD6c0db1F163A652B2A22dA2C4f6F79128B",
-    "composite_score": 86,
-    "confidence": 100,
-    "state": "VERIFIED",
+    "agent_uri": "data:application/json;base64,ewogICJ0eXBlIjogImh0dHBzOi8vZWlwcy5ldGhlcmV1bS5vcmcvRUlQUy9laXAtODAwNCNyZWdpc3RyYXRpb24tdjEiLAogICJuYW1lIjogIk9wZW5DbGF3IEdyaWQgU2lnbmFscyIsCiAgImRlc2NyaXB0aW9uIjogIlJlYWwtdGltZSBncmlkIHRyYWRpbmcgc2lnbmFscyBmb3IgRVRILCBTT0wsIExJTksgd2l0aCB4NDAyIG1pY3JvcGF5bWVudHMiLAogICJpbWFnZSI6ICIiLAogICJzZXJ2aWNlcyI6IFsKICAgIHsKICAgICAgIm5hbWUiOiAiTUNQIiwKICAgICAgImVuZHBvaW50IjogImh0dHBzOi8vaG91c2Vob2xkLWJyaWxsaWFudC1uZXV0cmFsLWZhbnMudHJ5Y2xvdWRmbGFyZS5jb20iLAogICAgICAibWNwVG9vbHMiOiBbCiAgICAgICAgImdldF9ldGhfc2lnbmFsIiwKICAgICAgICAiZ2V0X3NvbF9zaWduYWwiLAogICAgICAgICJnZXRfbGlua19zaWduYWwiCiAgICAgIF0KICAgIH0KICBdLAogICJyZWdpc3RyYXRpb25zIjogW10sCiAgInN1cHBvcnRlZFRydXN0cyI6IFsKICAgICJjcnlwdG8tZWNvbm9taWMiLAogICAgInJlcHV0YXRpb24iCiAgXSwKICAiYWN0aXZlIjogdHJ1ZSwKICAieDQwMnN1cHBvcnQiOiB0cnVlCn0=",
+    "owner_address": "0x43006b6d6781403953ea3c28922ca3e7390451a0",
+    "composite_score": 42,
+    "confidence": 60,
+    "state": "WITHHELD_LOW_CONFIDENCE",
     "dimensions": {
-      "identity_completeness": 80,
-      "endpoint_liveness": 100,
-      "onchain_history": 90,
-      "venice_trust_analysis": 75
+      "identity_completeness": 90,
+      "endpoint_liveness": 0,
+      "onchain_history": 70,
+      "venice_trust_analysis": 20
     },
-    "spread": 25,
+    "spread": 90,
     "endpoints": {
       "declared": 1,
-      "live": 1,
+      "live": 0,
       "secured": 0,
-      "dead": 0
+      "dead": 1
     },
     "tx_hash": null,
     "attestation_uid": null,
     "tool_calls_used": 4,
-    "timestamp": "2026-03-18T18:22:51.235791+00:00",
+    "timestamp": "2026-03-22T07:08:52.956504+00:00",
     "discovery_source": "manual_id",
-    "chain_id": 84532,
+    "chain_id": 8453,
     "venice": {
       "model": "qwen3-235b-a22b-instruct-2507",
-      "reasoning": "LAIDA agent with well-defined manifest including ZK proof capabilities. Humanity verification endpoint is live and responsive. Strong on-chain presence with active wallet. Agent demonstrates clear purpose and functioning infrastructure.",
-      "tokens_sent": 892,
-      "tokens_received": 446,
-      "latency_ms": 34972,
+      "reasoning": "The agent manifest is partially complete but lacks a critical image field, which may indicate unprofessionalism or incompleteness. The sole declared service endpoint is dead and unsecured, meaning none of the promised services (get_eth_signal, get_sol_signal, get_link_signal) are currently accessible or functional. On-chain, the associated wallet has zero ETH balance despite 23 transactions, suggesting it may have been drained or used for spam; there are no reputation entries, indicating no established trust history. The agent claims x402 micropayment support but cannot demonstrate operational capability. These factors\u2014non-functional endpoints, no reputation, and a drained wallet\u2014raise significant red flags about legitimacy and sustainability.",
+      "tokens_sent": 1089,
+      "tokens_received": 154,
+      "latency_ms": 22521,
       "parse_method": "json_schema"
     },
     "onchain": {
-      "wallet_address": "0x5e500fD6c0db1F163A652B2A22dA2C4f6F79128B",
-      "tx_count": 61,
-      "balance_eth": 0.03611270160526341,
+      "wallet_address": "0x43006b6d6781403953ea3c28922ca3e7390451a0",
+      "tx_count": 23,
+      "balance_eth": 3.2503683679e-08,
       "reputation_entries": 0
     },
     "identity": {
@@ -419,11 +419,13 @@
         "name",
         "description",
         "services",
-        "supportedTrust"
+        "image",
+        "active",
+        "registrations"
       ],
       "fields_missing": [],
       "services_declared": 1,
-      "uri_resolved": "data:application/json;base64,eyJuYW1lIjoiTEFJREEgLSBMaW5ndWlzdGljIEFJIERldGVybWl"
+      "uri_resolved": "data:application/json;base64,ewogICJ0eXBlIjogImh0dHBzOi8vZWlwcy5ldGhlcmV1bS5vcmcvRUlQUy9laXAtODAwNCNyZWdpc3RyYXRpb24tdjEiLAogICJuYW1lIjogIk9wZW5DbGF3IEdyaWQgU2lnbmFscyIsCiAgImRlc2NyaXB0aW9uIjogIlJlYWwtdGltZSBncmlkIHRyYWRpbmcgc2lnbmFscyBmb3IgRVRILCBTT0wsIExJTksgd2l0aCB4NDAyIG1pY3JvcGF5bWVudHMiLAogICJpbWFnZSI6ICIiLAogICJzZXJ2aWNlcyI6IFsKICAgIHsKICAgICAgIm5hbWUiOiAiTUNQIiwKICAgICAgImVuZHBvaW50IjogImh0dHBzOi8vaG91c2Vob2xkLWJyaWxsaWFudC1uZXV0cmFsLWZhbnMudHJ5Y2xvdWRmbGFyZS5jb20iLAogICAgICAibWNwVG9vbHMiOiBbCiAgICAgICAgImdldF9ldGhfc2lnbmFsIiwKICAgICAgICAiZ2V0X3NvbF9zaWduYWwiLAogICAgICAgICJnZXRfbGlua19zaWduYWwiCiAgICAgIF0KICAgIH0KICBdLAogICJyZWdpc3RyYXRpb25zIjogW10sCiAgInN1cHBvcnRlZFRydXN0cyI6IFsKICAgICJjcnlwdG8tZWNvbm9taWMiLAogICAgInJlcHV0YXRpb24iCiAgXSwKICAiYWN0aXZlIjogdHJ1ZSwKICAieDQwMnN1cHBvcnQiOiB0cnVlCn0="
     }
   }
 ]
