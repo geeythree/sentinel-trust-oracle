@@ -89,29 +89,37 @@ class LivenessChecker:
         )
 
     @staticmethod
-    def _is_private_endpoint(endpoint: str) -> bool:
-        """SSRF guard: block requests to private/internal IPs."""
+    def _is_private_endpoint(endpoint: str) -> tuple[bool, bool]:
+        """SSRF guard: block requests to private/internal IPs.
+
+        Returns (is_private, dns_failed). DNS failures are not treated as
+        private — the endpoint is simply unreachable.
+        """
         from urllib.parse import urlparse
         parsed = urlparse(endpoint)
         hostname = parsed.hostname or ""
         if not hostname:
-            return True
+            return (True, False)
         try:
             resolved = socket.gethostbyname(hostname)
             ip = ipaddress.ip_address(resolved)
-            return (
+            is_private = (
                 ip.is_private or ip.is_loopback or ip.is_link_local
                 or ip.is_multicast or ip.is_reserved
             )
+            return (is_private, False)
         except Exception:
-            return True  # DNS failure = block (conservative)
+            return (False, True)  # DNS failure = not private, just unreachable
 
     def _check_endpoint(self, endpoint: str) -> EndpointCheck:
         """Check a single endpoint. Interpret status codes correctly."""
         # SSRF guard: block private/internal IPs
-        if self._is_private_endpoint(endpoint):
+        is_private, dns_failed = self._is_private_endpoint(endpoint)
+        if is_private:
             _log.warning("Blocked liveness check to private/internal endpoint: %s", endpoint)
             return EndpointCheck(endpoint=endpoint, status="blocked_private", http_code=0, score=0)
+        if dns_failed:
+            return EndpointCheck(endpoint=endpoint, status="unreachable", http_code=0, score=0)
 
         try:
             # Use HEAD request first (lighter), fall back to GET if 405
