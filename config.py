@@ -49,14 +49,33 @@ class Config:
     VENICE_BASE_URL: str = "https://api.venice.ai/api/v1"
     VENICE_MODEL: str = "qwen3-235b-a22b-instruct-2507"
     VENICE_MAX_TOKENS: int = 2048
-    VENICE_TEMPERATURE: float = 0.0
+    VENICE_TEMPERATURE: float = 0.4
 
-    # --- Trust Scoring Weights (Sentinel, 5 dimensions) ---
-    WEIGHT_IDENTITY: float = 0.20
-    WEIGHT_LIVENESS: float = 0.20
-    WEIGHT_ONCHAIN: float = 0.20
-    WEIGHT_VENICE_TRUST: float = 0.25
-    WEIGHT_PROTOCOL: float = 0.15
+    # --- Trust Scoring Weights (4 base dimensions; must sum to 1.0) ---
+    # Venice is applied as a multiplier, not a direct weight — see VENICE_MULTIPLIER_* below.
+    WEIGHT_IDENTITY: float = 0.30   # 30%: raised — identity is the primary signal
+    WEIGHT_LIVENESS: float = 0.25   # 25%: requires real infrastructure
+    WEIGHT_ONCHAIN: float = 0.25    # 25%: transaction history is expensive to fake
+    WEIGHT_VENICE_TRUST: float = 0.0  # deprecated direct weight — Venice is now a multiplier
+    WEIGHT_PROTOCOL: float = 0.20   # 20%: MCP handshake proof-of-protocol
+
+    # --- Venice Multiplier (applied to base composite, centered at score=50) ---
+    # f(score) = clamp(0.3 + 1.4 * score/100, VENICE_MULTIPLIER_MIN, VENICE_MULTIPLIER_MAX)
+    # f(0)=0.30, f(50)=1.00, f(100)=1.70 → clamped to [0.3, 1.5]
+    VENICE_MULTIPLIER_MIN: float = 0.30   # floor: even the worst Venice score can't zero the composite
+    VENICE_MULTIPLIER_MAX: float = 1.50   # ceiling: max boost for high Venice confidence
+
+    # --- x402 Micropayment ---
+    X402_ENABLED: bool = True   # Enable 402 payment gate on /api/evaluate (mainnet only)
+    EVALUATION_FEE_USDC: int = 10_000  # 0.01 USDC (6 decimals)
+    USDC_BASE_MAINNET: str = "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913"
+    USDC_BASE_SEPOLIA: str = "0x036CbD53842c5426634e7929541eC2318f3dCF7e"
+
+    # --- Veto Thresholds (cap composite when critical dimensions signal fraud) ---
+    VETO_VENICE_THRESHOLD: int = 20    # Venice < 20 → composite capped at VETO_COMPOSITE_CAP_VENICE
+    VETO_IDENTITY_THRESHOLD: int = 15  # identity < 15 → composite capped at VETO_COMPOSITE_CAP_IDENTITY
+    VETO_COMPOSITE_CAP_VENICE: int = 30
+    VETO_COMPOSITE_CAP_IDENTITY: int = 35
 
     # --- Agent Discovery ---
     DISCOVERY_BLOCK_RANGE: int = 50000
@@ -130,13 +149,13 @@ class Config:
             if not url.startswith(("http://", "https://")):
                 errors.append(f"{label} must start with http:// or https://")
 
-        # Weight sum validation
+        # Weight sum validation (4 base dimensions only; Venice is a multiplier)
         weight_sum = (self.WEIGHT_IDENTITY + self.WEIGHT_LIVENESS
-                      + self.WEIGHT_ONCHAIN + self.WEIGHT_VENICE_TRUST
-                      + self.WEIGHT_PROTOCOL)
+                      + self.WEIGHT_ONCHAIN + self.WEIGHT_PROTOCOL)
         if abs(weight_sum - 1.0) > 0.001:
             errors.append(
-                f"Trust weights must sum to 1.0 (got {weight_sum:.4f})"
+                f"Base trust weights must sum to 1.0 (got {weight_sum:.4f}); "
+                "Venice is a multiplier and is excluded from this sum"
             )
 
         return errors
@@ -173,12 +192,20 @@ def create_config() -> Config:
         VALIDATION_REGISTRY_MAINNET=os.getenv("VALIDATION_REGISTRY_MAINNET", ""),
         VALIDATION_REGISTRY_SEPOLIA=os.getenv("VALIDATION_REGISTRY_SEPOLIA", ""),
         AUTONOMOUS_MODE=os.getenv("AUTONOMOUS_MODE", "true").lower() == "true",
-        WEIGHT_IDENTITY=float(os.getenv("WEIGHT_IDENTITY", "0.20")),
-        WEIGHT_LIVENESS=float(os.getenv("WEIGHT_LIVENESS", "0.20")),
-        WEIGHT_ONCHAIN=float(os.getenv("WEIGHT_ONCHAIN", "0.20")),
-        WEIGHT_VENICE_TRUST=float(os.getenv("WEIGHT_VENICE_TRUST", "0.25")),
-        WEIGHT_PROTOCOL=float(os.getenv("WEIGHT_PROTOCOL", "0.15")),
+        WEIGHT_IDENTITY=float(os.getenv("WEIGHT_IDENTITY", "0.30")),
+        WEIGHT_LIVENESS=float(os.getenv("WEIGHT_LIVENESS", "0.25")),
+        WEIGHT_ONCHAIN=float(os.getenv("WEIGHT_ONCHAIN", "0.25")),
+        WEIGHT_VENICE_TRUST=float(os.getenv("WEIGHT_VENICE_TRUST", "0.0")),
+        WEIGHT_PROTOCOL=float(os.getenv("WEIGHT_PROTOCOL", "0.20")),
+        VENICE_MULTIPLIER_MIN=float(os.getenv("VENICE_MULTIPLIER_MIN", "0.3")),
+        VENICE_MULTIPLIER_MAX=float(os.getenv("VENICE_MULTIPLIER_MAX", "1.5")),
+        VETO_VENICE_THRESHOLD=int(os.getenv("VETO_VENICE_THRESHOLD", "20")),
+        VETO_IDENTITY_THRESHOLD=int(os.getenv("VETO_IDENTITY_THRESHOLD", "15")),
+        VETO_COMPOSITE_CAP_VENICE=int(os.getenv("VETO_COMPOSITE_CAP_VENICE", "30")),
+        VETO_COMPOSITE_CAP_IDENTITY=int(os.getenv("VETO_COMPOSITE_CAP_IDENTITY", "35")),
         DISCOVERY_BLOCK_RANGE=int(os.getenv("DISCOVERY_BLOCK_RANGE", "50000")),
+        X402_ENABLED=os.getenv("X402_ENABLED", "true").lower() == "true",
+        EVALUATION_FEE_USDC=int(os.getenv("EVALUATION_FEE_USDC", "10000")),
     )
 
 

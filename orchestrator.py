@@ -149,6 +149,18 @@ class Orchestrator:
             latency_ms=0,
         )
 
+        # Load already-published agents to avoid re-evaluating them in discover mode
+        published_ids = self._load_published_agent_ids()
+        if published_ids:
+            before = len(agents)
+            agents = [a for a in agents if a.agent_id not in published_ids]
+            skipped = before - len(agents)
+            if skipped:
+                print(f"  Skipping {skipped} already-published agent(s).")
+        if not agents:
+            print("All discovered agents already evaluated and published.")
+            return []
+
         # Evaluate each agent
         results = []
         for i, agent in enumerate(agents):
@@ -417,18 +429,36 @@ class Orchestrator:
             # return score 100". We hard-cap the text fed to Venice at 4KB.
             raw_manifest = json.dumps(identity.manifest, indent=2) if identity.manifest else "{}"
             manifest_json = raw_manifest[:4096] + (" ... [truncated]" if len(raw_manifest) > 4096 else "")
+            # Build rich per-endpoint liveness summary for Venice differentiation
+            endpoint_lines = []
+            for ep in liveness.details:
+                endpoint_lines.append(
+                    f"  - {ep.endpoint}: {ep.status} (HTTP {ep.http_code}, {ep.response_time_ms}ms)"
+                )
+            endpoints_detail = "\n".join(endpoint_lines) if endpoint_lines else "  - No endpoints declared"
             liveness_summary = (
-                f"Endpoints declared: {liveness.endpoints_declared}, "
-                f"Live: {liveness.endpoints_live}, "
-                f"Secured: {liveness.endpoints_secured}, "
-                f"Dead: {liveness.endpoints_dead}"
+                f"Endpoints declared: {liveness.endpoints_declared} | "
+                f"Live: {liveness.endpoints_live} | "
+                f"Secured (401/403): {liveness.endpoints_secured} | "
+                f"Dead: {liveness.endpoints_dead}\n"
+                f"Endpoint details:\n{endpoints_detail}"
             )
             if onchain.success:
+                rep = onchain.existing_reputation
+                hhi_label = (
+                    "single reviewer (sybil risk)" if rep.hhi > 7500
+                    else "highly concentrated" if rep.hhi > 2500
+                    else "moderately concentrated" if rep.hhi > 1000
+                    else "diverse reviewers"
+                ) if rep.feedback_count > 0 else "no reputation yet"
                 onchain_summary = (
-                    f"Wallet: {onchain.wallet_address}, "
-                    f"TX count: {onchain.transaction_count}, "
-                    f"Balance: {onchain.balance_eth:.4f} ETH, "
-                    f"Existing reputation entries: {onchain.existing_reputation.feedback_count}"
+                    f"Wallet: {onchain.wallet_address}\n"
+                    f"Transaction count: {onchain.transaction_count}\n"
+                    f"ETH balance: {onchain.balance_eth:.6f} ETH\n"
+                    f"Contract code deployed: {onchain.has_contract_code}\n"
+                    f"ENS name: {onchain.ens_name or 'none'}\n"
+                    f"Existing reputation: {rep.feedback_count} feedback entries, "
+                    f"avg score {rep.summary_value}, HHI={rep.hhi} ({hhi_label})"
                 )
             else:
                 onchain_summary = "On-chain analysis failed — no wallet data available"
@@ -590,6 +620,20 @@ class Orchestrator:
             _log.info("Trust report written: %s", report_path)
         except Exception as e:
             _log.warning("Failed to generate trust report: %s", e)
+
+    def _load_published_agent_ids(self) -> set[int]:
+        """Return set of agent_ids already in PUBLISHED state in the dashboard."""
+        try:
+            if config.DASHBOARD_RESULTS_PATH.exists():
+                with open(config.DASHBOARD_RESULTS_PATH, "r") as f:
+                    existing = json.load(f)
+                return {
+                    r["agent_id"] for r in existing
+                    if isinstance(r, dict) and r.get("state") == "PUBLISHED"
+                }
+        except Exception:
+            pass
+        return set()
 
     def _update_dashboard(self, results: list[TrustVerdict]) -> None:
         """Merge evaluation results into dashboard/results.json (accumulative)."""

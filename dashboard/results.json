@@ -4005,62 +4005,53 @@
   },
   {
     "agent_id": 2730,
-    "agent_uri": "https://api.maw.finance/api/intents/wRa2wEjf9D-oDKAHWrRwF/identity.json",
-    "owner_address": "0xf13021F02E23a8113C1bD826575a1682F6Fac927",
-    "composite_score": 82,
-    "confidence": 100,
-    "state": "VERIFIED",
+    "agent_uri": "",
+    "owner_address": "0x17a09178acD46B89d84A8a3378C9f0aFA9bFEaC5",
+    "composite_score": 12,
+    "confidence": 28,
+    "state": "WITHHELD_LOW_CONFIDENCE",
     "dimensions": {
-      "identity_completeness": 90,
-      "endpoint_liveness": 100,
-      "onchain_history": 87,
-      "venice_trust_analysis": 76,
-      "protocol_compliance": 50
+      "identity_completeness": 0,
+      "endpoint_liveness": 0,
+      "onchain_history": 66,
+      "venice_trust_analysis": 30,
+      "protocol_compliance": 0
     },
-    "spread": 50,
+    "spread": 66,
     "endpoints": {
-      "declared": 1,
-      "live": 1,
+      "declared": 0,
+      "live": 0,
       "secured": 0,
       "dead": 0
     },
     "tx_hash": null,
     "attestation_uid": null,
-    "tool_calls_used": 4,
-    "timestamp": "2026-03-22T15:51:25.958980+00:00",
-    "discovery_source": "erc8004_events",
-    "chain_id": 84532,
+    "tool_calls_used": 3,
+    "timestamp": "2026-03-22T20:22:52.146166+00:00",
+    "discovery_source": "manual_id",
+    "chain_id": 8453,
     "venice": {
       "model": "qwen3-235b-a22b-instruct-2507",
-      "tokens_sent": 2162,
-      "tokens_received": 398,
-      "latency_ms": 80376,
+      "tokens_sent": 1330,
+      "tokens_received": 186,
+      "latency_ms": 68665,
       "parse_method": "json_schema"
     },
     "onchain": {
-      "wallet_address": "0xf13021F02E23a8113C1bD826575a1682F6Fac927",
-      "tx_count": 613,
-      "balance_eth": 0.49940170599042577,
+      "wallet_address": "0x17a09178acD46B89d84A8a3378C9f0aFA9bFEaC5",
+      "tx_count": 14,
+      "balance_eth": 0.00010015034577864,
       "has_contract_code": false,
       "reputation_entries": 0
     },
     "identity": {
-      "fields_present": [
-        "name",
-        "description",
-        "services",
-        "image",
-        "x402Support",
-        "active",
-        "registrations",
-        "supportedTrust"
-      ],
+      "fields_present": [],
       "fields_missing": [],
-      "services_declared": 1,
-      "uri_resolved": "https://api.maw.finance/api/intents/wRa2wEjf9D-oDKAHWrRwF/identity.json"
+      "services_declared": 0,
+      "uri_resolved": ""
     },
     "is_self_evaluation": false,
-    "input_hash": "8910d32546f39de2e3a1f21384bdbcb87fd829436e34add8be6069019206f666"
+    "input_hash": "52af8c50eb5116d6a532ba3034e21353883f146b3188ef4ab2d146d371cc6916"
   },
   {
     "agent_id": 2731,
@@ -4405,14 +4396,14 @@
     "tx_hash": null,
     "attestation_uid": null,
     "tool_calls_used": 3,
-    "timestamp": "2026-03-22T15:41:07.597480+00:00",
+    "timestamp": "2026-03-22T18:45:38.424887+00:00",
     "discovery_source": "erc8004_events",
     "chain_id": 8453,
     "venice": {
       "model": "qwen3-235b-a22b-instruct-2507",
       "tokens_sent": 1332,
-      "tokens_received": 214,
-      "latency_ms": 86418,
+      "tokens_received": 210,
+      "latency_ms": 102236,
       "parse_method": "json_schema"
     },
     "onchain": {
@@ -4435,8 +4426,8 @@
     "agent_id": 35627,
     "agent_uri": "https://execution.market/agents/0x52e05c8e45a32eee169639f6d2ca40f8887b5a15",
     "owner_address": "0x103040545AC5031A11E8C03dd11324C7333a13C7",
-    "composite_score": 21,
-    "confidence": 25,
+    "composite_score": 12,
+    "confidence": 28,
     "state": "WITHHELD_LOW_CONFIDENCE",
     "dimensions": {
       "identity_completeness": 0,
@@ -4455,14 +4446,14 @@
     "tx_hash": null,
     "attestation_uid": null,
     "tool_calls_used": 3,
-    "timestamp": "2026-03-22T15:39:01.284122+00:00",
+    "timestamp": "2026-03-22T20:44:01.374317+00:00",
     "discovery_source": "erc8004_events",
     "chain_id": 8453,
     "venice": {
       "model": "qwen3-235b-a22b-instruct-2507",
       "tokens_sent": 1332,
-      "tokens_received": 215,
-      "latency_ms": 114893,
+      "tokens_received": 203,
+      "latency_ms": 163819,
       "parse_method": "json_schema"
     },
     "onchain": {
@@ -4485,17 +4476,17 @@
     "agent_id": 35635,
     "agent_uri": "https://jina-ai-model.vercel.app/_aixyz/erc-8004.json",
     "owner_address": "0x506D7198e44F16E28ef81A6f5b7167F7D112Ff11",
-    "composite_score": 46,
-    "confidence": 25,
+    "composite_score": 49,
+    "confidence": 64,
     "state": "WITHHELD_LOW_CONFIDENCE",
     "dimensions": {
       "identity_completeness": 86,
       "endpoint_liveness": 0,
       "onchain_history": 63,
       "venice_trust_analysis": 35,
-      "protocol_compliance": 50
+      "protocol_compliance": 100
     },
-    "spread": 86,
+    "spread": 100,
     "endpoints": {
       "declared": 1,
       "live": 0,
@@ -4505,14 +4496,14 @@
     "tx_hash": null,
     "attestation_uid": null,
     "tool_calls_used": 4,
-    "timestamp": "2026-03-22T15:37:27.819641+00:00",
+    "timestamp": "2026-03-22T20:42:32.278776+00:00",
     "discovery_source": "erc8004_events",
     "chain_id": 8453,
     "venice": {
       "model": "qwen3-235b-a22b-instruct-2507",
-      "tokens_sent": 1598,
-      "tokens_received": 339,
-      "latency_ms": 86121,
+      "tokens_sent": 1601,
+      "tokens_received": 272,
+      "latency_ms": 83131,
       "parse_method": "json_schema"
     },
     "onchain": {
@@ -4537,40 +4528,216 @@
       "uri_resolved": "https://jina-ai-model.vercel.app/_aixyz/erc-8004.json"
     },
     "is_self_evaluation": false,
-    "input_hash": "92cd4160296d54a48f7f9934f3dbca62e02e90d9ea1693b39137f2229fc9e9a3"
+    "input_hash": "8211da68a4dcad6dc145a51d037da4cf3e358a2db97c626fb28ba4e1f07141fc"
   },
   {
-    "agent_id": 35683,
-    "agent_uri": "https://sentinel-trust-oracle-production.up.railway.app/agent.json",
-    "owner_address": "0xC32a21ec6d714D5Dd95a1Bc0b60ba8FA9dCABfDd",
-    "composite_score": 76,
-    "confidence": 98,
+    "agent_id": 35642,
+    "agent_uri": "https://agnt.social/api/agent/ay-the-vizier/registration.json",
+    "owner_address": "0x75775181080b3684Cc3be770ba070D1ECc1ec50D",
+    "composite_score": 100,
+    "confidence": 99,
     "state": "PUBLISHED",
     "dimensions": {
-      "identity_completeness": 87,
-      "endpoint_liveness": 65,
-      "onchain_history": 61,
-      "venice_trust_analysis": 72,
-      "protocol_compliance": 100
+      "identity_completeness": 100,
+      "endpoint_liveness": 67,
+      "onchain_history": 83,
+      "venice_trust_analysis": 76,
+      "protocol_compliance": 45
     },
-    "spread": 39,
+    "spread": 55,
+    "endpoints": {
+      "declared": 3,
+      "live": 2,
+      "secured": 1,
+      "dead": 1
+    },
+    "tx_hash": "62a611c0caf90b27d7542bb71351e5225e798c53c7d50e1cbbfbc7c5410ffdc6",
+    "attestation_uid": "0xd506503d0642b1afbaa11a875b172c9fec0960037ef17c2733161861bb5590f8",
+    "tool_calls_used": 4,
+    "timestamp": "2026-03-22T21:06:18.113575+00:00",
+    "discovery_source": "manual_id",
+    "chain_id": 8453,
+    "venice": {
+      "model": "qwen3-235b-a22b-instruct-2507",
+      "tokens_sent": 1961,
+      "tokens_received": 221,
+      "latency_ms": 43104,
+      "parse_method": "json_schema"
+    },
+    "onchain": {
+      "wallet_address": "0x75775181080b3684Cc3be770ba070D1ECc1ec50D",
+      "tx_count": 442,
+      "balance_eth": 0.039797753305612464,
+      "has_contract_code": false,
+      "reputation_entries": 0
+    },
+    "identity": {
+      "fields_present": [
+        "name",
+        "description",
+        "services",
+        "image",
+        "x402Support",
+        "active",
+        "registrations",
+        "supportedTrust"
+      ],
+      "fields_missing": [],
+      "services_declared": 3,
+      "uri_resolved": "https://agnt.social/api/agent/ay-the-vizier/registration.json"
+    },
+    "is_self_evaluation": false,
+    "input_hash": "26fa54d80cce790c8529a6714d6489e52f7d1c5a7e0366fffafca0350b070879"
+  },
+  {
+    "agent_id": 35654,
+    "agent_uri": "ipfs://bafkreihul7s4qt7hj3zpa3zuruihtulbsj7ekbjsoyql5dn6tdoxgwtca4",
+    "owner_address": "0x3F5F40D8c6b7Ec6f9bf89c664cf434bc4404E726",
+    "composite_score": 67,
+    "confidence": 96,
+    "state": "PUBLISHED",
+    "dimensions": {
+      "identity_completeness": 96,
+      "endpoint_liveness": 100,
+      "onchain_history": 63,
+      "venice_trust_analysis": 42,
+      "protocol_compliance": 30
+    },
+    "spread": 70,
     "endpoints": {
       "declared": 2,
       "live": 2,
       "secured": 0,
       "dead": 0
     },
-    "tx_hash": "b446d1115ab55c29c86f419821402a8a17cf827ca2e02c72257ad0970b566957",
-    "attestation_uid": "0x8f42622fb150c161ac1b7578b5ae74ae28796777427609ed7269b89c3c2ae7a9",
+    "tx_hash": "81264b79cecb3145fdd8bb957639d008c4e0680e4c9262ee49d60c61a291a632",
+    "attestation_uid": "0x6733628c6a34ce2a120a6d5bccd0f02177b2a5ef0daff1d86adc8eff7535c311",
     "tool_calls_used": 4,
-    "timestamp": "2026-03-22T18:28:06.880412+00:00",
-    "discovery_source": "manual_id",
+    "timestamp": "2026-03-22T20:38:27.341091+00:00",
+    "discovery_source": "erc8004_events",
+    "chain_id": 8453,
+    "venice": {
+      "model": "qwen3-235b-a22b-instruct-2507",
+      "tokens_sent": 1704,
+      "tokens_received": 329,
+      "latency_ms": 77031,
+      "parse_method": "json_schema"
+    },
+    "onchain": {
+      "wallet_address": "0x3F5F40D8c6b7Ec6f9bf89c664cf434bc4404E726",
+      "tx_count": 1,
+      "balance_eth": 0.0,
+      "has_contract_code": true,
+      "reputation_entries": 0
+    },
+    "identity": {
+      "fields_present": [
+        "name",
+        "description",
+        "services",
+        "image",
+        "x402Support",
+        "active",
+        "supportedTrust"
+      ],
+      "fields_missing": [],
+      "services_declared": 2,
+      "uri_resolved": "https://ipfs.io/ipfs/bafkreihul7s4qt7hj3zpa3zuruihtulbsj7ekbjsoyql5dn6tdoxgwtca4"
+    },
+    "is_self_evaluation": false,
+    "input_hash": "0ef0e4d59e8cf5d0bd8ab4499af44dc7a1295a28c00197f56fc759f9859cbab4"
+  },
+  {
+    "agent_id": 35680,
+    "agent_uri": "https://agnt.social/api/agent/nuget/registration.json",
+    "owner_address": "0x07a54080A1120ea10cBAb226AeFACf98057aa53e",
+    "composite_score": 89,
+    "confidence": 99,
+    "state": "PUBLISHED",
+    "dimensions": {
+      "identity_completeness": 100,
+      "endpoint_liveness": 90,
+      "onchain_history": 87,
+      "venice_trust_analysis": 58,
+      "protocol_compliance": 30
+    },
+    "spread": 70,
+    "endpoints": {
+      "declared": 2,
+      "live": 2,
+      "secured": 0,
+      "dead": 0
+    },
+    "tx_hash": "fb426a0377a5ffb603ac5952d4ba91020fab386eb5bd5f22682b53d9d3de5f3c",
+    "attestation_uid": "0xed63c7bfc489809cf3caa595bffeccbe939b069ffb61aad6165099e320651e48",
+    "tool_calls_used": 4,
+    "timestamp": "2026-03-22T20:37:05.771121+00:00",
+    "discovery_source": "erc8004_events",
+    "chain_id": 8453,
+    "venice": {
+      "model": "qwen3-235b-a22b-instruct-2507",
+      "tokens_sent": 1670,
+      "tokens_received": 304,
+      "latency_ms": 69112,
+      "parse_method": "json_schema"
+    },
+    "onchain": {
+      "wallet_address": "0x07a54080A1120ea10cBAb226AeFACf98057aa53e",
+      "tx_count": 279,
+      "balance_eth": 3.9437643275636e-05,
+      "has_contract_code": true,
+      "reputation_entries": 0
+    },
+    "identity": {
+      "fields_present": [
+        "name",
+        "description",
+        "services",
+        "image",
+        "x402Support",
+        "active",
+        "registrations",
+        "supportedTrust"
+      ],
+      "fields_missing": [],
+      "services_declared": 2,
+      "uri_resolved": "https://agnt.social/api/agent/nuget/registration.json"
+    },
+    "is_self_evaluation": false,
+    "input_hash": "715fff628b7fad3eef1ca65598ec9b9744dfc155f3b8be0024949449e894cf6d"
+  },
+  {
+    "agent_id": 35683,
+    "agent_uri": "https://sentinel-trust-oracle-production.up.railway.app/agent.json",
+    "owner_address": "0xC32a21ec6d714D5Dd95a1Bc0b60ba8FA9dCABfDd",
+    "composite_score": 95,
+    "confidence": 99,
+    "state": "PUBLISHED",
+    "dimensions": {
+      "identity_completeness": 87,
+      "endpoint_liveness": 65,
+      "onchain_history": 61,
+      "venice_trust_analysis": 72,
+      "protocol_compliance": 75
+    },
+    "spread": 26,
+    "endpoints": {
+      "declared": 2,
+      "live": 2,
+      "secured": 0,
+      "dead": 0
+    },
+    "tx_hash": "a6015cdd37a269898ce46d973d47c258bc01eb7e5779e6de44ec7e03eec1304a",
+    "attestation_uid": "0x2c54bb89096240647a33f427220ac4ac621ffacb658a25640a9d8f2adef81a82",
+    "tool_calls_used": 4,
+    "timestamp": "2026-03-22T20:35:15.437606+00:00",
+    "discovery_source": "erc8004_events",
     "chain_id": 8453,
     "venice": {
       "model": "qwen3-235b-a22b-instruct-2507",
       "tokens_sent": 2466,
       "tokens_received": 320,
-      "latency_ms": 55920,
+      "latency_ms": 95739,
       "parse_method": "json_schema"
     },
     "onchain": {
@@ -4600,17 +4767,17 @@
     "agent_id": 35691,
     "agent_uri": "https://microlink-io.vercel.app/_aixyz/erc-8004.json",
     "owner_address": "0x506D7198e44F16E28ef81A6f5b7167F7D112Ff11",
-    "composite_score": 45,
-    "confidence": 8,
+    "composite_score": 41,
+    "confidence": 63,
     "state": "WITHHELD_LOW_CONFIDENCE",
     "dimensions": {
       "identity_completeness": 91,
       "endpoint_liveness": 0,
       "onchain_history": 63,
       "venice_trust_analysis": 25,
-      "protocol_compliance": 50
+      "protocol_compliance": 100
     },
-    "spread": 91,
+    "spread": 100,
     "endpoints": {
       "declared": 2,
       "live": 0,
@@ -4620,14 +4787,14 @@
     "tx_hash": null,
     "attestation_uid": null,
     "tool_calls_used": 4,
-    "timestamp": "2026-03-22T17:59:48.040126+00:00",
+    "timestamp": "2026-03-22T21:09:15.610099+00:00",
     "discovery_source": "erc8004_events",
     "chain_id": 8453,
     "venice": {
       "model": "qwen3-235b-a22b-instruct-2507",
-      "tokens_sent": 1642,
-      "tokens_received": 287,
-      "latency_ms": 212385,
+      "tokens_sent": 1910,
+      "tokens_received": 140,
+      "latency_ms": 76932,
       "parse_method": "json_schema"
     },
     "onchain": {
@@ -4653,5 +4820,231 @@
     },
     "is_self_evaluation": false,
     "input_hash": "a4a14c28b4f534a0792a0ddb193ba09cb421a12ba944eb274846a168c487a6cd"
+  },
+  {
+    "agent_id": 35743,
+    "agent_uri": "https://execution.market/workers/0xe4dc963c56979e0260fc146b87ee24f18220e545",
+    "owner_address": "0x103040545AC5031A11E8C03dd11324C7333a13C7",
+    "composite_score": 17,
+    "confidence": 61,
+    "state": "WITHHELD_LOW_CONFIDENCE",
+    "dimensions": {
+      "identity_completeness": 0,
+      "endpoint_liveness": 0,
+      "onchain_history": 74,
+      "venice_trust_analysis": 45,
+      "protocol_compliance": 0
+    },
+    "spread": 74,
+    "endpoints": {
+      "declared": 0,
+      "live": 0,
+      "secured": 0,
+      "dead": 0
+    },
+    "tx_hash": null,
+    "attestation_uid": null,
+    "tool_calls_used": 3,
+    "timestamp": "2026-03-22T21:08:10.755277+00:00",
+    "discovery_source": "erc8004_events",
+    "chain_id": 8453,
+    "venice": {
+      "model": "qwen3-235b-a22b-instruct-2507",
+      "tokens_sent": 1548,
+      "tokens_received": 133,
+      "latency_ms": 42913,
+      "parse_method": "json_schema"
+    },
+    "onchain": {
+      "wallet_address": "0xe4dc963c56979E0260fc146b87eE24F18220e545",
+      "tx_count": 12,
+      "balance_eth": 5.8971570620633e-05,
+      "has_contract_code": false,
+      "reputation_entries": 0
+    },
+    "identity": {
+      "fields_present": [],
+      "fields_missing": [],
+      "services_declared": 0,
+      "uri_resolved": ""
+    },
+    "is_self_evaluation": false,
+    "input_hash": "a4fc2f2f255dde920d7cde8c199a8495b8b66a74e0e30c7c359c1feef5cfe791"
+  },
+  {
+    "agent_id": 35760,
+    "agent_uri": "ipfs://bafkreiakb2tl6revzb7zlx6jifbqxagn5dreeeg4u5vfrypfhwgzqpp77q",
+    "owner_address": "0x3c6dB36Db432909B5e5d76F3fDF16f6426a329dd",
+    "composite_score": 67,
+    "confidence": 96,
+    "state": "PUBLISHED",
+    "dimensions": {
+      "identity_completeness": 96,
+      "endpoint_liveness": 100,
+      "onchain_history": 63,
+      "venice_trust_analysis": 42,
+      "protocol_compliance": 30
+    },
+    "spread": 70,
+    "endpoints": {
+      "declared": 2,
+      "live": 2,
+      "secured": 0,
+      "dead": 0
+    },
+    "tx_hash": "a152bc30c97e43cd4c26bde132e6345d8a1c879f6bea261bfad390be6af71b5e",
+    "attestation_uid": "0xc313c264838803e086e8456010df8d8880ef0352fa2e227212fa1c59819131ba",
+    "tool_calls_used": 4,
+    "timestamp": "2026-03-22T20:30:25.619808+00:00",
+    "discovery_source": "erc8004_events",
+    "chain_id": 8453,
+    "venice": {
+      "model": "qwen3-235b-a22b-instruct-2507",
+      "tokens_sent": 1704,
+      "tokens_received": 360,
+      "latency_ms": 98146,
+      "parse_method": "json_schema"
+    },
+    "onchain": {
+      "wallet_address": "0x3c6dB36Db432909B5e5d76F3fDF16f6426a329dd",
+      "tx_count": 1,
+      "balance_eth": 0.0,
+      "has_contract_code": true,
+      "reputation_entries": 0
+    },
+    "identity": {
+      "fields_present": [
+        "name",
+        "description",
+        "services",
+        "image",
+        "x402Support",
+        "active",
+        "supportedTrust"
+      ],
+      "fields_missing": [],
+      "services_declared": 2,
+      "uri_resolved": "https://ipfs.io/ipfs/bafkreiakb2tl6revzb7zlx6jifbqxagn5dreeeg4u5vfrypfhwgzqpp77q"
+    },
+    "is_self_evaluation": false,
+    "input_hash": "6a738582add8ec53a6f1551860924aea0683dcb86d87f4b1f910c2822903ddb8"
+  },
+  {
+    "agent_id": 35761,
+    "agent_uri": "https://marketplace.olas.network/erc8004/base/ai-agents/447",
+    "owner_address": "0x67722c823010CEb4BED5325fE109196C0f67D053",
+    "composite_score": 60,
+    "confidence": 86,
+    "state": "PUBLISHED",
+    "dimensions": {
+      "identity_completeness": 95,
+      "endpoint_liveness": 70,
+      "onchain_history": 63,
+      "venice_trust_analysis": 42,
+      "protocol_compliance": 30
+    },
+    "spread": 65,
+    "endpoints": {
+      "declared": 2,
+      "live": 2,
+      "secured": 0,
+      "dead": 0
+    },
+    "tx_hash": "8f451b6cf780a8bdf39c72b0daa07723e655071a2389ac8d9a7b46c8e8f3b25d",
+    "attestation_uid": "0x4eabf4b37c35d4c48799aa37d27c74079a087ec843a6fc0f8854336ab0684879",
+    "tool_calls_used": 4,
+    "timestamp": "2026-03-22T20:27:14.074746+00:00",
+    "discovery_source": "erc8004_events",
+    "chain_id": 8453,
+    "venice": {
+      "model": "qwen3-235b-a22b-instruct-2507",
+      "tokens_sent": 1659,
+      "tokens_received": 433,
+      "latency_ms": 176881,
+      "parse_method": "json_schema"
+    },
+    "onchain": {
+      "wallet_address": "0x67722c823010CEb4BED5325fE109196C0f67D053",
+      "tx_count": 1,
+      "balance_eth": 0.0,
+      "has_contract_code": true,
+      "reputation_entries": 0
+    },
+    "identity": {
+      "fields_present": [
+        "name",
+        "description",
+        "services",
+        "image",
+        "x402Support",
+        "active",
+        "registrations",
+        "supportedTrust"
+      ],
+      "fields_missing": [],
+      "services_declared": 2,
+      "uri_resolved": "https://marketplace.olas.network/erc8004/base/ai-agents/447"
+    },
+    "is_self_evaluation": false,
+    "input_hash": "6a356af552646bcd583bedc84808c34787d46a8db6d282713933e52211bf2e30"
+  },
+  {
+    "agent_id": 35784,
+    "agent_uri": "https://marketplace.olas.network/erc8004/base/ai-agents/448",
+    "owner_address": "0x67722c823010CEb4BED5325fE109196C0f67D053",
+    "composite_score": 63,
+    "confidence": 92,
+    "state": "PUBLISHED",
+    "dimensions": {
+      "identity_completeness": 90,
+      "endpoint_liveness": 90,
+      "onchain_history": 63,
+      "venice_trust_analysis": 42,
+      "protocol_compliance": 30
+    },
+    "spread": 60,
+    "endpoints": {
+      "declared": 1,
+      "live": 1,
+      "secured": 0,
+      "dead": 0
+    },
+    "tx_hash": "75974e7454831bbfc46059d2cd3daa1c6f36dc27bea9a9c1c18720ef65720019",
+    "attestation_uid": "0x3f24005a7bd75d00a9ca1093476249bea69cfbfec27e169d2b3eef848b3d259c",
+    "tool_calls_used": 4,
+    "timestamp": "2026-03-22T20:38:28.315156+00:00",
+    "discovery_source": "erc8004_events",
+    "chain_id": 8453,
+    "venice": {
+      "model": "qwen3-235b-a22b-instruct-2507",
+      "tokens_sent": 1593,
+      "tokens_received": 307,
+      "latency_ms": 104950,
+      "parse_method": "json_schema"
+    },
+    "onchain": {
+      "wallet_address": "0x67722c823010CEb4BED5325fE109196C0f67D053",
+      "tx_count": 1,
+      "balance_eth": 0.0,
+      "has_contract_code": true,
+      "reputation_entries": 0
+    },
+    "identity": {
+      "fields_present": [
+        "name",
+        "description",
+        "services",
+        "image",
+        "x402Support",
+        "active",
+        "registrations",
+        "supportedTrust"
+      ],
+      "fields_missing": [],
+      "services_declared": 1,
+      "uri_resolved": "https://marketplace.olas.network/erc8004/base/ai-agents/448"
+    },
+    "is_self_evaluation": false,
+    "input_hash": "190620373b7df27b5a0fced5fd34d491278e71ead1edc8ea5b393f3f4f6a4d3b"
   }
 ]

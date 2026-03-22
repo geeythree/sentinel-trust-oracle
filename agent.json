@@ -41,7 +41,7 @@
     }
   ],
   "active": true,
-  "x402Support": false,
+  "x402Support": true,
   "operator": {
     "wallet": "0xC32a21ec6d714D5Dd95a1Bc0b60ba8FA9dCABfDd"
   },
@@ -60,7 +60,10 @@
       "identity_sepolia": "0x8004A818BFB912233c491871b3d84c89A494BD9e",
       "reputation_mainnet": "0x8004BAa17C55a88189AE136b182e5fdA19dE9b63",
       "reputation_sepolia": "0x8004B663056A597Dffe9eCcC1965A193B7388713",
-      "eas": "0x4200000000000000000000000000000000000021"
+      "validation_mainnet": "0x8004Cc8439f36fd5F9F049D9fF86523Df6dAAB58",
+      "validation_sepolia": "0x8004Cb1BF31DAf7788923b405b754f57acEB4272",
+      "eas": "0x4200000000000000000000000000000000000021",
+      "eas_schema_uid": "0x86402407ac6d3c823ea3bb44300b82011aa840ac19ef64c6f228b12fc4d60b87"
     }
   },
   "tools": [
@@ -74,6 +77,14 @@
     },
     {
       "name": "erc8004_reputation_write",
+      "type": "blockchain"
+    },
+    {
+      "name": "erc8004_validation_read",
+      "type": "blockchain"
+    },
+    {
+      "name": "erc8004_validation_write",
       "type": "blockchain"
     },
     {
@@ -104,11 +115,18 @@
       "protocol_compliance"
     ],
     "weights": {
-      "identity_completeness": 0.20,
-      "endpoint_liveness": 0.20,
-      "onchain_history": 0.20,
-      "venice_trust_analysis": 0.25,
-      "protocol_compliance": 0.15
+      "identity_completeness": 0.30,
+      "endpoint_liveness": 0.25,
+      "onchain_history": 0.25,
+      "protocol_compliance": 0.20,
+      "venice_trust_analysis": "multiplier [0.3–1.5× base]"
+    },
+    "sybil_detection": "HHI concentration index on reputation reviewers",
+    "confidence_model": "Bayesian log-odds with continuous LR, Venice correlation discount",
+    "transitive_trust": "Subjective Logic discount operator (Jøsang 2016)",
+    "veto_conditions": {
+      "venice_fraud_signal": "venice < 20 → composite capped at 30",
+      "unverifiable_identity": "identity < 15 → composite capped at 35"
     },
     "scale": "0-100 per dimension"
   },

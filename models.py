@@ -117,6 +117,8 @@ class ExistingReputation:
     feedback_count: int = 0
     summary_value: int = 0
     summary_decimals: int = 0
+    unique_reviewer_count: int = 0   # distinct caller addresses
+    hhi: int = 0                     # Herfindahl-Hirschman Index (0-10000); >2500 = sybil risk
 
 
 @dataclass
@@ -129,6 +131,7 @@ class OnchainAnalysis:
     has_contract_code: bool = False
     existing_reputation: ExistingReputation = field(default_factory=ExistingReputation)
     onchain_score: int = 0  # default 0; neutral baseline (50) set explicitly by analyzer on success
+    ens_name: str = ""
 
 
 @dataclass

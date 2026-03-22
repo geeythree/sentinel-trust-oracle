@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import ipaddress
+import json
 import logging
 import socket
 import time
@@ -40,6 +41,8 @@ class LivenessChecker:
         """Check all declared service endpoints."""
         services = manifest.get("services", [])
         if not services:
+            # Still score ERC-8004 protocol compliance even with no services
+            protocol_score = self._check_protocol_compliance(manifest, [])
             return LivenessResult(
                 success=True,
                 endpoints_declared=0,
@@ -47,6 +50,7 @@ class LivenessChecker:
                 endpoints_secured=0,
                 endpoints_dead=0,
                 liveness_score=0,
+                protocol_compliance_score=protocol_score,
                 details=[],
             )
 
@@ -79,8 +83,8 @@ class LivenessChecker:
         total_score = sum(d.score for d in details)
         avg_score = round(total_score / len(details)) if details else 0
 
-        # MCP protocol compliance check for stdio:// or SSE endpoints
-        protocol_score = self._check_protocol_compliance(services)
+        # MCP + ERC-8004 protocol compliance check
+        protocol_score = self._check_protocol_compliance(manifest, services)
 
         return LivenessResult(
             success=True,
@@ -93,63 +97,169 @@ class LivenessChecker:
             details=details,
         )
 
-    def _check_protocol_compliance(self, services: list[dict]) -> int:
-        """Check MCP protocol declaration in manifest services.
+    def _try_mcp_handshake(self, endpoint: str) -> tuple[bool, str]:
+        """Attempt MCP initialize handshake per spec 2025-03-26.
 
-        This checks whether services declare MCP-compatible transport or metadata.
-        It does NOT perform an actual MCP initialize handshake.
+        POSTs JSON-RPC initialize with Accept: application/json, text/event-stream.
+        Handles both plain JSON responses (Streamable HTTP transport) and
+        SSE event streams (legacy SSE transport).
 
-        Scoring:
-        - 100: Agent declares MCP transport (stdio, SSE) and has live HTTP endpoints
-        - 90: Agent declares MCP transport (no live HTTP)
-        - 80: Agent declares MCP metadata (supportedProtocols, mcpVersion)
-        - 50: Agent has HTTP endpoints only (no MCP signals)
-        - 0: No protocol signals detected
+        Returns (success, protocol_version_str).
         """
-        score = 0
+        is_private, dns_failed = self._is_private_endpoint(endpoint)
+        if is_private or dns_failed:
+            return (False, "")
+
+        payload = {
+            "jsonrpc": "2.0",
+            "id": 1,
+            "method": "initialize",
+            "params": {
+                "protocolVersion": "2025-03-26",
+                "capabilities": {},
+                "clientInfo": {"name": "sentinel-trust-oracle", "version": "1.0"},
+            },
+        }
+        headers = {
+            "Content-Type": "application/json",
+            "Accept": "application/json, text/event-stream",
+        }
+        try:
+            resp = self._session.post(
+                endpoint,
+                json=payload,
+                headers=headers,
+                timeout=5,
+                allow_redirects=False,
+                stream=True,
+            )
+            if resp.status_code not in (200, 201):
+                return (False, "")
+
+            content_type = resp.headers.get("Content-Type", "")
+            if "text/event-stream" in content_type:
+                # SSE transport: read first data event
+                for raw_line in resp.iter_lines(decode_unicode=True):
+                    if raw_line and raw_line.startswith("data:"):
+                        data_str = raw_line[5:].strip()
+                        try:
+                            data = json.loads(data_str)
+                            version = data.get("result", {}).get("protocolVersion", "")
+                            return (bool(version), version)
+                        except Exception:
+                            pass
+                        break
+            else:
+                # Streamable HTTP (or plain JSON) transport
+                try:
+                    data = resp.json()
+                    version = data.get("result", {}).get("protocolVersion", "")
+                    return (bool(version), version)
+                except Exception:
+                    pass
+
+            return (False, "")
+        except Exception:
+            return (False, "")
+
+    def _check_protocol_compliance(self, manifest: dict, services: list[dict]) -> int:
+        """ERC-8004 + MCP protocol compliance scoring.
+
+        Scores two layers of compliance:
+
+        Layer 1 — ERC-8004 manifest compliance (the protocol being evaluated):
+          - Has ERC-8004 type URI in manifest        → +10
+          - Services declare skills (interface spec)  → +20
+          - Services declare domains                  → +15
+          - Manifest has task_categories              → +10
+          - Has live HTTP infrastructure              → +35 baseline
+
+        Layer 2 — MCP transport signals (bonus on top):
+          - Declares stdio/SSE/streamable-http        → +15
+          - Successful MCP initialize handshake       → 100 (overrides all)
+
+        Resulting bands:
+          100  : MCP handshake confirmed
+          80-95: Full ERC-8004 compliance + MCP transport declared
+          65-80: Full ERC-8004 compliance (skills + domains + type + task_categories)
+          45-65: Partial ERC-8004 compliance
+          35   : HTTP infrastructure only, no metadata
+          20   : stdio-only agent (no HTTP to verify)
+          0    : No protocol signals
+        """
         has_mcp_transport = False
-        has_mcp_metadata = False
-        has_live_http = False
+        has_skills = False
+        has_domains = False
+        http_endpoints: list[str] = []
 
         for svc in services:
             if not isinstance(svc, dict):
                 continue
-
             endpoint = svc.get("endpoint", "")
             transport = svc.get("transport", "").lower()
             protocol = svc.get("protocol", "").lower()
 
-            # Check for MCP transport declarations
             if transport in ("stdio", "sse", "streamable-http"):
                 has_mcp_transport = True
             if "mcp" in protocol or "mcp" in svc.get("type", "").lower():
-                has_mcp_metadata = True
-
-            # Check for MCP-related fields
-            if svc.get("mcpVersion") or svc.get("supportedProtocols"):
-                has_mcp_metadata = True
-
-            # Check for live HTTP endpoints (already verified by liveness check)
-            if isinstance(endpoint, str) and endpoint.startswith(("http://", "https://")):
-                has_live_http = True
-
-            # Check for SSE endpoint pattern
+                has_mcp_transport = True
             if isinstance(endpoint, str) and "/sse" in endpoint.lower():
                 has_mcp_transport = True
+            if svc.get("skills"):
+                has_skills = True
+            if svc.get("domains"):
+                has_domains = True
+            if isinstance(endpoint, str) and endpoint.startswith(("http://", "https://")):
+                http_endpoints.append(endpoint)
 
-        if has_mcp_transport and has_live_http:
+        # Attempt real MCP handshake (best possible signal)
+        handshake_success = False
+        handshake_version = ""
+        for ep in http_endpoints:
+            ok, version = self._try_mcp_handshake(ep)
+            if ok:
+                handshake_success = True
+                handshake_version = version
+                _log.info("MCP handshake success: endpoint=%s protocolVersion=%s", ep, version)
+                break
+            else:
+                _log.debug("MCP handshake failed for endpoint: %s", ep)
+
+        if handshake_success:
             score = 100
-        elif has_mcp_transport:
-            score = 90
-        elif has_mcp_metadata:
-            score = 80
-        elif has_live_http:
-            # HTTP endpoints exist but no MCP signals — partial compliance
-            score = 50
-        # else: 0
+        else:
+            # ERC-8004 manifest compliance scoring
+            has_erc8004_type = bool(manifest.get("type", ""))
+            has_task_categories = bool(manifest.get("task_categories"))
 
-        _log.info("Protocol compliance: score=%d mcp_transport=%s mcp_meta=%s http=%s",
-                   score, has_mcp_transport, has_mcp_metadata, has_live_http)
+            score = 0
+            if http_endpoints:
+                score = 35  # baseline: has live HTTP infrastructure
+
+            if has_erc8004_type:
+                score += 10  # declares ERC-8004 type URI — protocol-aware agent
+            if has_skills:
+                score += 20  # service-level skill declarations — core ERC-8004 interface
+            if has_domains:
+                score += 15  # domain declarations — agent capability taxonomy
+            if has_task_categories:
+                score += 10  # top-level task taxonomy
+
+            # MCP transport bonus
+            if has_mcp_transport and http_endpoints:
+                score += 15  # declared MCP transport + HTTP infrastructure
+            elif has_mcp_transport:
+                score = max(score, 20)  # stdio-only: no HTTP to probe but transport declared
+
+            score = min(100, score)
+
+        _log.info(
+            "Protocol compliance: score=%d handshake=%s version=%r mcp_transport=%s "
+            "skills=%s domains=%s erc8004_type=%s http_eps=%d",
+            score, handshake_success, handshake_version,
+            has_mcp_transport, has_skills, has_domains,
+            bool(manifest.get("type")), len(http_endpoints),
+        )
         return score
 
     @staticmethod

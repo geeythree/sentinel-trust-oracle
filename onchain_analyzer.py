@@ -40,8 +40,13 @@ class OnchainAnalyzer:
             # 4. Check existing reputation in ERC-8004
             existing_rep = self._check_existing_reputation(agent_id)
 
-            # 5. Score (no penalty for new wallets)
-            score = self._compute_onchain_score(tx_count, balance_eth, existing_rep, has_code)
+            # 5. ENS reverse resolution (Ethereum identity signal)
+            ens_name = self._resolve_ens_name(agent_wallet)
+            if ens_name:
+                _log.info("ENS resolved: %s → %s", agent_wallet, ens_name)
+
+            # 6. Score (no penalty for new wallets; HHI sybil penalty applied if concentrated)
+            score = self._compute_onchain_score(tx_count, balance_eth, existing_rep, has_code, ens_name)
 
             return OnchainAnalysis(
                 success=True,
@@ -51,23 +56,44 @@ class OnchainAnalyzer:
                 has_contract_code=has_code,
                 existing_reputation=existing_rep,
                 onchain_score=score,
+                ens_name=ens_name,
             )
         except Exception as e:
             _log.warning("On-chain analysis failed for %s: %s", agent_wallet, e, exc_info=True)
+            ens_name = ""
             return OnchainAnalysis(
                 success=False,
                 wallet_address=agent_wallet,
                 onchain_score=0,  # failure = no data = 0 score
             )
 
-    def _check_existing_reputation(self, agent_id: int) -> ExistingReputation:
-        """Read from ERC-8004 Reputation Registry."""
+    def _resolve_ens_name(self, wallet_address: str) -> str:
+        """Resolve wallet address to ENS name via public reverse lookup.
+        Returns empty string if not found or on error."""
+        import requests as _req
         try:
-            result = self._blockchain.get_reputation_summary(agent_id)
+            resp = _req.get(
+                f"https://api.ensideas.com/ens/resolve/{wallet_address}",
+                timeout=5,
+            )
+            if resp.status_code == 200:
+                name = resp.json().get("name") or ""
+                if name and name.endswith(".eth"):
+                    return name
+        except Exception:
+            pass
+        return ""
+
+    def _check_existing_reputation(self, agent_id: int) -> ExistingReputation:
+        """Read from ERC-8004 Reputation Registry (with HHI sybil detection)."""
+        try:
+            count, avg_value, decimals, hhi, unique = self._blockchain.get_reputation_with_hhi(agent_id)
             return ExistingReputation(
-                feedback_count=result[0],
-                summary_value=result[1],
-                summary_decimals=result[2],
+                feedback_count=count,
+                summary_value=avg_value,
+                summary_decimals=decimals,
+                hhi=hhi,
+                unique_reviewer_count=unique,
             )
         except Exception:
             return ExistingReputation(feedback_count=0, summary_value=0, summary_decimals=0)
@@ -78,6 +104,7 @@ class OnchainAnalyzer:
         balance: float,
         rep: ExistingReputation,
         has_code: bool = False,
+        ens_name: str = "",
     ) -> int:
         """Score 0-100. Finer granularity for better score discrimination.
 
@@ -130,8 +157,31 @@ class OnchainAnalyzer:
             score += 3
         # no reputation: +0
 
+        # HHI sybil penalty — smooth continuous function (only when ≥3 feedbacks)
+        # Starts at HHI=1000 (10 equal reviewers), reaches max -15 at HHI=10000 (single reviewer)
+        # penalty = 15 × (HHI - 1000) / 9000, clamped to [0, 15]
+        if rep.feedback_count >= 3 and rep.hhi > 1000:
+            raw_penalty = 15.0 * (rep.hhi - 1000) / 9000.0
+            penalty = round(raw_penalty)
+            score -= penalty
+            if penalty >= 8:
+                _log.warning(
+                    "Sybil flag: HHI=%d penalty=-%d (unique_reviewers=%d count=%d)",
+                    rep.hhi, penalty, rep.unique_reviewer_count, rep.feedback_count,
+                )
+            else:
+                _log.info(
+                    "HHI concentration: HHI=%d penalty=-%d (unique=%d)",
+                    rep.hhi, penalty, rep.unique_reviewer_count,
+                )
+
         # Contract code detection (max +10)
         if has_code:
             score += 10  # address has deployed contract code — strong dev signal
 
-        return min(100, score)
+        # ENS identity bonus (max +8): verified on-chain identity
+        if ens_name:
+            score += 8
+            # Capped total stays at min(100, score)
+
+        return min(100, max(0, score))

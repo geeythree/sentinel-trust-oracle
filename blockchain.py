@@ -219,6 +219,89 @@ class BlockchainClient:
             _log.warning("get_reputation_summary(%d) failed", agent_id, exc_info=True)
             return (0, 0, 0)
 
+    def get_reputation_with_hhi(self, agent_id: int) -> tuple[int, int, int, int, int]:
+        """Like get_reputation_summary but also returns HHI concentration and unique reviewer count.
+
+        Returns (count, avg_value, decimals, hhi, unique_reviewers).
+
+        HHI = Σ(sᵢ²) * 10000 where sᵢ = count_i / total.
+        >2500 → highly concentrated (sybil risk); >1500 → moderately concentrated.
+        """
+        from collections import Counter
+        try:
+            latest = self._w3.eth.block_number
+            from_block = max(0, latest - 50_000)
+            address = Web3.to_checksum_address(config.reputation_registry)
+
+            event_sig = self._w3.keccak(text="NewFeedback(uint256,address,int128,string,string)")
+            agent_id_topic = "0x" + abi_encode(["uint256"], [agent_id]).hex()
+
+            chunk_size = 10_000
+            logs = []
+            start = from_block
+            while start <= latest:
+                end = min(start + chunk_size - 1, latest)
+                try:
+                    chunk_logs = self._w3.eth.get_logs({
+                        "fromBlock": start,
+                        "toBlock": end,
+                        "address": address,
+                        "topics": [event_sig, agent_id_topic],
+                    })
+                    logs.extend(chunk_logs)
+                except Exception:
+                    _log.warning("get_reputation_with_hhi chunk %d-%d failed", start, end, exc_info=True)
+                start = end + 1
+
+            if not logs:
+                return (0, 0, 0, 0, 0)
+
+            decoded = []
+            for log in logs:
+                try:
+                    event = self._reputation_registry.events.NewFeedback().process_log(log)
+                    decoded.append(event)
+                except Exception:
+                    continue
+
+            if not decoded:
+                return (0, 0, 0, 0, 0)
+
+            count = len(decoded)
+
+            # Recency-weighted average: feedback in last 10k blocks (≈3.5 hours)
+            # gets full weight; older feedback gets 0.5× weight.
+            # This makes recent reputation changes more impactful.
+            RECENCY_BLOCKS = 10_000
+            recency_cutoff = latest - RECENCY_BLOCKS
+            total_weight = 0.0
+            weighted_sum = 0.0
+            for e in decoded:
+                block_num = e.get("blockNumber", 0)
+                weight = 1.0 if block_num >= recency_cutoff else 0.5
+                value = e["args"]["value"]
+                weighted_sum += weight * value
+                total_weight += weight
+            avg_value = round(weighted_sum / total_weight) if total_weight > 0 else 0
+
+            # HHI: collect sender addresses and compute concentration
+            callers = [e["args"].get("sender", "") for e in decoded]
+            caller_counts = Counter(c.lower() for c in callers if c)
+            unique = len(caller_counts)
+            if unique > 0 and count > 0:
+                hhi = round(sum((c / count) ** 2 for c in caller_counts.values()) * 10000)
+            else:
+                hhi = 0
+
+            _log.info(
+                "Reputation HHI for agent %d: count=%d unique=%d HHI=%d",
+                agent_id, count, unique, hhi,
+            )
+            return (count, avg_value, 0, hhi, unique)
+        except Exception:
+            _log.warning("get_reputation_with_hhi(%d) failed", agent_id, exc_info=True)
+            return (0, 0, 0, 0, 0)
+
     def get_latest_block(self) -> int:
         """Get the latest block number."""
         return self._w3.eth.block_number

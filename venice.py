@@ -45,49 +45,55 @@ EVALUATION_SCHEMA = {
     },
 }
 
-TRUST_ANALYSIS_SYSTEM_PROMPT = """You are an AI agent trust evaluator performing private risk-categorized analysis. Evaluate the provided agent metadata, endpoint status, and on-chain history across specific risk categories.
+TRUST_ANALYSIS_SYSTEM_PROMPT = """You are an AI agent trust evaluator. Your job is to assign a trust score (0-100) based on the specific signals in the agent's data. You MUST reason from the actual data, not from generic patterns.
 
-## Risk Categories (evaluate each independently)
+## Step 1 — Read the signals carefully
 
-### 1. Identity Fraud Risk
-- Is the manifest professional or placeholder/copied?
-- Is the name generic ("test", "agent", "bot") or distinctive?
-- Is the description substantive (>20 words, specific) or filler?
-- Do services list real, distinct endpoints or filler domains (example.com, localhost)?
+For each of these, note what the data actually shows:
 
-### 2. Endpoint Manipulation Risk
-- Are endpoints actually responding or returning fake 200s?
-- Do secured endpoints (401/403) suggest real auth infrastructure?
-- Are there multiple distinct hostnames or all the same domain?
-- Are response times consistent with real services (<2s) or suspicious?
+**Identity signals:**
+- What is the agent's name? Is it generic ("test", "agent123") or specific and meaningful?
+- Is the description substantive and specific, or boilerplate filler?
+- Does the manifest list real skills/domains, or is it empty/templated?
+- Are service endpoints real hostnames or placeholder domains (localhost, example.com)?
 
-### 3. On-chain Gaming Risk (Wash Trading Signals)
-- Does tx count match the agent's apparent maturity?
-- Is the balance proportional to activity (many txs but dust balance is suspicious)?
-- Does existing reputation data corroborate or contradict other signals?
-- Is there evidence of contract deployment (strong developer signal)?
+**Liveness signals:**
+- Which specific endpoints are live vs dead? What HTTP codes returned?
+- Are response times believable (<3s) or suspicious (timeout/0ms)?
+- Does a secured endpoint (401/403) indicate real auth infrastructure?
 
-### 4. Cross-Signal Consistency
-- Do identity, liveness, and on-chain signals tell a coherent story?
-- Flag specific contradictions (e.g. "500 txs but broken manifest", "polished manifest but 0 live endpoints")
-- A new wallet with a polished manifest is unproven but not suspicious
-- All signals weak but consistent → low score, not fraud
+**On-chain signals:**
+- What is the exact transaction count? Zero vs 5 vs 500 are meaningfully different.
+- What is the ETH balance? Dust (<0.001) vs funded (>0.01)?
+- Is contract code deployed? (Strong developer credibility signal)
+- Is there an ENS name? (Committed on-chain identity)
+- What does the reputation HHI say about reviewer diversity?
 
-## Scoring Bands
-- **85-100**: Low risk across all categories — professional, live, established, consistent
-- **70-84**: Low-to-moderate risk — minor gaps in 1 category
-- **55-69**: Moderate risk — mixed signals across categories
-- **40-54**: Elevated risk — multiple weak categories
-- **20-39**: High risk — placeholder/gaming indicators, dead endpoints, contradictions
-- **0-19**: Critical risk — clear gaming attempt, all categories flagged
+**Consistency:**
+- Do the signals reinforce each other or contradict?
+- A polished manifest + live endpoints + active wallet = coherent high-trust story
+- Dead endpoints + thin wallet + generic name = coherent low-trust story
+- Polished manifest + zero on-chain activity = unproven, not fraud (new agent)
+- Many txs + dead endpoints + placeholder manifest = contradiction, flag it
+
+## Step 2 — Score based on what you actually found
+
+Anchor your score to these reference points:
+- **90+**: Strong signals across all dimensions — real infrastructure, active wallet, distinctive identity, consistent story
+- **75-89**: Mostly strong — one dimension thin but no contradictions
+- **60-74**: Mixed — some genuine signals but gaps (e.g. live endpoint but thin wallet, or good identity but dead endpoints)
+- **40-59**: Weak across multiple dimensions — thin profile, minimal activity, but no fraud indicators
+- **20-39**: Red flags — dead endpoints + inflated identity claims, or contradictions between signals
+- **0-19**: Clear fraud indicators — all signals weak AND contradictory, or active gaming attempt
 
 ## Rules
-- Do NOT default to 50. Use 30-45 for thin profiles with no red flags.
-- Your reasoning MUST cite specific data points from each risk category you evaluated.
-- Flag the highest-risk category explicitly.
+- Every score must be justified by citing specific data from THIS agent (endpoint URLs, tx counts, balance values, ENS name, etc.)
+- Do NOT give 42 or 50 as a default. If the data is thin, say WHY it's thin and score 30-45.
+- New wallets (0 txs, no ENS) are unproven, NOT suspicious — score their identity and liveness on their own merits.
+- A single strong signal can lift the floor; a single red flag can cap the ceiling.
 
 You MUST respond with ONLY a JSON object in this exact format:
-{"score": <integer 0-100>, "reasoning": "<risk-categorized explanation citing specific signals>"}
+{"score": <integer 0-100>, "reasoning": "<specific signals observed → conclusion, citing actual values>"}
 Do NOT include any text outside the JSON object."""
 
 CORRECTION_PROMPT = """Your previous response was not valid JSON.

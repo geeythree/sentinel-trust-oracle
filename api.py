@@ -5,18 +5,28 @@ Exposes the evaluation pipeline as REST endpoints for the interactive dashboard.
 from __future__ import annotations
 
 import asyncio
+import base64
 import json
+import math
 import os
 from pathlib import Path
+from typing import Optional
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, Header, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, JSONResponse
 from pydantic import BaseModel
+from web3 import Web3
 
 import logging
 
 _log = logging.getLogger("sentinel.api")
+
+# x402 replay protection (in-memory; resets on server restart — acceptable for hackathon)
+_used_payment_hashes: set[str] = set()
+
+# USDC Transfer event topic
+_USDC_TRANSFER_TOPIC = "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef"
 
 app = FastAPI(title="Sentinel — Agent Trust Oracle", version="1.0.0")
 
@@ -73,6 +83,55 @@ def _get_pipeline():
     return _pipeline_cache
 
 
+def _verify_usdc_payment(tx_hash: str, blockchain, fee_usdc: int) -> bool:
+    """Verify a USDC payment by checking the tx receipt for a Transfer event.
+
+    Looks for Transfer(from, to=OPERATOR, value>=fee_usdc) in the tx receipt logs.
+    """
+    if not tx_hash or not tx_hash.startswith("0x") or len(tx_hash) != 66:
+        return False
+    if tx_hash in _used_payment_hashes:
+        _log.warning("x402 replay attempt: tx_hash=%s already used", tx_hash)
+        return False
+    try:
+        receipt = blockchain.w3.eth.get_transaction_receipt(tx_hash)
+        if not receipt or receipt.status != 1:
+            return False
+
+        import config as cm
+        operator = blockchain._operator_account.address.lower()
+
+        for log_entry in receipt.logs:
+            topics = log_entry.get("topics", [])
+            if not topics:
+                continue
+            topic0 = topics[0].hex() if isinstance(topics[0], bytes) else str(topics[0])
+            if topic0.lower() != _USDC_TRANSFER_TOPIC:
+                continue
+            if len(topics) < 3:
+                continue
+            # topics[2] = 'to' address (indexed, padded to 32 bytes)
+            to_bytes = topics[2]
+            to_addr = "0x" + (to_bytes.hex() if isinstance(to_bytes, bytes) else str(to_bytes))[-40:]
+            if to_addr.lower() != operator:
+                continue
+            # data = value (uint256)
+            data = log_entry.get("data", b"")
+            if isinstance(data, bytes):
+                value = int.from_bytes(data[:32], "big") if len(data) >= 32 else 0
+            else:
+                value = int(str(data), 16) if data else 0
+            if value >= fee_usdc:
+                _used_payment_hashes.add(tx_hash)
+                _log.info("x402 payment verified: tx=%s amount=%d operator=%s", tx_hash, value, operator)
+                return True
+
+        return False
+    except Exception:
+        _log.warning("x402 payment verification failed for tx=%s", tx_hash, exc_info=True)
+        return False
+
+
 # --- Request model ---
 
 class EvaluateRequest(BaseModel):
@@ -107,10 +166,58 @@ async def health():
 
 
 @app.post("/api/evaluate")
-async def evaluate(req: EvaluateRequest):
-    """Run full evaluation pipeline for an agent. One at a time."""
+async def evaluate(req: EvaluateRequest, x_payment: Optional[str] = Header(None, alias="X-PAYMENT")):
+    """Run full evaluation pipeline for an agent. Requires 0.01 USDC payment on Base (x402).
+
+    Payment flow:
+    1. POST without X-PAYMENT → 402 with payment requirements
+    2. Pay USDC to the listed address on Base mainnet
+    3. Retry with X-PAYMENT: base64({"txHash":"0x...","scheme":"exact","network":"base"})
+    """
     if req.agent_id < 0:
         raise HTTPException(status_code=400, detail="agent_id must be non-negative")
+
+    _, _, blockchain, cfg = _get_pipeline()
+
+    # x402 payment gate (mainnet only — skip on testnet for development)
+    if cfg.X402_ENABLED and not cfg.USE_TESTNET:
+        operator_address = blockchain._operator_account.address
+        usdc_address = cfg.USDC_BASE_MAINNET
+
+        if not x_payment:
+            return JSONResponse(
+                status_code=402,
+                content={
+                    "x402Version": 1,
+                    "accepts": [{
+                        "scheme": "exact",
+                        "network": "base",
+                        "maxAmountRequired": str(cfg.EVALUATION_FEE_USDC),
+                        "resource": "/api/evaluate",
+                        "description": "Sentinel trust evaluation — 0.01 USDC",
+                        "mimeType": "application/json",
+                        "payTo": operator_address,
+                        "maxTimeoutSeconds": 300,
+                        "asset": usdc_address,
+                        "extra": {"name": "USDC", "decimals": 6},
+                    }],
+                    "error": "X-PAYMENT header required. Pay 0.01 USDC to the listed address on Base.",
+                },
+            )
+
+        # Verify payment
+        try:
+            payment_data = json.loads(base64.b64decode(x_payment.encode()).decode())
+            tx_hash = payment_data.get("txHash", "")
+        except Exception:
+            raise HTTPException(status_code=400, detail="Invalid X-PAYMENT header: must be base64-encoded JSON with txHash")
+
+        loop = asyncio.get_running_loop()
+        payment_valid = await loop.run_in_executor(
+            None, _verify_usdc_payment, tx_hash, blockchain, cfg.EVALUATION_FEE_USDC
+        )
+        if not payment_valid:
+            raise HTTPException(status_code=402, detail="Payment verification failed. Ensure tx is confirmed on Base mainnet with correct USDC amount.")
 
     if _eval_lock.locked():
         raise HTTPException(
@@ -161,14 +268,21 @@ async def get_reputation(agent_id: int):
     _, _, blockchain, _ = _get_pipeline()
 
     try:
-        count, value, decimals = await loop.run_in_executor(
-            None, blockchain.get_reputation_summary, agent_id
+        count, value, decimals, hhi, unique = await loop.run_in_executor(
+            None, blockchain.get_reputation_with_hhi, agent_id
         )
         return {
             "agent_id": agent_id,
             "feedback_count": count,
             "summary_value": value,
             "summary_decimals": decimals,
+            "unique_reviewer_count": unique,
+            "hhi": hhi,
+            "concentration": (
+                "HIGH_CONCENTRATION" if hhi > 2500 else
+                "MODERATE_CONCENTRATION" if hhi > 1500 else
+                "HEALTHY"
+            ),
         }
     except Exception:
         _log.exception("Reputation lookup failed for agent %d", agent_id)
@@ -229,17 +343,47 @@ async def compute_transitive_trust(req: TransitiveTrustRequest):
     if tgt_data is None:
         raise HTTPException(status_code=404, detail=f"No evaluation found for target agent {req.target_agent_id}")
 
-    req_confidence = (req_data.get("confidence") or 0) / 100.0
-    tgt_score = tgt_data.get("composite_score") or 0
-    derived = round(req_confidence * tgt_score, 1)
+    # Subjective Logic discount operator (Jøsang 2016)
+    req_score = (req_data.get("composite_score") or 0) / 100.0
+    req_uncertainty = 1.0 - (req_data.get("confidence") or 0) / 100.0
+    req_disbelief = max(0.0, 1.0 - req_score - req_uncertainty)
+
+    tgt_score_raw = (tgt_data.get("composite_score") or 0) / 100.0
+    tgt_uncertainty = 1.0 - (tgt_data.get("confidence") or 0) / 100.0
+    tgt_disbelief = max(0.0, 1.0 - tgt_score_raw - tgt_uncertainty)
+
+    b_derived = req_score * tgt_score_raw
+    d_derived = req_score * tgt_disbelief
+    u_derived = req_disbelief + req_uncertainty + req_score * tgt_uncertainty
+    total = b_derived + d_derived + u_derived
+    if total > 0:
+        b_derived /= total
+        d_derived /= total
+        u_derived /= total
+
+    projected = b_derived + 0.5 * u_derived
+    derived_trust = round(projected * 100, 1)
+    derived_confidence = round((1.0 - u_derived) * 100, 1)
 
     return {
         "requester_agent_id": req.requester_agent_id,
+        "requester_score": req_data.get("composite_score"),
         "requester_confidence": req_data.get("confidence"),
         "target_agent_id": req.target_agent_id,
-        "target_score": tgt_score,
-        "derived_trust": derived,
-        "interpretation": "TRUSTED" if derived >= 70 else "MODERATE" if derived >= 50 else "LOW_TRUST",
+        "target_score": tgt_data.get("composite_score"),
+        "target_confidence": tgt_data.get("confidence"),
+        "derived_trust": derived_trust,
+        "derived_confidence": derived_confidence,
+        "model": "subjective_logic_discount",
+        "interpretation": (
+            "TRUSTED" if derived_trust >= 70 else
+            "MODERATE" if derived_trust >= 50 else
+            "LOW_TRUST"
+        ),
+        "note": (
+            f"Trust decays through the referral chain. "
+            f"Uncertainty u={u_derived:.3f} grows with each hop."
+        ),
     }
 
 

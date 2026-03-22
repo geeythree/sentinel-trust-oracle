@@ -3,1249 +3,471 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sentinel — Agent Trust Oracle</title>
-    <meta name="description" content="Autonomous agent trust verification with on-chain reputation. ERC-8004 identity, endpoint liveness, on-chain history, and Venice private AI trust analysis.">
-    <meta property="og:title" content="Sentinel — Agent Trust Oracle">
-    <meta property="og:description" content="Autonomous agent that verifies ERC-8004 agent identities and writes verifiable trust scores to the Reputation Registry via EAS attestations on Base.">
-    <meta property="og:type" content="website">
-    <meta name="theme-color" content="#0a0e1a">
+    <title>Sentinel</title>
+    <meta name="theme-color" content="#0c0d12">
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🛡️</text></svg>">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
-    <script>tailwind.config = { theme: { extend: {} } }</script>
     <style>
-        /* === Base Dark Theme === */
-        body {
-            background: #0a0e1a;
-            color: #d1d5db;
-            font-family: 'Inter', system-ui, -apple-system, sans-serif;
-        }
+        *{box-sizing:border-box;margin:0}
+        body{background:#080a10;color:#b0b4c4;font-family:'DM Sans',system-ui,sans-serif}
+        .mono{font-family:'JetBrains Mono',monospace}
 
-        /* === Animated Grid Background === */
-        body::before {
-            content: '';
-            position: fixed;
-            inset: 0;
-            z-index: -1;
-            background-image:
-                linear-gradient(rgba(6, 182, 212, 0.03) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(6, 182, 212, 0.03) 1px, transparent 1px);
-            background-size: 60px 60px;
-            animation: gridMove 20s linear infinite;
-        }
-        @keyframes gridMove {
-            0% { transform: translate(0, 0); }
-            100% { transform: translate(60px, 60px); }
-        }
+        /* Ambient light — warm, not flat */
+        body::before{content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;
+            background:radial-gradient(ellipse 70% 50% at 15% 0%,rgba(90,143,168,0.06) 0%,transparent 60%),
+                        radial-gradient(ellipse 50% 40% at 90% 100%,rgba(140,110,180,0.04) 0%,transparent 50%)}
 
-        /* === Glassmorphism Card === */
-        .glass-card {
-            background: rgba(15, 23, 42, 0.8);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border: 1px solid rgba(6, 182, 212, 0.15);
-            border-radius: 12px;
-            transition: border-color 0.3s, box-shadow 0.3s, transform 0.3s;
-        }
-        .glass-card:hover {
-            border-color: rgba(6, 182, 212, 0.4);
-            box-shadow: 0 0 20px rgba(6, 182, 212, 0.08);
-            transform: translateY(-1px);
-        }
+        .crd{background:rgba(14,16,24,0.9);border-radius:16px;border:1px solid rgba(255,255,255,0.05);transition:border-color 0.3s,transform 0.3s,box-shadow 0.3s}
+        .crd:hover{border-color:rgba(255,255,255,0.1);transform:translateY(-1px);box-shadow:0 8px 32px rgba(0,0,0,0.3)}
+        .crd-pub{border-left:3px solid #3b9b6b;background:linear-gradient(135deg,rgba(14,16,24,0.9),rgba(12,20,16,0.85))}
+        .crd-with{border-left:3px solid #b8922e}
+        .crd-fail{border-left:3px solid #c0544e}
 
-        /* === Gradient Text === */
-        .gradient-text {
-            background: linear-gradient(135deg, #06b6d4, #22d3ee, #a78bfa);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
+        /* Muted but visible palette */
+        .sc-h{color:#5cb88a} .sc-m{color:#c9a83e} .sc-l{color:#c9635e}
+        .bg-h{background:rgba(92,184,138,0.12);color:#5cb88a;border:1px solid rgba(92,184,138,0.25)}
+        .bg-m{background:rgba(201,168,62,0.1);color:#c9a83e;border:1px solid rgba(201,168,62,0.2)}
+        .bg-r{background:rgba(201,99,94,0.1);color:#c9635e;border:1px solid rgba(201,99,94,0.2)}
+        .bg-c{background:rgba(100,160,190,0.1);color:#6fa5be;border:1px solid rgba(100,160,190,0.2)}
 
-        /* === Score Colors === */
-        .score-high { color: #10b981; }
-        .score-mid { color: #f59e0b; }
-        .score-low { color: #f43f5e; }
+        /* Radar */
+        .radar-label{font:500 11px 'DM Sans',sans-serif;fill:#7a7f96}
+        .radar-grid{stroke:rgba(100,160,190,0.1);stroke-width:1;fill:none}
+        .radar-axis{stroke:rgba(100,160,190,0.08);stroke-width:1}
+        .radar-fill{fill:rgba(100,160,190,0.12);stroke:#5a8fa8;stroke-width:1.5;filter:drop-shadow(0 0 4px rgba(90,143,168,0.2))}
+        .radar-point{fill:#6fa5be;filter:drop-shadow(0 0 4px rgba(100,160,190,0.5))}
+        .radar-val{font:600 10px 'JetBrains Mono',monospace;fill:#82b0c6}
 
-        /* === Radar Chart === */
-        .radar-label { font: 12px 'Inter', sans-serif; fill: #9ca3af; }
-        .radar-grid { stroke: rgba(6, 182, 212, 0.12); stroke-width: 1; fill: none; }
-        .radar-axis { stroke: rgba(6, 182, 212, 0.2); stroke-width: 1; }
-        .radar-fill {
-            fill: rgba(6, 182, 212, 0.15);
-            stroke: #22d3ee;
-            stroke-width: 2;
-            filter: drop-shadow(0 0 6px rgba(6, 182, 212, 0.4));
-            transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        .radar-point {
-            fill: #22d3ee;
-            filter: drop-shadow(0 0 4px rgba(6, 182, 212, 0.6));
-        }
+        /* Detail panels — with colored left accents */
+        .dtl{background:rgba(18,20,30,0.8);border:1px solid rgba(255,255,255,0.04);border-radius:10px;padding:10px 14px;margin-top:6px}
+        .dtl-sky{border-left:2px solid rgba(90,143,168,0.4)}
+        .dtl-amb{border-left:2px solid rgba(201,168,62,0.3)}
+        .dtl-vio{border-left:2px solid rgba(140,110,180,0.3)}
 
-        /* === Animations === */
-        @keyframes fadeInUp {
-            from { opacity: 0; transform: translateY(24px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        .animate-fade-in-up {
-            animation: fadeInUp 0.5s ease-out forwards;
-            opacity: 0;
-        }
+        .pill{display:inline-flex;align-items:center;padding:3px 10px;border-radius:20px;font-size:10px;font-weight:600}
+        .prf{display:inline-flex;align-items:center;gap:4px;font-size:11px;padding:4px 10px;border-radius:8px;background:rgba(255,255,255,0.04);color:#9498ad;text-decoration:none;transition:all 0.2s;font-family:'JetBrains Mono',monospace;border:1px solid rgba(255,255,255,0.04)}
+        .prf:hover{background:rgba(100,160,190,0.08);color:#82b0c6;border-color:rgba(100,160,190,0.15)}
 
-        @keyframes pulseGlow {
-            0%, 100% { box-shadow: 0 0 4px rgba(16, 185, 129, 0.3); }
-            50% { box-shadow: 0 0 12px rgba(16, 185, 129, 0.6); }
-        }
-        .pulse-glow-green {
-            animation: pulseGlow 2s ease-in-out infinite;
-        }
-        @keyframes pulseGlowCyan {
-            0%, 100% { box-shadow: 0 0 4px rgba(6, 182, 212, 0.3); }
-            50% { box-shadow: 0 0 12px rgba(6, 182, 212, 0.6); }
-        }
-        .pulse-glow-cyan {
-            animation: pulseGlowCyan 2s ease-in-out infinite;
-        }
+        .st-box{padding:20px 16px;border-radius:14px;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.04);text-align:center;transition:border-color 0.3s}
+        .st-box:hover{border-color:rgba(255,255,255,0.08)}
+        .st-num{font-size:36px;font-weight:700;letter-spacing:-0.03em;line-height:1}
+        .st-lbl{font-size:11px;color:#7a7f96;margin-top:8px;font-weight:500}
 
-        @keyframes scoreReveal {
-            0% { transform: scale(0.5); opacity: 0; }
-            50% { transform: scale(1.2); }
-            100% { transform: scale(1); opacity: 1; }
-        }
-        .score-reveal {
-            animation: scoreReveal 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
-        }
+        .ev-in{background:rgba(14,16,24,0.9);border:1px solid rgba(255,255,255,0.08);border-radius:12px;color:#e0e2ec;padding:12px 16px;font-size:15px;width:200px;transition:all 0.3s;font-family:'DM Sans'}
+        .ev-in:focus{outline:none;border-color:rgba(100,160,190,0.4);box-shadow:0 0 0 3px rgba(100,160,190,0.06)}
+        .ev-in::placeholder{color:#2a2b38}
+        .ev-btn{background:linear-gradient(135deg,#5a8fa8,#4a7f98);color:#fff;border:none;border-radius:12px;padding:12px 32px;font-weight:700;font-size:14px;cursor:pointer;transition:all 0.25s;box-shadow:0 2px 12px rgba(90,143,168,0.2)}
+        .ev-btn:hover:not(:disabled){box-shadow:0 4px 20px rgba(90,143,168,0.3);transform:translateY(-1px)}
+        .ev-btn:disabled{opacity:0.2;cursor:not-allowed}
 
-        @keyframes shimmer {
-            0% { background-position: -200% 0; }
-            100% { background-position: 200% 0; }
-        }
-        .shimmer {
-            background: linear-gradient(90deg, transparent, rgba(6, 182, 212, 0.08), transparent);
-            background-size: 200% 100%;
-            animation: shimmer 2s infinite;
-        }
+        .fb{padding:6px 16px;font-size:12px;font-weight:600;border-radius:20px;border:1px solid rgba(255,255,255,0.06);background:transparent;color:#7a7f96;cursor:pointer;transition:all 0.2s}
+        .fb:hover{color:#b0b4c4;border-color:rgba(255,255,255,0.12)}
+        .fb.on{background:rgba(100,160,190,0.08);color:#82b0c6;border-color:rgba(100,160,190,0.2)}
 
-        /* === Pipeline Stages === */
-        .pipeline-stage {
-            padding: 6px 14px;
-            border-radius: 8px;
-            font-size: 11px;
-            font-weight: 600;
-            font-family: 'SF Mono', 'Fira Code', monospace;
-            border: 1px solid rgba(100, 116, 139, 0.3);
-            color: #64748b;
-            background: rgba(15, 23, 42, 0.6);
-            transition: all 0.4s ease;
-            position: relative;
-            overflow: hidden;
-        }
-        .pipeline-stage.active {
-            border-color: #22d3ee;
-            color: #22d3ee;
-            background: rgba(6, 182, 212, 0.1);
-            box-shadow: 0 0 12px rgba(6, 182, 212, 0.3);
-        }
-        .pipeline-stage.active::before {
-            content: '';
-            position: absolute;
-            inset: 0;
-            background: linear-gradient(90deg, transparent, rgba(6, 182, 212, 0.1), transparent);
-            background-size: 200% 100%;
-            animation: shimmer 1.5s infinite;
-        }
-        .pipeline-stage.done {
-            border-color: #10b981;
-            color: #10b981;
-            background: rgba(16, 185, 129, 0.1);
-            box-shadow: 0 0 8px rgba(16, 185, 129, 0.2);
-        }
-        .pipeline-arrow {
-            color: #334155;
-            font-size: 14px;
-            transition: color 0.3s;
-        }
-        .pipeline-arrow.lit {
-            color: #22d3ee;
-            filter: drop-shadow(0 0 4px rgba(6, 182, 212, 0.5));
-        }
+        .budget-bar{height:5px;border-radius:3px;background:rgba(255,255,255,0.04);overflow:hidden}
+        .budget-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,#5a8fa8,#5cb88a);transition:width 0.3s}
 
-        /* === Neon Button === */
-        .neon-btn {
-            background: linear-gradient(135deg, #06b6d4, #0891b2);
-            color: white;
-            border: none;
-            border-radius: 8px;
-            padding: 8px 24px;
-            font-weight: 600;
-            font-size: 14px;
-            cursor: pointer;
-            transition: all 0.3s;
-            box-shadow: 0 0 12px rgba(6, 182, 212, 0.3);
-        }
-        .neon-btn:hover:not(:disabled) {
-            box-shadow: 0 0 24px rgba(6, 182, 212, 0.5);
-            transform: translateY(-1px);
-        }
-        .neon-btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
+        .pipe{display:flex;align-items:center;justify-content:center;gap:4px}
+        .p-dot{width:10px;height:10px;border-radius:50%;background:rgba(255,255,255,0.06);transition:all 0.4s}
+        .p-dot.on{background:#6fa5be;box-shadow:0 0 12px rgba(100,160,190,0.5)}
+        .p-dot.ok{background:#5cb88a;box-shadow:0 0 8px rgba(92,184,138,0.4)}
+        .p-bar{width:20px;height:2px;background:rgba(255,255,255,0.04);border-radius:1px;transition:background 0.4s}
+        .p-bar.lit{background:linear-gradient(90deg,#6fa5be,#5cb88a)}
+        .p-label{font-size:9px;color:#7a7f96;text-align:center;min-width:44px;font-weight:500}
 
-        /* === Filter Buttons === */
-        .filter-btn {
-            padding: 6px 14px;
-            font-size: 13px;
-            font-weight: 500;
-            border-radius: 8px;
-            border: 1px solid rgba(100, 116, 139, 0.3);
-            background: rgba(15, 23, 42, 0.6);
-            color: #94a3b8;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-        .filter-btn:hover {
-            border-color: rgba(6, 182, 212, 0.4);
-            color: #cbd5e1;
-        }
-        .filter-btn.active {
-            background: linear-gradient(135deg, rgba(6, 182, 212, 0.2), rgba(139, 92, 246, 0.2));
-            border-color: #22d3ee;
-            color: #22d3ee;
-            box-shadow: 0 0 8px rgba(6, 182, 212, 0.2);
-        }
+        .det{font-size:11px;color:#7a7f96;padding:8px 12px;border-radius:8px;background:rgba(18,20,30,0.6);border:1px solid rgba(255,255,255,0.03);margin-top:4px;font-family:'JetBrains Mono',monospace}
 
-        /* === Misc === */
-        .line-clamp-2 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-        .budget-bar { height: 6px; border-radius: 3px; background: rgba(100, 116, 139, 0.2); overflow: hidden; }
-        .budget-fill { height: 100%; border-radius: 3px; background: linear-gradient(90deg, #06b6d4, #22d3ee); transition: width 0.3s; }
-        details summary { cursor: pointer; list-style: none; }
-        details summary::-webkit-details-marker { display: none; }
-
-        /* === Neon Input === */
-        .neon-input {
-            background: rgba(15, 23, 42, 0.8);
-            border: 1px solid rgba(100, 116, 139, 0.3);
-            border-radius: 8px;
-            color: #e2e8f0;
-            padding: 8px 16px;
-            font-size: 14px;
-            transition: all 0.3s;
-        }
-        .neon-input:focus {
-            outline: none;
-            border-color: #22d3ee;
-            box-shadow: 0 0 12px rgba(6, 182, 212, 0.2);
-        }
-        .neon-input::placeholder { color: #4b5563; }
-
-        /* === Scrollbar === */
-        ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-track { background: #0a0e1a; }
-        ::-webkit-scrollbar-thumb { background: rgba(6, 182, 212, 0.3); border-radius: 3px; }
-        ::-webkit-scrollbar-thumb:hover { background: rgba(6, 182, 212, 0.5); }
-
-        /* === Sub-detail Panels === */
-        .detail-panel {
-            background: rgba(15, 23, 42, 0.6);
-            border: 1px solid rgba(100, 116, 139, 0.15);
-            border-radius: 8px;
-            padding: 8px 12px;
-            margin-top: 8px;
-        }
-        .detail-panel-sky { border-color: rgba(14, 165, 233, 0.2); }
-        .detail-panel-amber { border-color: rgba(245, 158, 11, 0.2); }
-        .detail-panel-violet { border-color: rgba(139, 92, 246, 0.2); }
-
-        /* === State Badges === */
-        .badge-published {
-            background: rgba(16, 185, 129, 0.15);
-            color: #34d399;
-            border: 1px solid rgba(16, 185, 129, 0.3);
-            animation: pulseGlow 3s ease-in-out infinite;
-        }
-        .badge-verified {
-            background: rgba(6, 182, 212, 0.15);
-            color: #22d3ee;
-            border: 1px solid rgba(6, 182, 212, 0.3);
-            animation: pulseGlowCyan 3s ease-in-out infinite;
-        }
-        .badge-withheld {
-            background: rgba(245, 158, 11, 0.15);
-            color: #fbbf24;
-            border: 1px solid rgba(245, 158, 11, 0.3);
-        }
-        .badge-pending {
-            background: rgba(251, 146, 60, 0.15);
-            color: #fb923c;
-            border: 1px solid rgba(251, 146, 60, 0.3);
-        }
-        .badge-failed {
-            background: rgba(244, 63, 94, 0.15);
-            color: #fb7185;
-            border: 1px solid rgba(244, 63, 94, 0.3);
-        }
-
-        /* === Banner variants === */
-        .banner-blue {
-            background: rgba(6, 182, 212, 0.06);
-            border: 1px solid rgba(6, 182, 212, 0.2);
-        }
-        .banner-violet {
-            background: rgba(139, 92, 246, 0.06);
-            border: 1px solid rgba(139, 92, 246, 0.2);
-        }
-        .banner-emerald {
-            background: rgba(16, 185, 129, 0.06);
-            border: 1px solid rgba(16, 185, 129, 0.2);
-        }
+        @keyframes up{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
+        .an{animation:up 0.7s cubic-bezier(0.16,1,0.3,1) forwards;opacity:0}
+        @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.3}}
+        .pulse{animation:pulse 2s ease-in-out infinite}
+        details summary{cursor:pointer;list-style:none}details summary::-webkit-details-marker{display:none}
+        ::-webkit-scrollbar{width:3px}::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.06);border-radius:2px}
     </style>
 </head>
-<body class="min-h-screen">
-    <div class="max-w-6xl mx-auto px-4 py-8">
-        <!-- Header -->
-        <div class="glass-card p-6 mb-6 animate-fade-in-up">
-            <div class="flex items-center justify-between">
-                <div>
-                    <div class="flex items-center gap-3">
-                        <h1 class="text-2xl font-bold gradient-text">Sentinel — Agent Trust Oracle</h1>
-                        <span id="mainnet-badge" class="hidden px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-900/40 text-emerald-400 border border-emerald-500/40 pulse-glow-green">● Base Mainnet</span>
-                    </div>
-                    <p class="text-gray-500 mt-1 text-sm">Autonomous agent trust verification with on-chain reputation</p>
-                    <div id="mainnet-tx-link" class="hidden mt-1 text-xs"></div>
-                </div>
-                <div class="text-right text-sm text-gray-500">
-                    <div class="text-cyan-400 font-semibold">ERC-8004 on Base</div>
-                    <div id="agent-id" class="font-mono text-gray-400"></div>
-                    <div id="last-eval-time" class="text-xs text-gray-600 mt-1"></div>
-                </div>
+<body>
+<div class="max-w-5xl mx-auto px-5 py-14">
+
+    <!-- HEADER -->
+    <div class="an mb-14">
+        <div class="flex items-start justify-between gap-4 flex-wrap">
+            <div>
+                <h1 class="text-[42px] font-bold text-white tracking-tight leading-none">Sentinel</h1>
+                <p class="text-[14px] text-[#7a7f96] mt-2 leading-relaxed max-w-sm">Trust oracle for <span class="text-[#9498ad]">ERC-8004</span> agents.<br>Autonomous evaluation. On-chain proof.</p>
+                <div id="mainnet-tx-link" class="hidden mt-3"></div>
             </div>
-            <div class="mt-4 grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm">
-                <div class="bg-slate-800/50 rounded-lg p-3 border border-slate-700/50">
-                    <div class="text-gray-500 text-xs">Operator</div>
-                    <div id="operator-wallet" class="font-mono text-xs text-gray-300 truncate"></div>
-                </div>
-                <div class="bg-slate-800/50 rounded-lg p-3 border border-slate-700/50">
-                    <div class="text-gray-500 text-xs">Evaluator</div>
-                    <div id="evaluator-wallet" class="font-mono text-xs text-gray-300 truncate"></div>
-                </div>
-                <div class="bg-slate-800/50 rounded-lg p-3 border border-slate-700/50">
-                    <div class="text-gray-500 text-xs">Agents Evaluated</div>
-                    <div id="total-count" class="text-2xl font-bold text-cyan-400">0</div>
-                </div>
+            <div class="flex items-center gap-3 mt-1">
+                <span id="mainnet-badge" class="hidden text-[11px] font-semibold pill bg-h">Mainnet</span>
+                <span id="last-eval-time" class="text-[11px] text-[#9498ad] mono"></span>
             </div>
         </div>
-
-        <!-- ERC-8004 Multi-Registry Banner -->
-        <div id="erc8004-banner" class="glass-card banner-blue rounded-lg p-4 mb-6" style="display:none">
-            <div class="flex items-center gap-3">
-                <div class="text-cyan-400 font-semibold text-sm">ERC-8004 Multi-Registry Integration</div>
-                <span class="px-2 py-0.5 rounded bg-cyan-900/40 text-cyan-300 text-xs font-mono border border-cyan-700/30">3-wallet isolation</span>
-            </div>
-            <div class="mt-2 grid grid-cols-2 md:grid-cols-4 gap-3 text-xs">
-                <div>
-                    <div class="text-cyan-600">Identity Registry</div>
-                    <a id="identity-registry" href="#" target="_blank" rel="noopener noreferrer" class="text-cyan-400 font-mono hover:text-cyan-300 break-all"></a>
-                </div>
-                <div>
-                    <div class="text-cyan-600">Reputation Registry</div>
-                    <a id="reputation-registry" href="#" target="_blank" rel="noopener noreferrer" class="text-cyan-400 font-mono hover:text-cyan-300 break-all"></a>
-                </div>
-                <div>
-                    <div class="text-cyan-600">EAS Attestations</div>
-                    <a id="eas-contract" href="#" target="_blank" rel="noopener noreferrer" class="text-cyan-400 font-mono hover:text-cyan-300 break-all"></a>
-                </div>
-                <div>
-                    <div class="text-cyan-600">Sentinel Agent ID</div>
-                    <div id="sentinel-agent-id" class="text-cyan-300 font-mono font-bold"></div>
-                </div>
-            </div>
-            <div class="mt-2 text-[10px] text-cyan-700">
-                Operator wallet registers identity. Evaluator wallet writes reputation feedback. Separate wallets enforce trust isolation.
-            </div>
+        <div class="mt-10 grid grid-cols-4 gap-3">
+            <div class="st-box"><div id="total-count" class="st-num text-white">0</div><div class="st-lbl">Agents Evaluated</div></div>
+            <div class="st-box"><div id="stat-published" class="st-num sc-h">0</div><div class="st-lbl">EAS Attested</div></div>
+            <div class="st-box"><div id="stat-avg-score" class="st-num text-white">—</div><div class="st-lbl">Avg Trust Score</div></div>
+            <div class="st-box"><div id="stat-mainnet" class="st-num sc-h">0</div><div class="st-lbl">On Base Mainnet</div></div>
         </div>
 
-        <!-- Venice Stats Banner -->
-        <div id="venice-banner" class="glass-card banner-violet rounded-lg p-4 mb-6" style="display:none">
-            <div class="flex items-center gap-3">
-                <div class="text-violet-400 font-semibold text-sm">Venice Private Inference</div>
-                <span class="px-2 py-0.5 rounded bg-violet-900/40 text-violet-300 text-xs font-mono border border-violet-700/30">zero data retention</span>
+        <!-- Trust model explainer -->
+        <div class="mt-6 grid grid-cols-3 gap-3 text-[11px]">
+            <div class="dtl dtl-sky">
+                <div class="font-semibold text-[#5a8fa8] mb-1">Trust Confirmed</div>
+                <div class="text-[#7a7f96]">Confidence ≥ 70%. Score written to ERC-8004 Reputation Registry + EAS attestation created on Base. Permanent, tamper-proof receipt.</div>
             </div>
-            <div class="mt-2 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4 text-sm">
-                <div>
-                    <div class="text-violet-500 text-xs">API Calls</div>
-                    <div id="venice-calls" class="text-lg font-bold text-violet-400">0</div>
-                </div>
-                <div>
-                    <div class="text-violet-500 text-xs">Total Tokens</div>
-                    <div id="venice-tokens" class="text-lg font-bold text-violet-400">0</div>
-                </div>
-                <div>
-                    <div class="text-violet-500 text-xs">Model</div>
-                    <div id="venice-model" class="text-lg font-bold text-violet-400">—</div>
-                </div>
-                <div>
-                    <div class="text-violet-500 text-xs">Parse Success</div>
-                    <div id="venice-parse" class="text-lg font-bold text-violet-400">—</div>
-                </div>
-                <div>
-                    <div class="text-violet-500 text-xs">Parse Strategy</div>
-                    <div class="text-xs text-violet-500 mt-1">4-layer fallback: json_schema → regex → retry → neutral</div>
-                </div>
+            <div class="dtl dtl-amb">
+                <div class="font-semibold text-[#c9a83e] mb-1">Abstained — Low Evidence</div>
+                <div class="text-[#7a7f96]">Confidence &lt; 70%. Insufficient signal to make a reliable trust claim. System abstains rather than publish a guess. Not a failure — conservative by design.</div>
             </div>
-        </div>
-
-        <!-- Autonomy Stats Banner -->
-        <div id="autonomy-banner" class="glass-card banner-emerald rounded-lg p-4 mb-6" style="display:none">
-            <div class="flex items-center gap-3">
-                <div class="text-emerald-400 font-semibold text-sm">Autonomous Pipeline</div>
-                <span class="px-2 py-0.5 rounded bg-emerald-900/40 text-emerald-300 text-xs font-mono border border-emerald-700/30">fully autonomous</span>
+            <div class="dtl dtl-vio">
+                <div class="font-semibold text-[#8c6eb4] mb-1">Venice Private Inference</div>
+                <div class="text-[#7a7f96]">Every evaluation routes through Venice (zero data retention). The trust reasoning stays private. Only the score leaves — written permanently on-chain via EAS.</div>
             </div>
-            <div class="mt-2 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4 text-sm">
-                <div>
-                    <div class="text-emerald-500 text-xs">Pipeline Stages</div>
-                    <div class="text-lg font-bold text-emerald-400">9</div>
-                </div>
-                <div>
-                    <div class="text-emerald-500 text-xs">State Machine</div>
-                    <div class="text-lg font-bold text-emerald-400">12 states</div>
-                </div>
-                <div>
-                    <div class="text-emerald-500 text-xs">Tool Budget</div>
-                    <div class="text-lg font-bold text-emerald-400">15/eval</div>
-                </div>
-                <div>
-                    <div class="text-emerald-500 text-xs">Published</div>
-                    <div id="autonomy-published" class="text-lg font-bold text-emerald-400">0</div>
-                </div>
-                <div>
-                    <div class="text-emerald-500 text-xs">Auto-Withheld</div>
-                    <div id="autonomy-withheld" class="text-lg font-bold text-emerald-400">0</div>
-                </div>
-            </div>
-            <div class="mt-2 text-[10px] text-emerald-700">
-                discover → verify identity → check liveness → on-chain analysis → Venice trust → score → verify → publish. Confidence ≥70 auto-publishes. &lt;70 auto-withholds.
-            </div>
-        </div>
-
-        <!-- Verify On-Chain -->
-        <div id="verify-banner" class="glass-card rounded-lg p-4 mb-6" style="display:none; border-color: rgba(251, 191, 36, 0.25);">
-            <div class="flex items-center gap-3 mb-3">
-                <div class="text-amber-400 font-semibold text-sm">Verify On-Chain — Don't Trust, Verify</div>
-                <span class="px-2 py-0.5 rounded bg-amber-900/40 text-amber-300 text-xs font-mono border border-amber-700/30">independent verification</span>
-            </div>
-            <p class="text-xs text-amber-500/80 mb-3">Every published evaluation creates immutable on-chain artifacts. Click any link below to independently verify on a block explorer — no need to trust this dashboard.</p>
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div class="bg-slate-900/60 rounded-lg p-3 border border-amber-800/20">
-                    <div class="text-xs text-amber-500 mb-1">Reputation Transactions</div>
-                    <div class="text-[11px] text-amber-400/70 mb-2">Each published score calls <code class="bg-slate-800 px-1 rounded text-amber-300">giveFeedback()</code> on the Reputation Registry. Verify the agent ID, score value, and evaluator wallet in the TX input data.</div>
-                    <div id="verify-rep-links" class="flex flex-wrap gap-1.5"></div>
-                </div>
-                <div class="bg-slate-900/60 rounded-lg p-3 border border-amber-800/20">
-                    <div class="text-xs text-amber-500 mb-1">EAS Attestations</div>
-                    <div class="text-[11px] text-amber-400/70 mb-2">Each published score creates an EAS attestation with trust score, confidence, identity status, and endpoint counts. Attestations are immutable and timestamped.</div>
-                    <div id="verify-eas-links" class="flex flex-wrap gap-1.5"></div>
-                </div>
-            </div>
-            <div class="mt-3 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-                <div class="bg-slate-900/60 rounded-lg p-3 border border-amber-800/20">
-                    <div class="text-xs text-amber-500 mb-1">Evaluator Wallet</div>
-                    <div class="text-[11px] text-amber-400/70 mb-1">All reputation TXs are signed by this wallet — proving a single autonomous agent evaluated all agents.</div>
-                    <a id="verify-evaluator" href="#" target="_blank" rel="noopener noreferrer" class="text-amber-400 hover:text-amber-300 font-mono text-[10px] break-all"></a>
-                </div>
-                <div class="bg-slate-900/60 rounded-lg p-3 border border-amber-800/20">
-                    <div class="text-xs text-amber-500 mb-1">Reputation Registry Contract</div>
-                    <div class="text-[11px] text-amber-400/70 mb-1">ERC-8004 Reputation Registry — verify <code class="bg-slate-800 px-1 rounded text-amber-300">giveFeedback()</code> events.</div>
-                    <a id="verify-rep-contract" href="#" target="_blank" rel="noopener noreferrer" class="text-amber-400 hover:text-amber-300 font-mono text-[10px] break-all"></a>
-                </div>
-                <div class="bg-slate-900/60 rounded-lg p-3 border border-amber-800/20">
-                    <div class="text-xs text-amber-500 mb-1">Input Hashes (Tamper-Proof)</div>
-                    <div class="text-[11px] text-amber-400/70 mb-1">SHA-256 of evaluation inputs. Recompute from raw data to verify scores weren't tampered with.</div>
-                    <div id="verify-input-hashes" class="flex flex-wrap gap-1"></div>
-                </div>
-                <div class="bg-slate-900/60 rounded-lg p-3 border border-amber-800/20">
-                    <div class="text-xs text-amber-500 mb-1">GitHub Repository</div>
-                    <div class="text-[11px] text-amber-400/70 mb-1">Full source code — every line of the evaluation pipeline is open source.</div>
-                    <a href="https://github.com/geeythree/sentinel-trust-oracle" target="_blank" rel="noopener noreferrer" class="text-amber-400 hover:text-amber-300 font-mono text-[10px]">github.com/geeythree/sentinel-trust-oracle</a>
-                </div>
-            </div>
-        </div>
-
-        <!-- Try It Live -->
-        <div id="live-eval" class="glass-card p-6 mb-6">
-            <div class="flex items-center justify-between mb-3">
-                <h2 class="text-lg font-semibold gradient-text">Try It Live</h2>
-                <div id="api-status" class="flex items-center gap-2 text-xs">
-                    <span id="api-dot" class="inline-block w-2 h-2 rounded-full bg-gray-600"></span>
-                    <span id="api-label" class="text-gray-500">Checking API...</span>
-                </div>
-            </div>
-            <p class="text-sm text-gray-500 mb-2">Enter any ERC-8004 Agent ID to run a full autonomous trust evaluation. Sentinel will:</p>
-            <div class="text-xs text-gray-500 mb-4 grid grid-cols-1 sm:grid-cols-3 gap-2">
-                <div class="flex items-center gap-1.5"><span class="text-cyan-500">1.</span> Fetch agent identity from the registry</div>
-                <div class="flex items-center gap-1.5"><span class="text-cyan-500">2.</span> Check endpoint liveness + on-chain history</div>
-                <div class="flex items-center gap-1.5"><span class="text-cyan-500">3.</span> Run Venice private AI trust analysis + publish score</div>
-            </div>
-            <div class="flex items-center gap-3">
-                <input id="eval-input" type="number" min="0" placeholder="Agent ID (e.g. 5, 100, 2094)"
-                    class="neon-input flex-1 max-w-xs" />
-                <button id="eval-btn" onclick="runLiveEval()" class="neon-btn">
-                    Evaluate
-                </button>
-            </div>
-            <div id="api-hint" class="mt-2 text-[11px] text-amber-500/80" style="display:none">
-                API server not connected. To enable live evaluations, start the server:<br>
-                <code class="bg-slate-800 text-amber-400 px-1.5 py-0.5 rounded font-mono text-[10px]">cd aqe && python3 main.py serve</code>
-                &nbsp;or open with&nbsp;
-                <code class="bg-slate-800 text-amber-400 px-1.5 py-0.5 rounded font-mono text-[10px]">?api=http://localhost:8000</code>
-            </div>
-
-            <!-- Pipeline Visualization -->
-            <div id="eval-pipeline" class="mt-4 flex items-center gap-2 flex-wrap" style="display:none">
-                <div class="pipeline-stage" data-stage="0">Discovering</div>
-                <span class="pipeline-arrow">→</span>
-                <div class="pipeline-stage" data-stage="1">Identity</div>
-                <span class="pipeline-arrow">→</span>
-                <div class="pipeline-stage" data-stage="2">Liveness</div>
-                <span class="pipeline-arrow">→</span>
-                <div class="pipeline-stage" data-stage="3">On-chain</div>
-                <span class="pipeline-arrow">→</span>
-                <div class="pipeline-stage" data-stage="4">Venice</div>
-                <span class="pipeline-arrow">→</span>
-                <div class="pipeline-stage" data-stage="5">Scoring</div>
-            </div>
-
-            <div id="eval-status" class="mt-3" style="display:none">
-                <div class="flex items-center gap-2">
-                    <svg class="animate-spin h-4 w-4 text-cyan-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
-                    </svg>
-                    <span id="eval-status-text" class="text-sm text-cyan-400">Evaluating agent... this takes ~30-60s (Venice inference is thorough)</span>
-                </div>
-            </div>
-            <div id="eval-error" class="mt-3 text-sm text-rose-400" style="display:none"></div>
-            <div id="eval-success" class="mt-3 text-sm text-emerald-400" style="display:none"></div>
-        </div>
-
-        <!-- Filter Controls -->
-        <div class="flex items-center gap-3 mb-4">
-            <button id="filter-all" onclick="setFilter('all')" class="filter-btn active">All</button>
-            <button id="filter-published" onclick="setFilter('published')" class="filter-btn">Published / Verified</button>
-            <button id="filter-withheld" onclick="setFilter('withheld')" class="filter-btn">Withheld</button>
-            <span id="filter-count" class="text-sm text-gray-600 ml-auto font-mono"></span>
-        </div>
-
-        <!-- Evaluation Cards -->
-        <div id="evaluations" class="space-y-6"></div>
-
-        <!-- Empty State -->
-        <div id="empty-state" class="glass-card p-12 text-center text-gray-600">
-            <p class="text-lg">No evaluations yet</p>
-            <p class="mt-2 text-sm">Run: <code class="bg-slate-800 text-cyan-400 px-2 py-1 rounded font-mono text-xs">python3 main.py discover --testnet</code></p>
         </div>
     </div>
 
-    <script>
-    // ========== HTML Escaping (XSS prevention) ==========
-    const _escapeEl = document.createElement('div');
-    function esc(str) {
-        if (str == null) return '';
-        _escapeEl.textContent = String(str);
-        return _escapeEl.innerHTML;
+    <!-- EVALUATE -->
+    <div class="crd p-8 mb-14 an" style="animation-delay:0.1s">
+        <div class="flex items-center gap-3 flex-wrap">
+            <input id="eval-input" type="number" min="0" placeholder="Agent ID" class="ev-in"/>
+            <button id="eval-btn" onclick="runLiveEval()" class="ev-btn">Evaluate</button>
+            <div id="api-status" class="flex items-center gap-1.5 ml-auto">
+                <span id="api-dot" class="inline-block w-[6px] h-[6px] rounded-full bg-[#1c1d27]"></span>
+                <span id="api-label" class="text-[10px] text-[#9498ad] mono"></span>
+            </div>
+        </div>
+        <div id="api-hint" class="mt-3 text-[11px] text-[#7a7f96]" style="display:none">Viewing cached results</div>
+        <div id="eval-pipeline" class="mt-6" style="display:none">
+            <div class="pipe">
+                <div class="p-dot" data-stage="0"></div><div class="p-bar"></div>
+                <div class="p-dot" data-stage="1"></div><div class="p-bar"></div>
+                <div class="p-dot" data-stage="2"></div><div class="p-bar"></div>
+                <div class="p-dot" data-stage="3"></div><div class="p-bar"></div>
+                <div class="p-dot" data-stage="4"></div><div class="p-bar"></div>
+                <div class="p-dot" data-stage="5"></div>
+            </div>
+            <div class="flex justify-center mt-2 gap-0">
+                <span class="p-label">Discover</span><span class="p-label">Identity</span><span class="p-label">Liveness</span><span class="p-label">On-chain</span><span class="p-label">Venice</span><span class="p-label">Score</span>
+            </div>
+        </div>
+        <div id="eval-status" class="mt-4 text-center" style="display:none"><span id="eval-status-text" class="text-[12px] text-[#9498ad] pulse">Evaluating...</span></div>
+        <div id="eval-error" class="mt-4 text-[13px] sc-l text-center" style="display:none"></div>
+        <div id="eval-success" class="mt-4 text-[13px] text-center" style="display:none"></div>
+    </div>
+
+    <!-- SCORE DISTRIBUTION -->
+    <div id="dist-section" class="crd p-6 mb-8 an" style="animation-delay:0.12s;display:none">
+        <div class="flex items-center justify-between mb-4">
+            <span class="text-[12px] font-semibold text-[#9498ad]">Score Distribution — <span id="dist-total" class="text-white">0</span> agents evaluated</span>
+            <span class="text-[10px] text-[#7a7f96]">Conservative scoring: system abstains rather than guess</span>
+        </div>
+        <div id="dist-chart" class="flex items-end gap-1.5 h-16"></div>
+        <div class="flex justify-between mt-1 text-[9px] text-[#7a7f96] mono">
+            <span>0</span><span>10</span><span>20</span><span>30</span><span>40</span><span>50</span><span>60</span><span>70</span><span>80</span><span>90</span><span>100</span>
+        </div>
+    </div>
+
+    <!-- AGENTS -->
+    <div class="flex items-center gap-2 mb-6 an" style="animation-delay:0.15s">
+        <span class="text-[13px] text-[#9498ad] font-semibold">Agents</span>
+        <div class="flex-1 h-px bg-[#1c1d27] mx-3"></div>
+        <button id="filter-all" onclick="setFilter('all')" class="fb">All</button>
+        <button id="filter-published" onclick="setFilter('published')" class="fb on">Trust Confirmed</button>
+        <button id="filter-withheld" onclick="setFilter('withheld')" class="fb">Abstained</button>
+        <span id="filter-count" class="text-[11px] text-[#9498ad] mono ml-2"></span>
+    </div>
+    <div id="evaluations" class="space-y-4"></div>
+    <div id="empty-state" class="text-center py-20"><div class="text-[14px] text-[#9498ad]">No evaluations yet</div></div>
+
+    <!-- ERC-8004 REGISTRIES — always visible -->
+    <div class="crd p-6 mt-14 an" style="animation-delay:0.2s">
+        <div class="flex items-center justify-between mb-4 flex-wrap gap-2">
+            <div>
+                <span class="text-[13px] font-semibold text-white">ERC-8004 Registry Coverage</span>
+                <span class="ml-2 text-[10px] text-[#7a7f96]">All three registries — Identity · Reputation · Validation</span>
+            </div>
+            <span class="pill bg-h text-[10px]">Base Mainnet</span>
+        </div>
+        <div class="grid grid-cols-3 gap-3 text-[11px]">
+            <div class="dtl dtl-sky">
+                <div class="font-semibold text-[#5a8fa8] mb-1">Identity Registry</div>
+                <a href="https://basescan.org/address/0x8004A169FB4a3325136EB29fA0ceB6D2e539a432" target="_blank" class="mono text-[#6fa5be] hover:text-[#82b0c6] transition-colors block">0x8004A169…432 ↗</a>
+                <div class="text-[#7a7f96] mt-1">Agent discovery via ERC-721 registration events. Sentinel reads identity + resolves IPFS/HTTP manifests.</div>
+            </div>
+            <div class="dtl dtl-amb">
+                <div class="font-semibold text-[#c9a83e] mb-1">Reputation Registry</div>
+                <a href="https://basescan.org/address/0x8004BAa17C55a88189AE136b182e5fdA19dE9b63" target="_blank" class="mono text-[#c9a83e] hover:text-[#d4b84a] transition-colors block">0x8004BAa1…b63 ↗</a>
+                <div class="text-[#7a7f96] mt-1">Trust scores published via <span class="mono">giveFeedback()</span>. HHI sybil analysis on existing reviewer concentration.</div>
+            </div>
+            <div class="dtl dtl-vio">
+                <div class="font-semibold text-[#8c6eb4] mb-1">Validation Registry</div>
+                <a href="https://basescan.org/address/0x8004Cc8439f36fd5F9F049D9fF86523Df6dAAB58" target="_blank" class="mono text-[#8c6eb4] hover:text-[#9d7fc5] transition-colors block">0x8004Cc84…B58 ↗</a>
+                <div class="text-[#7a7f96] mt-1">Challenge-response dispute resolution via <span class="mono">validationRequest</span> / <span class="mono">validationResponse</span>.</div>
+            </div>
+        </div>
+        <div class="mt-3 grid grid-cols-2 gap-3 text-[11px]">
+            <div class="dtl" style="border-left:2px solid rgba(92,184,138,0.3)">
+                <div class="font-semibold text-[#5cb88a] mb-1">EAS — Ethereum Attestation Service</div>
+                <a href="https://base.easscan.org/schema/view/0x86402407ac6d3c823ea3bb44300b82011aa840ac19ef64c6f228b12fc4d60b87" target="_blank" class="mono text-[#5cb88a] hover:text-[#6dd49a] transition-colors block truncate">Schema: 0x86402407…b87 ↗</a>
+                <div class="text-[#7a7f96] mt-1">Every published trust score creates a tamper-proof EAS attestation on Base. Permanently verifiable.</div>
+            </div>
+            <div class="dtl" style="border-left:2px solid rgba(140,110,180,0.3)">
+                <div class="font-semibold text-[#8c6eb4] mb-1">Venice Private Inference</div>
+                <div id="venice-banner-inline" class="flex gap-3 flex-wrap mt-1">
+                    <span class="text-[#7a7f96]">Model: <span id="venice-model" class="text-[#8c6eb4] mono">qwen3-235b</span></span>
+                    <span class="text-[#7a7f96]">Calls: <span id="venice-calls" class="text-[#8c6eb4]">—</span></span>
+                    <span class="text-[#7a7f96]">Tokens: <span id="venice-tokens" class="text-[#8c6eb4]">—</span></span>
+                </div>
+                <div class="text-[#7a7f96] mt-1">Zero data retention. Trust reasoning stays private — only the score is published on-chain.</div>
+            </div>
+        </div>
+        <div class="mt-3 grid grid-cols-3 gap-2 text-[11px]">
+            <div class="det"><span class="text-[#9498ad]">Operator wallet</span><div id="operator-wallet" class="text-[#6fa5be] truncate mt-0.5 mono"></div></div>
+            <div class="det"><span class="text-[#9498ad]">Evaluator wallet</span><div id="evaluator-wallet" class="text-[#6fa5be] truncate mt-0.5 mono"></div></div>
+            <div class="det"><span class="text-[#9498ad]">Sentinel agent ID</span><div id="sentinel-agent-id" class="text-[#5cb88a] mt-0.5 mono font-semibold"></div></div>
+        </div>
+    </div>
+
+    <!-- hidden elements kept for JS compat -->
+    <span id="agent-id" style="display:none"></span>
+    <a id="identity-registry" style="display:none"></a>
+    <a id="reputation-registry" style="display:none"></a>
+    <a id="eas-contract" style="display:none"></a>
+    <div id="venice-banner" style="display:none">
+        <span id="venice-parse"></span>
+    </div>
+</div>
+
+<script>
+const _e=document.createElement('div');
+function esc(s){if(s==null)return '';_e.textContent=String(s);return _e.innerHTML}
+function sc(s){return s>=70?'sc-h':s>=40?'sc-m':'sc-l'}
+function safeHex(h){return typeof h==='string'?h.replace(/[^0-9a-fA-Fx]/g,''):''}
+
+// Radar chart — size=240 with 36px padding for labels (no clipping)
+function createRadar(dims) {
+    if (!dims) return '<div class="text-[#9498ad] text-xs p-4">No data</div>';
+    const labels = ['Identity', 'Liveness', 'On-chain', 'Venice', 'Protocol'];
+    const vals = [dims.identity_completeness??0, dims.endpoint_liveness??0, dims.onchain_history??0, dims.venice_trust_analysis??0, dims.protocol_compliance??0];
+    // Use large viewBox but display at 240px — labels have room, no clipping
+    const vb = 300, maxR = 90, n = 5, cx = vb/2, cy = vb/2;
+
+    let svg = `<svg width="240" height="240" viewBox="0 0 ${vb} ${vb}" style="overflow:visible">`;
+    // Grid
+    for (let lv = 1; lv <= 4; lv++) {
+        const r = maxR/4*lv, pts = [];
+        for (let j = 0; j < n; j++) { const a = Math.PI*2*j/n - Math.PI/2; pts.push(`${cx+r*Math.cos(a)},${cy+r*Math.sin(a)}`); }
+        svg += `<polygon points="${pts.join(' ')}" class="radar-grid"/>`;
     }
-
-    // ========== SVG Radar Chart Generator ==========
-    let _radarId = 0;
-    function createRadarChart(dimensions, size = 200) {
-        if (!dimensions) return '<div class="text-gray-600 text-xs p-4">No dimension data</div>';
-        const labels = ['Identity', 'Liveness', 'On-chain', 'Venice', 'Protocol'];
-        const n = 5;
-        const values = [
-            dimensions.identity_completeness ?? 0,
-            dimensions.endpoint_liveness ?? 0,
-            dimensions.onchain_history ?? 0,
-            dimensions.venice_trust_analysis ?? 0,
-            dimensions.protocol_compliance ?? 0
-        ];
-        const cx = size / 2, cy = size / 2;
-        const maxR = size / 2 - 30;
-        const levels = 4;
-        const filterId = 'glow-' + (++_radarId);
-
-        let svg = `<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}">`;
-
-        // Glow filter (unique ID per chart)
-        svg += `<defs>
-            <filter id="${filterId}">
-                <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
-                <feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge>
-            </filter>
-        </defs>`;
-
-        // Grid polygons
-        for (let i = 1; i <= levels; i++) {
-            const r = (maxR / levels) * i;
-            const points = [];
-            for (let j = 0; j < n; j++) {
-                const angle = (Math.PI * 2 * j) / n - Math.PI / 2;
-                points.push(`${cx + r * Math.cos(angle)},${cy + r * Math.sin(angle)}`);
-            }
-            svg += `<polygon points="${points.join(' ')}" class="radar-grid"/>`;
-        }
-
-        // Axes + Labels
-        for (let j = 0; j < n; j++) {
-            const angle = (Math.PI * 2 * j) / n - Math.PI / 2;
-            const x = cx + maxR * Math.cos(angle);
-            const y = cy + maxR * Math.sin(angle);
-            svg += `<line x1="${cx}" y1="${cy}" x2="${x}" y2="${y}" class="radar-axis"/>`;
-
-            const lx = cx + (maxR + 20) * Math.cos(angle);
-            const ly = cy + (maxR + 20) * Math.sin(angle);
-            const anchor = Math.abs(Math.cos(angle)) < 0.3 ? 'middle' : Math.cos(angle) > 0 ? 'start' : 'end';
-            svg += `<text x="${lx}" y="${ly}" text-anchor="${anchor}" dominant-baseline="middle" class="radar-label">${labels[j]}</text>`;
-        }
-
-        // Data polygon with glow
-        const dataPoints = [];
-        for (let j = 0; j < n; j++) {
-            const angle = (Math.PI * 2 * j) / n - Math.PI / 2;
-            const r = (values[j] / 100) * maxR;
-            const x = cx + r * Math.cos(angle);
-            const y = cy + r * Math.sin(angle);
-            dataPoints.push(`${x},${y}`);
-        }
-        svg += `<polygon points="${dataPoints.join(' ')}" class="radar-fill" filter="url(#${filterId})"/>`;
-
-        // Data points
-        for (let j = 0; j < n; j++) {
-            const angle = (Math.PI * 2 * j) / n - Math.PI / 2;
-            const r = (values[j] / 100) * maxR;
-            const x = cx + r * Math.cos(angle);
-            const y = cy + r * Math.sin(angle);
-            svg += `<circle cx="${x}" cy="${y}" r="4" class="radar-point"/>`;
-            svg += `<text x="${x}" y="${y - 10}" text-anchor="middle" class="radar-label" style="font-weight:bold;fill:#22d3ee">${values[j]}</text>`;
-        }
-
-        svg += '</svg>';
-        return svg;
+    // Axes + labels — pushed far enough that text never clips
+    for (let j = 0; j < n; j++) {
+        const a = Math.PI*2*j/n - Math.PI/2;
+        svg += `<line x1="${cx}" y1="${cy}" x2="${cx+maxR*Math.cos(a)}" y2="${cy+maxR*Math.sin(a)}" class="radar-axis"/>`;
+        const lx = cx + (maxR+30)*Math.cos(a), ly = cy + (maxR+30)*Math.sin(a);
+        const anc = Math.abs(Math.cos(a)) < 0.3 ? 'middle' : Math.cos(a) > 0 ? 'start' : 'end';
+        svg += `<text x="${lx}" y="${ly}" text-anchor="${anc}" dominant-baseline="middle" class="radar-label">${labels[j]}</text>`;
     }
-
-    function scoreClass(score) {
-        if (score >= 70) return 'score-high';
-        if (score >= 40) return 'score-mid';
-        return 'score-low';
+    // Data polygon
+    const dp = [];
+    for (let j = 0; j < n; j++) { const a = Math.PI*2*j/n - Math.PI/2, r = vals[j]/100*maxR; dp.push(`${cx+r*Math.cos(a)},${cy+r*Math.sin(a)}`); }
+    svg += `<polygon points="${dp.join(' ')}" class="radar-fill"/>`;
+    // Points + values
+    for (let j = 0; j < n; j++) {
+        const a = Math.PI*2*j/n - Math.PI/2, r = vals[j]/100*maxR, x = cx+r*Math.cos(a), y = cy+r*Math.sin(a);
+        svg += `<circle cx="${x}" cy="${y}" r="3.5" class="radar-point"/>`;
+        // Position value text toward center from the data point (never overlaps outer labels)
+        const vOff = 14;
+        const vx = x - vOff*Math.cos(a), vy = y - vOff*Math.sin(a);
+        svg += `<text x="${vx}" y="${vy}" text-anchor="middle" dominant-baseline="middle" class="radar-val">${vals[j]}</text>`;
     }
+    return svg + '</svg>';
+}
 
-    function stateLabel(state) {
-        const map = {
-            'PUBLISHED': ['Published', 'badge-published'],
-            'VERIFIED': ['Verified', 'badge-verified'],
-            'WITHHELD_LOW_CONFIDENCE': ['Withheld', 'badge-withheld'],
-            'PENDING_HUMAN_REVIEW': ['Pending Review', 'badge-pending'],
-            'FAILED': ['Failed', 'badge-failed'],
-        };
-        const [label, cls] = map[state] || [esc(state), 'bg-slate-700 text-gray-300'];
-        return `<span class="px-2 py-1 rounded-full text-xs font-medium ${cls}">${label}</span>`;
-    }
+function renderCard(e) {
+    if (!e) return '';
+    const explorer = e.chain_id===84532 ? 'https://sepolia.basescan.org' : 'https://basescan.org';
+    const easBase = e.chain_id===84532 ? 'https://base-sepolia.easscan.org' : 'https://base.easscan.org';
+    const tx = safeHex(e.tx_hash), att = safeHex(e.attestation_uid), own = safeHex(e.owner_address);
+    const d = e.dimensions||{}, ep = e.endpoints||{}, oc = e.onchain||{}, id = e.identity||{}, v = e.venice||{};
+    const pub = e.state==='PUBLISHED'||e.state==='VERIFIED';
+    const cls = pub?'crd-pub':e.state==='WITHHELD_LOW_CONFIDENCE'?'crd-with':'crd-fail';
+    const net = e.chain_id===84532?'Sepolia':'Mainnet';
+    const stText = e.state==='PUBLISHED'?'Trust Confirmed':e.state==='VERIFIED'?'Verified':e.state==='WITHHELD_LOW_CONFIDENCE'?'Abstained — Low Evidence':'Failed';
+    const stCls = pub?'bg-h':e.state==='WITHHELD_LOW_CONFIDENCE'?'bg-m':'bg-r';
+    const netCls = e.chain_id===84532?'bg-m':'bg-h';
+    const budgetPct = Math.min(100, Math.round(((e.tool_calls_used||0)/15)*100));
 
-    // ========== Render Single Evaluation Card ==========
-    function renderEvaluation(eval_data) {
-        if (!eval_data) return '';
-        const explorerBase = eval_data.chain_id === 84532 ? 'https://sepolia.basescan.org' : 'https://basescan.org';
-        const easBase = eval_data.chain_id === 84532 ? 'https://base-sepolia.easscan.org' : 'https://base.easscan.org';
+    const txLink = tx ? `<a href="${explorer}/tx/${tx}" target="_blank" class="prf">${tx.slice(0,14)}...</a>` : '<span class="text-[#9498ad] text-xs">N/A</span>';
+    const attestLink = att ? `<a href="${easBase}/attestation/view/0x${att}" target="_blank" class="prf">0x${att.slice(0,12)}...</a>` : '<span class="text-[#9498ad] text-xs">N/A</span>';
+    const ownerLink = own ? `<a href="${explorer}/address/${own}" target="_blank" class="text-[#9498ad] hover:text-[#a0a3b8] mono text-xs">${own.slice(0,14)}...</a>` : '';
 
-        // Sanitize hex strings (only allow 0x + hex chars)
-        const safeHex = (h) => typeof h === 'string' ? h.replace(/[^0-9a-fA-Fx]/g, '') : '';
-        const safeTxHash = safeHex(eval_data.tx_hash);
-        const safeAttUid = safeHex(eval_data.attestation_uid);
-        const safeOwner = safeHex(eval_data.owner_address);
+    // Identity detail
+    const identityRow = id.fields_present ? `
+        <div class="dtl dtl-amb">
+            <div class="flex items-center gap-2 text-xs">
+                <span class="font-semibold text-[#c9a83e]">Identity Verification</span>
+                <span class="px-1.5 py-0.5 rounded bg-[#c9a83e10] text-[#c9a83e] mono text-[10px] border border-[#c9a83e30]">${id.services_declared||0} services</span>
+            </div>
+            <div class="mt-1 flex gap-1 flex-wrap">
+                ${(id.fields_present||[]).map(f=>`<span class="px-1.5 py-0.5 rounded bg-[#5cb88a10] text-[#5cb88a] text-[10px] border border-[#5cb88a20]">${esc(f)}</span>`).join('')}
+                ${(id.fields_missing||[]).map(f=>`<span class="px-1.5 py-0.5 rounded bg-[#c9635e10] text-[#c9635e] text-[10px] line-through border border-[#c9635e20]">${esc(f)}</span>`).join('')}
+            </div>
+        </div>` : '';
 
-        const txLink = safeTxHash
-            ? `<a href="${explorerBase}/tx/${safeTxHash}" target="_blank" rel="noopener noreferrer" class="text-cyan-400 hover:text-cyan-300 font-mono text-xs">${safeTxHash.slice(0, 14)}...</a>`
-            : '<span class="text-gray-600 text-xs">N/A</span>';
-        const attestLink = safeAttUid
-            ? `<a href="${easBase}/attestation/view/0x${safeAttUid}" target="_blank" rel="noopener noreferrer" class="text-emerald-400 hover:text-emerald-300 font-mono text-xs">0x${safeAttUid.slice(0, 12)}...</a>`
-            : '<span class="text-gray-600 text-xs">N/A</span>';
-        const ownerLink = safeOwner
-            ? `<a href="${explorerBase}/address/${safeOwner}" target="_blank" rel="noopener noreferrer" class="text-cyan-400 hover:text-cyan-300 font-mono text-xs">${safeOwner.slice(0, 14)}...</a>`
-            : '<span class="text-gray-600 text-xs">N/A</span>';
+    // Onchain detail
+    const safeOcWallet = safeHex(oc.wallet_address);
+    const onchainRow = oc.tx_count !== undefined ? `
+        <div class="dtl dtl-sky">
+            <div class="text-xs font-semibold text-[#5a8fa8]">On-chain Analysis</div>
+            <div class="mt-1 flex gap-4 text-[10px] text-[#9498ad] mono">
+                ${safeOcWallet?`<span title="${safeOcWallet}">Wallet: ${safeOcWallet.slice(0,10)}...</span>`:''}
+                <span>${parseInt(oc.tx_count,10)||0} transactions</span>
+                <span>${(Number(oc.balance_eth)||0).toFixed(4)} ETH</span>
+                <span>${parseInt(oc.reputation_entries,10)||0} existing reputation entries</span>
+            </div>
+        </div>` : '';
 
-        const d = eval_data.dimensions || {};
-        const ep = eval_data.endpoints || {};
-        const oc = eval_data.onchain || {};
-        const id = eval_data.identity || {};
-        const budgetPct = Math.min(100, Math.round(((eval_data.tool_calls_used || 0) / 15) * 100));
+    // Venice detail
+    const veniceRow = v.tokens_sent > 0 ? `
+        <div class="dtl dtl-vio">
+            <div class="flex items-center gap-2 text-xs">
+                <span class="font-semibold text-[#8c6eb4]">Venice Private Inference</span>
+                <span class="px-1.5 py-0.5 rounded bg-[#8c6eb410] text-[#8c6eb4] mono text-[10px] border border-[#8c6eb420]">${esc(v.model||'qwen3-235b')}</span>
+                <span class="px-1.5 py-0.5 rounded bg-[#8c6eb410] text-[#8c6eb4] mono text-[10px] border border-[#8c6eb420]">${esc(v.parse_method||'json_schema')}</span>
+            </div>
+            <div class="mt-1 text-xs text-[#7a7f96] italic">Reasoning is private — only the score is published.</div>
+            <div class="mt-1 flex gap-3 text-[10px] text-[#9498ad] mono">
+                <span>${(Number(v.tokens_sent)||0)+(Number(v.tokens_received)||0)} tokens</span>
+                <span>${((Number(v.latency_ms)||0)/1000).toFixed(1)}s latency</span>
+                <span>zero data retention</span>
+            </div>
+        </div>` : '';
 
-        // On-chain details row
-        const safeOcWallet = safeHex(oc.wallet_address);
-        const onchainRow = oc.tx_count !== undefined ? `
-            <div class="detail-panel detail-panel-sky">
-                <div class="text-xs font-semibold text-sky-400">On-chain Analysis</div>
-                <div class="mt-1 flex gap-4 text-[10px] text-sky-500 font-mono">
-                    ${safeOcWallet ? `<span title="${safeOcWallet}">Wallet: ${safeOcWallet.slice(0, 10)}...</span>` : ''}
-                    <span>${parseInt(oc.tx_count, 10) || 0} transactions</span>
-                    <span>${(Number(oc.balance_eth) || 0).toFixed(4)} ETH</span>
-                    <span>${parseInt(oc.reputation_entries, 10) || 0} existing reputation entries</span>
+    return `
+    <div class="crd ${cls} p-6 eval-card">
+        <div class="flex flex-col sm:flex-row justify-between items-start gap-4">
+            <div class="min-w-0">
+                <h3 class="text-lg font-semibold text-white">Agent <span class="text-[#6fa5be]">#${parseInt(e.agent_id,10)||0}</span></h3>
+                <div class="mt-1 text-xs text-[#9498ad] truncate max-w-md mono" title="${esc(e.agent_uri)}">${esc(e.agent_uri)}</div>
+                <div class="mt-1 text-xs">Owner: ${ownerLink}</div>
+                <div class="mt-2 flex items-center gap-2">
+                    <span class="pill ${stCls}">${stText}</span>
+                    <span class="pill ${netCls} text-[10px]">${net}</span>
                 </div>
-            </div>` : '';
-
-        // Identity details row
-        const identityRow = id.fields_present ? `
-            <div class="detail-panel detail-panel-amber">
-                <div class="flex items-center gap-2 text-xs">
-                    <span class="font-semibold text-amber-400">Identity Verification</span>
-                    <span class="px-1.5 py-0.5 rounded bg-amber-900/30 text-amber-400 font-mono text-[10px] border border-amber-700/30">${parseInt(id.services_declared, 10) || 0} services</span>
+            </div>
+            <div class="text-right flex-shrink-0">
+                <div class="text-3xl font-bold ${sc(e.composite_score??0)}">${e.composite_score??0}</div>
+                <div class="text-sm text-[#7a7f96]">Trust Score</div>
+                <div class="mt-1 text-sm">Confidence: <span class="${sc(e.confidence??0)} font-semibold">${e.confidence??0}%</span></div>
+                ${att ? `<a href="${easBase}/attestation/view/0x${att}" target="_blank" class="mt-3 flex items-center justify-end gap-1.5 text-[10px] font-semibold px-2.5 py-1.5 rounded-lg border border-[#5cb88a30] bg-[#5cb88a08] text-[#5cb88a] hover:bg-[#5cb88a14] hover:border-[#5cb88a50] transition-all mono" title="View EAS attestation on Base">⬡ EAS On-Chain ↗</a>` : ''}
+                <div class="mt-2 w-32 ml-auto">
+                    <div class="flex justify-between text-[10px] text-[#9498ad] mb-0.5"><span>Tool Budget</span><span>${e.tool_calls_used||0}/15</span></div>
+                    <div class="budget-bar"><div class="budget-fill" style="width:${budgetPct}%"></div></div>
                 </div>
-                <div class="mt-1 flex gap-1 flex-wrap">
-                    ${(id.fields_present || []).map(f => `<span class="px-1 py-0.5 rounded bg-emerald-900/30 text-emerald-400 text-[10px] border border-emerald-700/20">${esc(f)}</span>`).join('')}
-                    ${(id.fields_missing || []).map(f => `<span class="px-1 py-0.5 rounded bg-rose-900/30 text-rose-400 text-[10px] line-through border border-rose-700/20">${esc(f)}</span>`).join('')}
-                </div>
-            </div>` : '';
-
-        // Venice details (expandable reasoning)
-        const v = eval_data.venice || {};
-        const veniceRow = v.tokens_sent > 0 ? `
-            <div class="detail-panel detail-panel-violet">
-                <div class="flex items-center gap-2 text-xs">
-                    <span class="font-semibold text-violet-400">Venice Private Inference</span>
-                    <span class="px-1.5 py-0.5 rounded bg-violet-900/30 text-violet-400 font-mono text-[10px] border border-violet-700/30">${esc(v.model || 'qwen3-235b')}</span>
-                    <span class="px-1.5 py-0.5 rounded bg-violet-900/30 text-violet-400 font-mono text-[10px] border border-violet-700/30">${esc(v.parse_method || 'json_schema')}</span>
-                </div>
-                <div class="mt-1 text-xs text-violet-500 italic">Reasoning is private — only the score is published on-chain.</div>
-                <div class="mt-1 flex gap-3 text-[10px] text-violet-500 font-mono">
-                    <span>${(Number(v.tokens_sent) || 0) + (Number(v.tokens_received) || 0)} tokens</span>
-                    <span>${((Number(v.latency_ms) || 0) / 1000).toFixed(1)}s latency</span>
-                    <span>zero data retention</span>
-                </div>
-            </div>` : '';
-
-        return `
-        <div class="glass-card p-6 eval-card">
-            <div class="flex flex-col sm:flex-row justify-between items-start gap-4">
-                <div class="min-w-0">
-                    <h3 class="text-lg font-semibold text-gray-100">Agent <span class="text-cyan-400">#${parseInt(eval_data.agent_id, 10) || 0}</span></h3>
-                    <div class="mt-1 text-xs text-gray-500 truncate max-w-md font-mono" title="${esc(eval_data.agent_uri)}">${esc(eval_data.agent_uri)}</div>
-                    <div class="mt-1 text-xs text-gray-400">Owner: ${ownerLink}</div>
-                    <div class="mt-2 flex items-center gap-2">
-                        ${stateLabel(eval_data.state)}
-                        <span class="px-2 py-0.5 rounded text-xs font-mono ${eval_data.chain_id === 84532 ? 'bg-violet-900/30 text-violet-400 border border-violet-700/30' : 'bg-cyan-900/30 text-cyan-400 border border-cyan-700/30'}">${eval_data.chain_id === 84532 ? 'Sepolia' : 'Mainnet'}</span>
+            </div>
+        </div>
+        <div class="mt-4 flex flex-col md:flex-row items-start gap-6">
+            <div class="flex-shrink-0 mx-auto md:mx-0">${createRadar(e.dimensions)}</div>
+            <div class="flex-1">
+                <table class="w-full text-sm">
+                    <tr class="border-b border-[#1c1d27]"><td class="py-2 text-[#9498ad]">Identity Completeness</td><td class="py-2 text-right font-semibold ${sc(d.identity_completeness??0)}">${d.identity_completeness??0}</td></tr>
+                    <tr class="border-b border-[#1c1d27]"><td class="py-2 text-[#9498ad]">Endpoint Liveness</td><td class="py-2 text-right font-semibold ${sc(d.endpoint_liveness??0)}">${d.endpoint_liveness??0}</td></tr>
+                    <tr class="border-b border-[#1c1d27]"><td class="py-2 text-[#9498ad]">On-chain History</td><td class="py-2 text-right font-semibold ${sc(d.onchain_history??0)}">${d.onchain_history??0}</td></tr>
+                    <tr class="border-b border-[#1c1d27]"><td class="py-2 text-[#9498ad]">Venice Trust Analysis</td><td class="py-2 text-right font-semibold ${sc(d.venice_trust_analysis??0)}">${d.venice_trust_analysis??0}</td></tr>
+                    <tr class="border-b border-[#1c1d27]"><td class="py-2 text-[#9498ad]">Protocol Declaration</td><td class="py-2 text-right font-semibold ${sc(d.protocol_compliance??0)}">${d.protocol_compliance??0}</td></tr>
+                    <tr><td class="py-2 text-[#9498ad]">Spread</td><td class="py-2 text-right text-[#8b8fa3]">${e.spread??0}</td></tr>
+                </table>
+                <div class="mt-3 space-y-1">
+                    <div class="text-xs text-[#7a7f96]">
+                        Endpoints: <span class="text-[#9498ad]">${ep.live||0}/${ep.declared||0} live</span>,
+                        <span class="text-[#9498ad]">${ep.secured||0} secured</span>,
+                        <span class="${(ep.dead||0)>0?'sc-l':'text-[#9498ad]'}">${ep.dead||0} dead</span>
                     </div>
-                </div>
-                <div class="text-right flex-shrink-0">
-                    <div class="text-3xl font-bold ${scoreClass(eval_data.composite_score ?? 0)} score-value" data-target="${eval_data.composite_score ?? 0}">${eval_data.composite_score ?? 0}</div>
-                    <div class="text-sm text-gray-500">Trust Score</div>
-                    <div class="mt-1 text-sm text-gray-400">Confidence: <span class="${scoreClass(eval_data.confidence ?? 0)} font-semibold confidence-value" data-target="${eval_data.confidence ?? 0}">${eval_data.confidence ?? 0}%</span></div>
-                    <div class="mt-2 w-32 ml-auto">
-                        <div class="flex justify-between text-[10px] text-gray-500 mb-0.5">
-                            <span>Tool Budget</span>
-                            <span>${eval_data.tool_calls_used || 0}/15</span>
-                        </div>
-                        <div class="budget-bar">
-                            <div class="budget-fill" style="width: ${budgetPct}%"></div>
-                        </div>
+                    ${identityRow}${onchainRow}${veniceRow}
+                    <div class="text-xs text-[#9498ad] mt-2">
+                        <div>Source: ${esc(e.discovery_source)} | Tools: ${e.tool_calls_used||0}/15</div>
+                        <div>Reputation TX: ${txLink}</div>
+                        <div>EAS Attestation: ${attestLink}</div>
+                        ${e.input_hash?`<div>Input Hash: <span class="mono text-[#7a7f96]" title="${esc(e.input_hash)}">${esc(e.input_hash.slice(0,16))}...</span></div>`:''}
+                        <div>${esc(e.timestamp)}</div>
                     </div>
                 </div>
             </div>
-            <div class="mt-4 flex flex-col md:flex-row items-start gap-6">
-                <div class="flex-shrink-0 mx-auto md:mx-0">${createRadarChart(eval_data.dimensions, 220)}</div>
-                <div class="flex-1">
-                    <table class="w-full text-sm">
-                        <tr class="border-b border-slate-700/50"><td class="py-2 text-gray-400">Identity Completeness</td><td class="py-2 text-right font-semibold ${scoreClass(d.identity_completeness ?? 0)}">${d.identity_completeness ?? 0}</td></tr>
-                        <tr class="border-b border-slate-700/50"><td class="py-2 text-gray-400">Endpoint Liveness</td><td class="py-2 text-right font-semibold ${scoreClass(d.endpoint_liveness ?? 0)}">${d.endpoint_liveness ?? 0}</td></tr>
-                        <tr class="border-b border-slate-700/50"><td class="py-2 text-gray-400">On-chain History</td><td class="py-2 text-right font-semibold ${scoreClass(d.onchain_history ?? 0)}">${d.onchain_history ?? 0}</td></tr>
-                        <tr class="border-b border-slate-700/50"><td class="py-2 text-gray-400">Venice Trust Analysis</td><td class="py-2 text-right font-semibold ${scoreClass(d.venice_trust_analysis ?? 0)}">${d.venice_trust_analysis ?? 0}</td></tr>
-                        <tr class="border-b border-slate-700/50"><td class="py-2 text-gray-400">Protocol Declaration</td><td class="py-2 text-right font-semibold ${scoreClass(d.protocol_compliance ?? 0)}">${d.protocol_compliance ?? 0}</td></tr>
-                        <tr><td class="py-2 text-gray-400">Spread</td><td class="py-2 text-right text-gray-300">${eval_data.spread ?? 0}</td></tr>
-                    </table>
-                    <div class="mt-3 space-y-1">
-                        <div class="text-xs text-gray-500">
-                            Endpoints: <span class="font-medium text-gray-400">${ep.live || 0}/${ep.declared || 0} live</span>,
-                            <span class="font-medium text-gray-400">${ep.secured || 0} secured</span>,
-                            <span class="font-medium ${(ep.dead || 0) > 0 ? 'text-rose-400' : 'text-gray-400'}">${ep.dead || 0} dead</span>
-                        </div>
-                        ${identityRow}
-                        ${onchainRow}
-                        ${veniceRow}
-                        <div class="text-xs text-gray-600 mt-2">
-                            <div>Source: ${esc(eval_data.discovery_source)} | Tools: ${eval_data.tool_calls_used || 0}/15</div>
-                            <div>Reputation TX: ${txLink}</div>
-                            <div>EAS Attestation: ${attestLink}</div>
-                            ${eval_data.input_hash ? `<div>Input Hash: <span class="font-mono text-gray-500" title="${esc(eval_data.input_hash)}">${esc(eval_data.input_hash.slice(0, 16))}...</span></div>` : ''}
-                            <div>${esc(eval_data.timestamp)}</div>
-                        </div>
-                    </div>
-                </div>
+        </div>
+    </div>`;
+}
+
+function renderDistribution(data) {
+    if (!data.length) return;
+    const sec = document.getElementById('dist-section');
+    sec.style.display = 'block';
+    document.getElementById('dist-total').textContent = data.length;
+
+    // 10 buckets: 0-9, 10-19, ..., 90-100
+    const buckets = Array(10).fill(0);
+    const pubBuckets = Array(10).fill(0);
+    data.forEach(e => {
+        const s = e.composite_score ?? 0;
+        const b = Math.min(9, Math.floor(s / 10));
+        buckets[b]++;
+        if (e.state === 'PUBLISHED' || e.state === 'VERIFIED') pubBuckets[b]++;
+    });
+    const maxB = Math.max(...buckets, 1);
+    const colors = ['#c9635e','#c9635e','#c9a83e','#c9a83e','#c9a83e','#c9a83e','#5a8fa8','#5a8fa8','#5cb88a','#5cb88a'];
+    const chart = document.getElementById('dist-chart');
+    chart.innerHTML = buckets.map((cnt, i) => {
+        const h = Math.max(4, Math.round((cnt / maxB) * 56));
+        const pubH = cnt > 0 ? Math.round((pubBuckets[i] / cnt) * h) : 0;
+        const label = i === 9 ? '90–100' : `${i*10}–${i*10+9}`;
+        return `<div class="flex-1 flex flex-col items-center gap-0.5" title="${label}: ${cnt} agents (${pubBuckets[i]} published)">
+            <div style="height:${h}px;width:100%;border-radius:3px 3px 0 0;background:${colors[i]};opacity:0.25;position:relative;overflow:hidden">
+                <div style="position:absolute;bottom:0;left:0;right:0;height:${pubH}px;background:${colors[i]};opacity:1;border-radius:3px 3px 0 0"></div>
             </div>
         </div>`;
-    }
+    }).join('');
+}
 
-    // ========== State ==========
-    let allData = [];
-    let currentFilter = 'all';
-    const stateOrder = { 'PUBLISHED': 0, 'VERIFIED': 1, 'WITHHELD_LOW_CONFIDENCE': 2, 'FAILED': 3 };
+let allData=[],currentFilter='published';
+const SO={'PUBLISHED':0,'VERIFIED':1,'WITHHELD_LOW_CONFIDENCE':2,'FAILED':3};
+function setFilter(f){currentFilter=f;['all','published','withheld'].forEach(x=>document.getElementById('filter-'+x).className='fb'+(x===f?' on':''));renderAll()}
+function renderAll(){
+    let fl=allData;if(currentFilter==='published')fl=allData.filter(e=>e.state==='PUBLISHED'||e.state==='VERIFIED');else if(currentFilter==='withheld')fl=allData.filter(e=>e.state!=='PUBLISHED'&&e.state!=='VERIFIED');
+    const c=document.getElementById('evaluations');c.innerHTML=fl.map(renderCard).join('');
+    document.getElementById('filter-count').textContent=fl.length+'/'+allData.length;
+    document.getElementById('empty-state').style.display=allData.length?'none':'block';
+    requestAnimationFrame(()=>{c.querySelectorAll('.eval-card').forEach((el,i)=>{el.style.opacity='0';el.style.transform='translateY(16px)';el.style.transition=`opacity 0.5s cubic-bezier(0.16,1,0.3,1) ${i*0.06}s, transform 0.5s cubic-bezier(0.16,1,0.3,1) ${i*0.06}s`;requestAnimationFrame(()=>{el.style.opacity='1';el.style.transform='translateY(0)'})})});
+}
 
-    // ========== Filters ==========
-    function setFilter(filter) {
-        currentFilter = filter;
-        ['all', 'published', 'withheld'].forEach(f => {
-            const btn = document.getElementById('filter-' + f);
-            if (f === filter) {
-                btn.className = 'filter-btn active';
-            } else {
-                btn.className = 'filter-btn';
-            }
-        });
-        renderAll();
-    }
+let pipeTmr=null;
+function startPipeline(){const pl=document.getElementById('eval-pipeline');pl.style.display='block';const dots=pl.querySelectorAll('.p-dot'),bars=pl.querySelectorAll('.p-bar');dots.forEach(d=>d.classList.remove('on','ok'));bars.forEach(b=>b.classList.remove('lit'));let cur=0;(function adv(){if(cur>0){dots[cur-1].classList.remove('on');dots[cur-1].classList.add('ok');}if(cur<dots.length){dots[cur].classList.add('on');if(cur>0)bars[cur-1].classList.add('lit');cur++;pipeTmr=setTimeout(adv,1800+Math.random()*2500)}})()}
+function donePipeline(){if(pipeTmr)clearTimeout(pipeTmr);const pl=document.getElementById('eval-pipeline');pl.querySelectorAll('.p-dot').forEach(d=>{d.classList.remove('on');d.classList.add('ok')});pl.querySelectorAll('.p-bar').forEach(b=>b.classList.add('lit'))}
+function resetPipeline(){document.getElementById('eval-pipeline').style.display='none'}
 
-    function renderAll() {
-        let filtered = allData;
-        if (currentFilter === 'published') {
-            filtered = allData.filter(e => e.state === 'PUBLISHED' || e.state === 'VERIFIED');
-        } else if (currentFilter === 'withheld') {
-            filtered = allData.filter(e => e.state !== 'PUBLISHED' && e.state !== 'VERIFIED');
-        }
-        const container = document.getElementById('evaluations');
-        container.innerHTML = filtered.map(renderEvaluation).join('');
-        document.getElementById('filter-count').textContent = `${filtered.length} / ${allData.length}`;
+const FB={operator:{wallet:'0xC32a21ec6d714D5Dd95a1Bc0b60ba8FA9dCABfDd'},evaluator:{wallet:'0x3CE2637B630c8caB992d0C15Ba94d4b144099Fd9'},chain:{registries:{identity_sepolia:'0x8004A818BFB912233c491871b3d84c89A494BD9e',reputation_sepolia:'0x8004B663056A597Dffe9eCcC1965A193B7388713',eas:'0x4200000000000000000000000000000000000021'}}};
+async function loadAgent(){let a=null;const ps=['../agent.json','agent.json','/agent.json'];if(API_BASE)ps.unshift(`${API_BASE}/agent.json`);for(const p of ps){try{const r=await fetch(p);if(r.ok){a=await r.json();break}}catch(_){}}if(!a)a=FB;try{document.getElementById('operator-wallet').textContent=a.operator?.wallet||'';document.getElementById('evaluator-wallet').textContent=a.evaluator?.wallet||'';if(a.operator?.erc8004_agent_id)document.getElementById('agent-id').textContent=`#${a.operator.erc8004_agent_id}`;const rg=a.chain?.registries;if(rg){const ex='https://sepolia.basescan.org';const set=(id,addr)=>{const el=document.getElementById(id);if(el&&addr){el.textContent=addr.slice(0,14)+'…';el.href=`${ex}/address/${addr}`}};set('identity-registry',rg.identity_sepolia||rg.identity_mainnet);set('reputation-registry',rg.reputation_sepolia||rg.reputation_mainnet);set('eas-contract',rg.eas);if(a.operator?.erc8004_agent_id)document.getElementById('sentinel-agent-id').textContent=`#${a.operator.erc8004_agent_id}`}}catch(_){}}
 
-        // Staggered fade-in for cards
-        requestAnimationFrame(() => {
-            const cards = container.querySelectorAll('.eval-card');
-            cards.forEach((card, i) => {
-                card.style.opacity = '0';
-                card.style.transform = 'translateY(24px)';
-                card.style.transition = `opacity 0.5s ease ${i * 0.08}s, transform 0.5s ease ${i * 0.08}s`;
-                requestAnimationFrame(() => {
-                    card.style.opacity = '1';
-                    card.style.transform = 'translateY(0)';
-                });
-            });
-        });
-    }
+const params=new URLSearchParams(location.search),rawApi=params.get('api')||'';
+const API_BASE=(rawApi===''||rawApi.startsWith('/')||/^https?:\/\/localhost[:/]/.test(rawApi)||rawApi.startsWith(location.origin))?rawApi:'';
 
-    // ========== Animated Counter ==========
-    function animateCounter(el, target, suffix = '') {
-        const duration = 800;
-        const start = performance.now();
-        const initial = 0;
-        function tick(now) {
-            const elapsed = now - start;
-            const progress = Math.min(elapsed / duration, 1);
-            const eased = 1 - Math.pow(1 - progress, 3); // ease-out cubic
-            const current = Math.round(initial + (target - initial) * eased);
-            el.textContent = current + suffix;
-            if (progress < 1) requestAnimationFrame(tick);
-        }
-        requestAnimationFrame(tick);
-    }
+async function runLiveEval(){
+    const input=document.getElementById('eval-input'),btn=document.getElementById('eval-btn'),status=document.getElementById('eval-status'),stxt=document.getElementById('eval-status-text'),errEl=document.getElementById('eval-error'),okEl=document.getElementById('eval-success');
+    const aid=parseInt(input.value,10);if(isNaN(aid)||aid<0){errEl.textContent='Enter a valid Agent ID.';errEl.style.display='block';okEl.style.display='none';return}
+    btn.disabled=true;input.disabled=true;status.style.display='block';errEl.style.display='none';okEl.style.display='none';stxt.textContent=`Evaluating Agent #${aid}…`;startPipeline();
+    try{const resp=await fetch(`${API_BASE}/api/evaluate`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({agent_id:aid})});if(resp.status===429)throw new Error('Another evaluation in progress.');if(!resp.ok){const e=await resp.json().catch(()=>({detail:resp.statusText}));throw new Error(e.detail||`HTTP ${resp.status}`)}const result=await resp.json();donePipeline();const idx=allData.findIndex(e=>e.agent_id===result.agent_id);if(idx>=0)allData[idx]=result;else allData.unshift(result);renderAll();updateStats();
+    const s=result.composite_score??0;let expl='';if(s>=70)expl='Published on-chain.';else if(s>=40)expl='Mixed signals. Withheld.';else expl='Low trust. Not published.';
+    okEl.innerHTML=`<span class="text-white font-bold">Agent #${aid}</span> <span class="font-bold text-lg ${sc(s)}">${s}</span><span class="text-[#7a7f96]">/100 — ${esc(expl)}</span>`;okEl.style.display='block';document.getElementById('evaluations').scrollIntoView({behavior:'smooth',block:'start'})}
+    catch(e){errEl.textContent=e.message;errEl.style.display='block';resetPipeline()}
+    finally{btn.disabled=false;input.disabled=false;status.style.display='none';setTimeout(resetPipeline,2000)}
+}
+document.getElementById('eval-input').addEventListener('keydown',e=>{if(e.key==='Enter')runLiveEval()});
 
-    // ========== Pipeline Animation ==========
-    let pipelineTimer = null;
-    function startPipelineAnimation() {
-        const pipeline = document.getElementById('eval-pipeline');
-        pipeline.style.display = 'flex';
-        const stages = pipeline.querySelectorAll('.pipeline-stage');
-        const arrows = pipeline.querySelectorAll('.pipeline-arrow');
-        // Reset
-        stages.forEach(s => { s.classList.remove('active', 'done'); });
-        arrows.forEach(a => { a.classList.remove('lit'); });
+function updateStats(){const data=allData;if(!data.length)return;const pub=data.filter(e=>e.state==='PUBLISHED'||e.state==='VERIFIED').length;const mn=data.filter(e=>e.chain_id===8453&&e.tx_hash).length;const avg=Math.round(data.reduce((s,e)=>s+(e.composite_score||0),0)/data.length);document.getElementById('total-count').textContent=data.length;document.getElementById('stat-published').textContent=pub;document.getElementById('stat-avg-score').textContent=avg;document.getElementById('stat-mainnet').textContent=mn;renderDistribution(data);if(mn>0){document.getElementById('mainnet-badge').classList.remove('hidden');const first=data.find(e=>e.chain_id===8453&&e.tx_hash);if(first){const h=safeHex(first.tx_hash);document.getElementById('mainnet-tx-link').classList.remove('hidden');document.getElementById('mainnet-tx-link').innerHTML=`<a href="https://basescan.org/tx/${h}" target="_blank" class="prf">${h.slice(0,28)}… ↗</a>`}}const ts=data.map(e=>e.timestamp).filter(Boolean).sort().reverse();if(ts.length){const diff=Math.round((Date.now()-new Date(ts[0]))/60000);const ago=diff<1?'just now':diff<60?diff+'m ago':diff<1440?Math.round(diff/60)+'h ago':Math.round(diff/1440)+'d ago';document.getElementById('last-eval-time').textContent=data.length+' evaluated · '+ago}}
 
-        let current = 0;
-        function advanceStage() {
-            if (current > 0) {
-                stages[current - 1].classList.remove('active');
-                stages[current - 1].classList.add('done');
-            }
-            if (current < stages.length) {
-                stages[current].classList.add('active');
-                if (current > 0) arrows[current - 1].classList.add('lit');
-                current++;
-                pipelineTimer = setTimeout(advanceStage, 3000 + Math.random() * 4000);
-            }
-        }
-        advanceStage();
-    }
+async function loadData(){try{const url=API_BASE?`${API_BASE}/api/results`:'results.json';const resp=await fetch(url);if(!resp.ok)throw 0;const data=await resp.json();if(!data.length)return;allData=data.sort((a,b)=>{const sa=SO[a.state]??9,sb=SO[b.state]??9;return sa!==sb?sa-sb:(b.composite_score||0)-(a.composite_score||0)});setFilter('published');updateStats();const ve=data.filter(e=>e.venice&&e.venice.tokens_sent>0);if(ve.length){document.getElementById('venice-banner').style.display='flex';document.getElementById('venice-calls').textContent=ve.length;document.getElementById('venice-tokens').textContent=ve.reduce((s,e)=>s+(e.venice.tokens_sent||0)+(e.venice.tokens_received||0),0).toLocaleString();document.getElementById('venice-model').textContent=(ve[0].venice.model||'qwen3-235b').replace('-instruct-2507','');const js=ve.filter(e=>e.venice.parse_method==='json_schema').length;document.getElementById('venice-parse').textContent=`${js}/${ve.length}`}}catch(_){}}
 
-    function completePipeline() {
-        if (pipelineTimer) clearTimeout(pipelineTimer);
-        const pipeline = document.getElementById('eval-pipeline');
-        const stages = pipeline.querySelectorAll('.pipeline-stage');
-        const arrows = pipeline.querySelectorAll('.pipeline-arrow');
-        stages.forEach(s => { s.classList.remove('active'); s.classList.add('done'); });
-        arrows.forEach(a => { a.classList.add('lit'); });
-    }
+async function checkApi(){const dot=document.getElementById('api-dot'),label=document.getElementById('api-label'),hint=document.getElementById('api-hint');try{const url=API_BASE?`${API_BASE}/api/health`:'/api/health';const r=await fetch(url).catch(()=>null);if(r&&r.ok){dot.style.background='#5cb88a';label.textContent='Connected';label.style.color='#5cb88a';hint.style.display='none';return}}catch(_){}dot.style.background='#1c1d27';label.textContent='';hint.style.display='block'}
 
-    function resetPipeline() {
-        const pipeline = document.getElementById('eval-pipeline');
-        pipeline.style.display = 'none';
-    }
-
-    // ========== Load Agent Info ==========
-    // Hardcoded fallback from agent.json — used when file can't be fetched (e.g. static server)
-    const AGENT_FALLBACK = {
-        operator: { wallet: '0xA8E23950073B9ee31433F327Ee63798939EAB0c3', erc8004_agent_id: 33465 },
-        evaluator: { wallet: '0xb85f6995E093411DfEB88c484D3A318a78A9f106' },
-        chain: {
-            registries: {
-                identity_sepolia: '0x8004A818BFB912233c491871b3d84c89A494BD9e',
-                reputation_sepolia: '0x8004B663056A597Dffe9eCcC1965A193B7388713',
-                eas: '0x4200000000000000000000000000000000000021'
-            }
-        }
-    };
-
-    async function loadAgent() {
-        let agent = null;
-        try {
-            // Try multiple paths: parent dir, same dir, root, API
-            const paths = ['../agent.json', 'agent.json', '/agent.json'];
-            if (API_BASE) paths.unshift(`${API_BASE}/agent.json`);
-            for (const path of paths) {
-                try {
-                    const resp = await fetch(path);
-                    if (resp.ok) { agent = await resp.json(); break; }
-                } catch (_) {}
-            }
-        } catch (_) {}
-
-        // Use fallback if fetch failed
-        if (!agent) agent = AGENT_FALLBACK;
-
-        try {
-            document.getElementById('operator-wallet').textContent = agent.operator?.wallet || 'Not set';
-            document.getElementById('evaluator-wallet').textContent = agent.evaluator?.wallet || 'Not set';
-            if (agent.operator?.erc8004_agent_id) {
-                document.getElementById('agent-id').textContent = `Agent #${agent.operator.erc8004_agent_id}`;
-            }
-
-            const regs = agent.chain?.registries;
-            if (regs) {
-                document.getElementById('erc8004-banner').style.display = 'block';
-                const explorer = 'https://sepolia.basescan.org';
-
-                const idAddr = regs.identity_sepolia || regs.identity_mainnet;
-                const repAddr = regs.reputation_sepolia || regs.reputation_mainnet;
-                const easAddr = regs.eas;
-
-                const idEl = document.getElementById('identity-registry');
-                idEl.textContent = idAddr?.slice(0, 12) + '...';
-                idEl.href = `${explorer}/address/${idAddr}`;
-
-                const repEl = document.getElementById('reputation-registry');
-                repEl.textContent = repAddr?.slice(0, 12) + '...';
-                repEl.href = `${explorer}/address/${repAddr}`;
-
-                const easEl = document.getElementById('eas-contract');
-                easEl.textContent = easAddr?.slice(0, 12) + '...';
-                easEl.href = `${explorer}/address/${easAddr}`;
-
-                if (agent.operator?.erc8004_agent_id) {
-                    document.getElementById('sentinel-agent-id').textContent = `#${agent.operator.erc8004_agent_id}`;
-                }
-            }
-        } catch (e) {}
-    }
-
-    // ========== API URL Detection ==========
-    const params = new URLSearchParams(window.location.search);
-    const rawApi = params.get('api') || '';
-    // Only allow same-origin or localhost API URLs to prevent open redirect
-    const API_BASE = (rawApi === '' || rawApi.startsWith('/') || /^https?:\/\/localhost[:/]/.test(rawApi) || rawApi.startsWith(window.location.origin)) ? rawApi : '';
-
-    // ========== Live Evaluation ==========
-    async function runLiveEval() {
-        const input = document.getElementById('eval-input');
-        const btn = document.getElementById('eval-btn');
-        const status = document.getElementById('eval-status');
-        const statusText = document.getElementById('eval-status-text');
-        const errorEl = document.getElementById('eval-error');
-        const successEl = document.getElementById('eval-success');
-
-        const agentId = parseInt(input.value, 10);
-        if (isNaN(agentId) || agentId < 0) {
-            errorEl.textContent = 'Please enter a valid agent ID (non-negative integer).';
-            errorEl.style.display = 'block';
-            successEl.style.display = 'none';
-            return;
-        }
-
-        // Disable UI
-        btn.disabled = true;
-        input.disabled = true;
-        status.style.display = 'block';
-        errorEl.style.display = 'none';
-        successEl.style.display = 'none';
-        statusText.textContent = `Evaluating Agent #${agentId}... this takes ~30-60s (Venice inference is thorough)`;
-
-        // Start pipeline animation
-        startPipelineAnimation();
-
-        try {
-            const resp = await fetch(`${API_BASE}/api/evaluate`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ agent_id: agentId }),
-            });
-
-            if (resp.status === 429) {
-                throw new Error('Another evaluation is in progress. Please wait and try again.');
-            }
-            if (!resp.ok) {
-                const err = await resp.json().catch(() => ({ detail: resp.statusText }));
-                throw new Error(err.detail || `HTTP ${resp.status}`);
-            }
-
-            const result = await resp.json();
-
-            // Complete pipeline animation
-            completePipeline();
-
-            // Insert new card at top
-            const existing = allData.findIndex(e => e.agent_id === result.agent_id);
-            if (existing >= 0) {
-                allData[existing] = result;
-            } else {
-                allData.unshift(result);
-            }
-            document.getElementById('empty-state').style.display = 'none';
-            document.getElementById('total-count').textContent = allData.length;
-            renderAll();
-
-            // Animate the score reveal on the first card
-            setTimeout(() => {
-                const firstCard = document.querySelector('.eval-card');
-                if (firstCard) {
-                    const scoreEl = firstCard.querySelector('.score-value');
-                    if (scoreEl) {
-                        scoreEl.classList.add('score-reveal');
-                        animateCounter(scoreEl, result.composite_score);
-                    }
-                    const confEl = firstCard.querySelector('.confidence-value');
-                    if (confEl) {
-                        animateCounter(confEl, result.confidence, '%');
-                    }
-                }
-            }, 200);
-
-            // Build score explanation
-            const dims = result.dimensions || {};
-            const ep = result.endpoints || {};
-            let explanation = '';
-            const score = result.composite_score ?? 0;
-            if (score >= 70) {
-                explanation = `Score ${score}: Strong trust signals across dimensions. Verdict: trusted and published on-chain.`;
-            } else if (score >= 40) {
-                const weak = [];
-                if ((dims.identity_completeness ?? 0) < 40) weak.push('weak identity');
-                if ((dims.endpoint_liveness ?? 0) < 40) weak.push('low endpoint liveness');
-                if ((dims.onchain_history ?? 0) < 40) weak.push('sparse on-chain history');
-                if ((dims.venice_trust_analysis ?? 0) < 40) weak.push('low Venice trust score');
-                explanation = `Score ${score}: Mixed signals${weak.length ? ' — ' + weak.join(', ') : ''}. Verdict: not confident enough to publish.`;
-            } else {
-                const problems = [];
-                if ((dims.identity_completeness ?? 0) < 30) problems.push('identity verification failed or very weak');
-                if ((ep.live ?? 0) === 0 && (ep.declared ?? 0) > 0) problems.push('no live endpoints detected');
-                if ((dims.onchain_history ?? 0) < 40) problems.push('sparse on-chain history');
-                if (problems.length === 0) problems.push('weak signals across all dimensions');
-                explanation = `Score ${score}: ${problems.join(', ')}. Verdict: not trustworthy enough to publish.`;
-            }
-            successEl.innerHTML = `Agent <span class="text-cyan-400 font-mono">#${parseInt(agentId, 10)}</span> evaluated! Trust score: <span class="font-bold ${scoreClass(score)}">${score}</span>, State: ${esc(result.state)}<br><span class="text-gray-400 text-xs">${esc(explanation)}</span>`;
-            successEl.style.display = 'block';
-
-            // Scroll to the new card
-            document.getElementById('evaluations').scrollIntoView({ behavior: 'smooth' });
-        } catch (e) {
-            errorEl.textContent = e.message;
-            errorEl.style.display = 'block';
-            resetPipeline();
-        } finally {
-            btn.disabled = false;
-            input.disabled = false;
-            status.style.display = 'none';
-            // Hide pipeline after a delay so user can see completion
-            setTimeout(resetPipeline, 3000);
-        }
-    }
-
-    // Allow Enter key to trigger evaluation
-    document.getElementById('eval-input').addEventListener('keydown', function(e) {
-        if (e.key === 'Enter') runLiveEval();
-    });
-
-    // ========== Load Data ==========
-    async function loadData() {
-        try {
-            const url = API_BASE ? `${API_BASE}/api/results` : 'results.json';
-            const resp = await fetch(url);
-            if (!resp.ok) throw new Error('No data');
-            const data = await resp.json();
-
-            if (data.length === 0) return;
-
-            document.getElementById('empty-state').style.display = 'none';
-            document.getElementById('total-count').textContent = data.length;
-
-            // Sort: PUBLISHED/VERIFIED first, then by score descending
-            allData = data.sort((a, b) => {
-                const sa = stateOrder[a.state] ?? 9;
-                const sb = stateOrder[b.state] ?? 9;
-                if (sa !== sb) return sa - sb;
-                return b.composite_score - a.composite_score;
-            });
-
-            renderAll();
-
-            // Populate Venice stats banner
-            const veniceEvals = data.filter(e => e.venice && e.venice.tokens_sent > 0);
-            if (veniceEvals.length > 0) {
-                document.getElementById('venice-banner').style.display = 'block';
-                document.getElementById('venice-calls').textContent = veniceEvals.length;
-                const totalTokens = veniceEvals.reduce((sum, e) => sum + (e.venice.tokens_sent || 0) + (e.venice.tokens_received || 0), 0);
-                document.getElementById('venice-tokens').textContent = totalTokens.toLocaleString();
-                document.getElementById('venice-model').textContent = (veniceEvals[0].venice.model || 'qwen3-235b').replace('-instruct-2507', '');
-                const jsonSchema = veniceEvals.filter(e => e.venice.parse_method === 'json_schema').length;
-                document.getElementById('venice-parse').textContent = `${jsonSchema}/${veniceEvals.length} json_schema`;
-            }
-
-            // Populate Autonomy stats banner
-            document.getElementById('autonomy-banner').style.display = 'block';
-            const published = data.filter(e => e.state === 'PUBLISHED' || e.state === 'VERIFIED').length;
-            const withheld = data.filter(e => e.state === 'WITHHELD_LOW_CONFIDENCE').length;
-            document.getElementById('autonomy-published').textContent = published;
-            document.getElementById('autonomy-withheld').textContent = withheld;
-
-            // Show mainnet badge if any mainnet evaluations exist
-            const mainnetEvals = data.filter(e => e.chain_id === 8453);
-            if (mainnetEvals.length > 0) {
-                document.getElementById('mainnet-badge').classList.remove('hidden');
-                const firstMainnet = mainnetEvals.find(e => e.tx_hash);
-                if (firstMainnet) {
-                    const h = (firstMainnet.tx_hash || '').replace(/[^0-9a-fA-Fx]/g, '');
-                    document.getElementById('mainnet-tx-link').classList.remove('hidden');
-                    document.getElementById('mainnet-tx-link').innerHTML = `Live on mainnet: <a href="https://basescan.org/tx/${h}" target="_blank" rel="noopener noreferrer" class="text-emerald-400 hover:text-emerald-300 font-mono">${h.slice(0, 18)}...</a>`;
-                }
-            }
-
-            // Show last evaluation time + total count
-            const timestamps = data.map(e => e.timestamp).filter(Boolean).sort().reverse();
-            if (timestamps.length > 0) {
-                const lastEval = new Date(timestamps[0]);
-                const now = new Date();
-                const diffMin = Math.round((now - lastEval) / 60000);
-                let ago;
-                if (diffMin < 1) ago = 'just now';
-                else if (diffMin < 60) ago = `${diffMin}m ago`;
-                else if (diffMin < 1440) ago = `${Math.round(diffMin/60)}h ago`;
-                else ago = `${Math.round(diffMin/1440)}d ago`;
-                document.getElementById('last-eval-time').textContent = `${data.length} agents evaluated · last: ${ago}`;
-            }
-
-            // Populate Verify On-Chain section
-            const publishedEvals = data.filter(e => (e.state === 'PUBLISHED' || e.state === 'VERIFIED') && (e.tx_hash || e.attestation_uid));
-            if (publishedEvals.length > 0) {
-                document.getElementById('verify-banner').style.display = 'block';
-                const safeHex = (h) => typeof h === 'string' ? h.replace(/[^0-9a-fA-Fx]/g, '') : '';
-
-                // Reputation TX links
-                const repContainer = document.getElementById('verify-rep-links');
-                repContainer.innerHTML = publishedEvals
-                    .filter(e => e.tx_hash)
-                    .map(e => {
-                        const explorer = e.chain_id === 84532 ? 'https://sepolia.basescan.org' : 'https://basescan.org';
-                        const h = safeHex(e.tx_hash);
-                        return `<a href="${explorer}/tx/${h}" target="_blank" rel="noopener noreferrer" class="px-2 py-1 rounded bg-amber-900/30 text-amber-400 hover:text-amber-300 font-mono text-[10px] border border-amber-700/20">#${parseInt(e.agent_id,10)} → ${h.slice(0,10)}...</a>`;
-                    }).join('');
-                if (!repContainer.innerHTML) repContainer.innerHTML = '<span class="text-amber-600 text-[10px]">No published TXs yet</span>';
-
-                // EAS Attestation links
-                const easContainer = document.getElementById('verify-eas-links');
-                easContainer.innerHTML = publishedEvals
-                    .filter(e => e.attestation_uid)
-                    .map(e => {
-                        const easBase = e.chain_id === 84532 ? 'https://base-sepolia.easscan.org' : 'https://base.easscan.org';
-                        const uid = safeHex(e.attestation_uid);
-                        return `<a href="${easBase}/attestation/view/0x${uid}" target="_blank" rel="noopener noreferrer" class="px-2 py-1 rounded bg-amber-900/30 text-amber-400 hover:text-amber-300 font-mono text-[10px] border border-amber-700/20">#${parseInt(e.agent_id,10)} → 0x${uid.slice(0,8)}...</a>`;
-                    }).join('');
-                if (!easContainer.innerHTML) easContainer.innerHTML = '<span class="text-amber-600 text-[10px]">No EAS attestations yet</span>';
-
-                // Input hashes
-                const hashContainer = document.getElementById('verify-input-hashes');
-                if (hashContainer) {
-                    hashContainer.innerHTML = publishedEvals
-                        .filter(e => e.input_hash)
-                        .map(e => `<span class="px-2 py-1 rounded bg-amber-900/30 text-amber-400 font-mono text-[10px] border border-amber-700/20" title="${esc(e.input_hash)}">#${parseInt(e.agent_id,10)} → ${esc(e.input_hash.slice(0, 12))}...</span>`)
-                        .join('');
-                    if (!hashContainer.innerHTML) hashContainer.innerHTML = '<span class="text-amber-600 text-[10px]">No input hashes yet</span>';
-                }
-
-                // Evaluator wallet link
-                const evalWallet = document.getElementById('evaluator-wallet')?.textContent || '';
-                if (evalWallet && evalWallet !== 'Not set') {
-                    const explorer = publishedEvals[0].chain_id === 84532 ? 'https://sepolia.basescan.org' : 'https://basescan.org';
-                    const walletEl = document.getElementById('verify-evaluator');
-                    walletEl.textContent = evalWallet;
-                    walletEl.href = `${explorer}/address/${safeHex(evalWallet)}`;
-                }
-
-                // Reputation Registry contract link
-                const repAddr = document.getElementById('reputation-registry')?.href || '';
-                if (repAddr) {
-                    const repContractEl = document.getElementById('verify-rep-contract');
-                    const repText = document.getElementById('reputation-registry')?.textContent || '';
-                    repContractEl.textContent = repText;
-                    repContractEl.href = repAddr;
-                }
-            }
-
-        } catch (e) {
-            // No data yet -- show empty state
-        }
-    }
-
-    // ========== API Health Check ==========
-    async function checkApiHealth() {
-        const dot = document.getElementById('api-dot');
-        const label = document.getElementById('api-label');
-        const hint = document.getElementById('api-hint');
-        const btn = document.getElementById('eval-btn');
-
-        try {
-            const url = API_BASE ? `${API_BASE}/api/health` : '/api/health';
-            const resp = await fetch(url).catch(() => null);
-            if (resp && resp.ok) {
-                const data = await resp.json().catch(() => ({}));
-                if (data.status === 'degraded') {
-                    dot.className = 'inline-block w-2 h-2 rounded-full bg-amber-400';
-                    label.textContent = 'API Degraded — pipeline not initialized';
-                    label.className = 'text-amber-400';
-                    return false;
-                }
-                dot.className = 'inline-block w-2 h-2 rounded-full bg-emerald-400 pulse-glow-green';
-                label.textContent = 'API Connected';
-                label.className = 'text-emerald-400';
-                hint.style.display = 'none';
-                btn.disabled = false;
-                return true;
-            }
-        } catch (_) {}
-
-        dot.className = 'inline-block w-2 h-2 rounded-full bg-amber-400';
-        label.textContent = 'API Offline — viewing cached results';
-        label.className = 'text-amber-400';
-        hint.style.display = 'block';
-        // Don't disable button — let them try and see the error
-        return false;
-    }
-
-    loadData();
-    loadAgent();
-    checkApiHealth();
-    // Auto-refresh every 10 seconds
-    setInterval(loadData, 10000);
-    // Re-check API health every 30 seconds
-    setInterval(checkApiHealth, 30000);
-    </script>
+loadData();loadAgent();checkApi();setInterval(loadData,10000);setInterval(checkApi,30000);
+</script>
 </body>
 </html>

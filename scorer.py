@@ -1,4 +1,19 @@
-"""4-dimension trust scoring engine with Bayesian confidence and CV-based disagreement penalty."""
+"""5-dimension trust scoring engine with Bayesian confidence and CV-based disagreement penalty.
+
+Likelihood ratio model uses a continuous exponential function rather than flat buckets,
+so score=99 and score=71 produce different LRs (not identical as in a 3-bucket model).
+
+  LR(s) = exp(k * (s - 50) / 50)   where k = log(LR_MAX) = log(8) ≈ 2.08
+
+This gives:
+  s=100 → LR ≈ 8.0   (strong trust signal)
+  s= 75 → LR ≈ 2.8
+  s= 50 → LR = 1.0   (neutral — no update)
+  s= 25 → LR ≈ 0.35
+  s=  0 → LR ≈ 0.125 (strong distrust signal)
+
+The function is monotone, symmetric around 50, and bounded in [1/LR_MAX, LR_MAX].
+"""
 from __future__ import annotations
 
 import logging
@@ -18,11 +33,9 @@ from models import (
 
 logger = logging.getLogger(__name__)
 
-# Likelihood ratios encode a 2-bit information model:
-#   strong evidence FOR trust, neutral (no update), strong evidence AGAINST.
-_LR_STRONG = 4.0    # score > 70
-_LR_NEUTRAL = 1.0   # score 30–70
-_LR_WEAK = 0.25     # score < 30
+# Continuous LR model: LR(s) = exp(k * (s-50)/50), k = log(LR_MAX)
+# LR_MAX = 8.0 → at score=100, LR=8; at score=0, LR=1/8=0.125
+_LR_K = math.log(8.0)
 
 # Venice parse-quality degradation factor for non-JSON_SCHEMA parse methods.
 _VENICE_DEGRADATION = 0.75
@@ -55,38 +68,71 @@ class Scorer:
         return dims
 
     def compute_composite(self, dimensions: TrustDimensions) -> int:
-        """Weighted composite score across 5 dimensions, clamped 0-100.
+        """Composite score: 4-dimension weighted base × Venice multiplier, with veto floor.
 
-        Weight rationale (env-configurable via WEIGHT_* vars):
-        - Identity 20%: Most gameable — anyone can fill manifest fields.
-        - Liveness 20%: Requires real infrastructure to sustain.
-        - On-chain 20%: Historical transaction record is expensive to forge.
-        - Venice 25%: Cross-references ALL signals and detects inconsistencies.
-          Highest weight because it synthesizes rather than measures a single axis.
-        - Protocol 15%: MCP handshake compliance — verifies agent actually speaks
-          the protocol, not just serves HTTP. Lowest weight as it's binary.
+        Architecture:
+        - Base (4 dims, sum=1.0): identity 30%, liveness 25%, onchain 25%, protocol 20%
+        - Venice applied as a score multiplier centered at 50, range [0.3, 1.5]:
+            multiplier = clamp(0.3 + 1.4 × venice/100, 0.3, 1.5)
+          This prevents high base scores from compensating for fraud signals.
+          Venice synthesizes all other dimensions — treating it as an additive
+          weight would double-count identity+liveness+onchain evidence.
+        - Veto floor: if Venice < threshold or identity < threshold, composite is
+          hard-capped regardless of other dimensions (closes compensation attack).
         """
-        raw = (
-            dimensions.identity_completeness * config.WEIGHT_IDENTITY       # 0.20
-            + dimensions.endpoint_liveness * config.WEIGHT_LIVENESS         # 0.20
-            + dimensions.onchain_history * config.WEIGHT_ONCHAIN            # 0.20
-            + dimensions.venice_trust_analysis * config.WEIGHT_VENICE_TRUST # 0.25
-            + dimensions.protocol_compliance * config.WEIGHT_PROTOCOL       # 0.15
+        # --- Base composite (4 dimensions, Venice excluded) ---
+        base = (
+            dimensions.identity_completeness * config.WEIGHT_IDENTITY   # 0.30
+            + dimensions.endpoint_liveness   * config.WEIGHT_LIVENESS   # 0.25
+            + dimensions.onchain_history     * config.WEIGHT_ONCHAIN    # 0.25
+            + dimensions.protocol_compliance * config.WEIGHT_PROTOCOL   # 0.20
         )
+
+        # --- Venice multiplier ---
+        # f(0)=0.30  f(50)=1.00  f(100)=1.70 → clamped to [0.3, 1.5]
+        venice = dimensions.venice_trust_analysis
+        multiplier = max(
+            config.VENICE_MULTIPLIER_MIN,
+            min(config.VENICE_MULTIPLIER_MAX, 0.3 + 1.4 * (venice / 100.0)),
+        )
+        raw = base * multiplier
         composite = max(0, min(100, round(raw)))
-        logger.info("Composite: raw=%.2f clamped=%d", raw, composite)
+
+        # --- Veto floor (hard caps for critical fraud signals) ---
+        veto_cap = 100
+        if venice < config.VETO_VENICE_THRESHOLD:
+            veto_cap = min(veto_cap, config.VETO_COMPOSITE_CAP_VENICE)
+            logger.warning(
+                "Venice veto: venice=%d < %d threshold → cap=%d",
+                venice, config.VETO_VENICE_THRESHOLD, config.VETO_COMPOSITE_CAP_VENICE,
+            )
+        if dimensions.identity_completeness < config.VETO_IDENTITY_THRESHOLD:
+            veto_cap = min(veto_cap, config.VETO_COMPOSITE_CAP_IDENTITY)
+            logger.warning(
+                "Identity veto: identity=%d < %d threshold → cap=%d",
+                dimensions.identity_completeness,
+                config.VETO_IDENTITY_THRESHOLD, config.VETO_COMPOSITE_CAP_IDENTITY,
+            )
+        composite = min(composite, veto_cap)
+
+        logger.info(
+            "Composite: base=%.2f venice=%d mult=%.3f raw=%.2f veto_cap=%d final=%d",
+            base, venice, multiplier, raw, veto_cap, composite,
+        )
         return composite
 
     # --- Bayesian log-odds confidence model ---
 
     @staticmethod
     def _score_to_lr(score: int) -> float:
-        """Map a dimension score (0-100) to a likelihood ratio."""
-        if score > 70:
-            return _LR_STRONG
-        if score < 30:
-            return _LR_WEAK
-        return _LR_NEUTRAL
+        """Map a dimension score (0-100) to a likelihood ratio via continuous exponential.
+
+        LR(s) = exp(k * (s - 50) / 50), k = log(8)
+
+        This is monotone and differentiable: score 99 > score 71, both above neutral,
+        but produce distinct LRs rather than collapsing to the same bucket value.
+        """
+        return math.exp(_LR_K * (score - 50) / 50.0)
 
     def compute_confidence(
         self,
@@ -129,7 +175,13 @@ class Scorer:
         else:
             logger.info("On-chain abstained (analysis failed)")
 
-        # --- Venice ---
+        # --- Venice (with correlation discount) ---
+        # Venice synthesizes identity + liveness + onchain signals, so its evidence
+        # partially overlaps with the other three dimensions already counted above.
+        # Applying a 0.6 discount factor to its log-odds contribution avoids
+        # inflating confidence by treating correlated evidence as independent.
+        # Equivalent to: effective LR = lr^0.6 (dampened but directionally correct).
+        _VENICE_CORRELATION_DISCOUNT = 0.6
         if venice.venice_parse_failed:
             logger.info("Venice abstained (parse failed)")
         else:
@@ -141,8 +193,13 @@ class Scorer:
                     venice.score, effective_score, venice.parse_method.value,
                 )
             lr = self._score_to_lr(effective_score)
-            log_odds += math.log(lr)
+            discounted_log_lr = _VENICE_CORRELATION_DISCOUNT * math.log(lr)
+            log_odds += discounted_log_lr
             observed_scores.append(dimensions.venice_trust_analysis)
+            logger.info(
+                "Venice log-odds: full=%.3f discounted=%.3f (correlation_discount=%.1f)",
+                math.log(lr), discounted_log_lr, _VENICE_CORRELATION_DISCOUNT,
+            )
 
         # --- Protocol Declaration ---
         if dimensions.protocol_compliance > 0:
