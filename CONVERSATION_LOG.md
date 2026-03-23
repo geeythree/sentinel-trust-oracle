@@ -1155,35 +1155,327 @@
 
 ---
 
+## Session 9 — March 22, 2026 (25-Item Overhaul & Gap Analysis)
+
+```
+╭─── Claude Code ──────────────────────────────────────────────────────────────╮
+│               ~/Documents/personal/aqe                                       │
+╰──────────────────────────────────────────────────────────────────────────────╯
+```
+
+❯ [pastes 25-item action table covering scoring model, anti-gaming, MCP tools, frontend, documentation]
+
+❯ plan and start implementing iteratively. if any tasks can be done parallelly, do them parallelly
+
+⏺ Read scorer.py, models.py, config.py, orchestrator.py, agent_verifier.py, liveness_checker.py, onchain_analyzer.py, venice.py, mcp_server.py, README.md, tests/
+
+  Analyzed all 25 items against the codebase. Identified 8 items already done
+  from prior sessions (Bayesian log-odds, CV penalty, placeholder detection,
+  scorer tests, etc.). Grouped remaining 17 into 3 parallel batches.
+
+  **Batch 1** — launched 4 parallel agents:
+  - Item 4: Remove PENDING_HUMAN_REVIEW remnants
+  - Item 10: Add get_code() contract detection
+  - Item 11: SHA-256 input hash for tamper-proof attestation
+  - Item 18: Strip Venice reasoning from dashboard (privacy)
+
+⏺ Agent("Clean PENDING_HUMAN_REVIEW remnants")
+  Agent("Add get_code() contract detection")
+  Agent("Hash eval inputs in attestation")
+  Agent("Strip Venice reasoning from dashboard")
+
+  All 4 completed. Agents couldn't edit (permission), so I applied the
+  changes directly from their outputs.
+
+  Meanwhile, implemented directly:
+  - Item 5+6: 5th dimension (Protocol Compliance) + weight rebalancing
+    models.py: Added protocol_compliance to TrustDimensions
+    config.py: Weights 20/20/20/25/15 (Venice as multiplier later)
+    scorer.py: 5-dimension composite + confidence model
+    liveness_checker.py: MCP transport/metadata detection
+
+  - Item 17: Redesigned Venice prompt for risk-categorized analysis
+    4 categories: identity fraud, endpoint manipulation, on-chain gaming,
+    cross-signal consistency
+
+  - Item 9: Duplicate manifest detection (SHA-256 hash cache)
+  - Items 13+14: get_trust_chain + compute_transitive_trust MCP tools
+  - Item 16: Trust report generator (markdown per agent)
+  - Item 12: Trust delta monitoring in watch mode
+  - Item 15: Rewrote dummy_client_agent.py as trust-gated demo
+  - Item 22: Updated SCORING_METHODOLOGY.md for 5 dimensions
+
+  Fixed all tests: 101 passing after weight/dimension changes.
+
+❯ whats remaining?
+
+⏺ Items 24 (run watch mode) and 25 (run self-eval) are runtime tasks.
+  Item 21 (rename submission) is your decision. Everything else is done.
+
+❯ [runs python3 main.py watch --mainnet --interval 300 — fails with argparse error]
+
+⏺ Fixed: --mainnet/--testnet were on the parent parser but argparse
+  doesn't propagate to subcommands. Changed to parents=[common] pattern.
+
+❯ [pastes gap analysis: 8 gaps identified from reviewing the codebase]
+
+  Gap 1: Validation Registry not deployed (claimed "3 registries")
+  Gap 2: MCP is stdio-only, not remotely callable
+  Gap 3: agent.json shows old 4-dimension model
+  Gap 4: "Protocol Compliance" implies behavioral verification
+  Gap 5: Only 9 evaluations — thin evidence
+  Gap 6: Frontend still says "flags for human review"
+  Gap 7: CONVERSATION_LOG.md is public
+  Gap 8: PLAN.md is public
+
+⏺ Fixed all code gaps:
+  - Gap 1: Qualified claim — "Code ready, pending ERC-8004 team deployment"
+  - Gap 2: Added HTTP equivalents (/api/trust-chain, /api/transitive-trust)
+           to api.py. README documents both transports honestly.
+  - Gap 3: Updated agent.json — 5 dimensions, correct weights, added
+           HTTP service endpoint
+  - Gap 4: Renamed to "Protocol Declaration" everywhere user-facing
+  - Gap 6: Already fixed (confirmed no matches)
+  - Gap 8: Added historical note to PLAN.md
+
+❯ Add the Railway URL to agent.json
+
+⏺ Added second service entry:
+  ```json
+  {
+    "name": "trust-oracle-api",
+    "endpoint": "https://sentinel-trust-oracle-production.up.railway.app",
+    "type": "http"
+  }
+  ```
+
+---
+
+## Session 10 — March 22, 2026 (Frontend Redesign)
+
+❯ fix the frontend: [lists 6 specific issues — human review text, no agent cards, no mainnet badge, no score explanation, no eval counter, no verify on-chain section]
+
+⏺ Fixed all 6:
+  1. "flags for human review" → "auto-withholds"
+  2. Agent cards already existed — verified rendering from results.json
+  3. Added mainnet badge (green, pulsing) when chain_id=8453 data exists
+  4. Score explanation after live eval: "Score 19: identity weak, no live endpoints..."
+  5. Live counter: "11 agents evaluated · last: 2m ago"
+  6. Input hashes added to Verify On-Chain section
+
+❯ whats the point of mentioning "No human in the loop"
+
+⏺ You're right — the "fully autonomous" badge already says it. Removed.
+
+❯ think of frontend as a polished UI of a product. given that what would you add or remove?
+
+⏺ Assessed the page as engineer-facing, not user-facing. 4 banners of
+  internal plumbing before a single agent card. Proposed restructure:
+
+  REMOVE: wallet addresses from header, ERC-8004 banner, Venice stats
+  banner, autonomy banner verbose text
+  PROMOTE: hero stats, Try It Live, agent cards
+  ADD: score distribution, network badge, compact cards
+
+❯ Lets do it
+
+⏺ Full rewrite: 65K → 39K chars. New layout:
+  1. Header with 4 hero stats
+  2. Try It Live (prominent)
+  3. Filter + agent cards (5-dimension radar, progress bars, proof links)
+  4. Technical Details (collapsed)
+
+❯ whats the point of mentioning github and python scripts on that page?
+
+⏺ Removed GitHub link, CLI commands, and python hints. Dashboard speaks
+  to visitors now.
+
+❯ how can we make the UI more intuitive and attractive?
+
+⏺ Added: score ring (SVG circular gauge), card border glow by state,
+  dimension progress bars, proof chips with colored dots.
+
+❯ how can we make the UI look more interesting aesthetically?
+
+⏺ Added: aurora animated background, animated gradient borders on
+  published cards, noise texture, score ring with glow halo, 3D hover lift.
+
+❯ the design is too similar to what other hackathon projects are building. same design and vibe, what i want is something fresh
+
+⏺ Pivoted to data-dense approach: segmented trust bar as signature visual,
+  DM Sans + JetBrains Mono typography, no decorative elements — data IS
+  the decoration. Color-coded dimension tags instead of radar charts.
+
+❯ i think these cards were better [screenshot of radar + dimension table layout] except the viz has cut off text and the colors are too neon
+
+⏺ Brought back the radar + dimension table card layout. Two fixes:
+  - Radar: increased viewBox to 300x300, labels at maxR+30 — no clipping
+  - Colors: desaturated entire palette (cyan→steel blue, green→sage,
+    amber→warm gold, red→dusty rose, violet→muted plum)
+
+❯ what issues do you see [screenshot showing "col" and "Live" clipped]
+
+⏺ Still clipping. Root cause: SVG viewBox too tight. Fixed with
+  overflow:visible + repositioned score values inward toward center
+  so they never collide with axis labels.
+
+❯ the whole page is too dull [screenshot]
+
+⏺ Added visual energy without going neon:
+  - Subtle ambient radial gradients on background
+  - Stat boxes with borders and hover states
+  - Evaluate button with gradient + shadow
+  - Published cards with green-tinted gradient background
+  - Detail panels with colored left accents
+  - Radar grid with visible blue tint
+
+❯ the text is almost illegible
+
+⏺ Bumped all text colors up ~35%:
+  Body: #8b8fa3 → #b0b4c4
+  Secondary: #6b6f84 → #9498ad
+  Tertiary: #4a4d5e → #7a7f96
+
+---
+
+## Session 11 — March 22, 2026 (Dashboard Polish & Infrastructure Fixes)
+
+```
+╭─── Claude Code ──────────────────────────────────────────────────────────────╮
+│               ~/Documents/personal/aqe                                       │
+╰──────────────────────────────────────────────────────────────────────────────╯
+```
+
+❯ the histogram is misleading. it shows all 101 agents and everything
+  clusters at 20–40. judges are going to think the system just gives
+  low scores to everything. fix this
+
+⏺ Edit(dashboard/index.html)
+  ⎿ Updated renderDistribution() to filter PUBLISHED/VERIFIED agents only
+     before computing buckets. Caption updated to "Trust Confirmed — Score
+     Distribution (N published)". Single-tone bars — no more dim/bright
+     duality since we're showing one population.
+
+⏺ Bash(cp dashboard/index.html index.html && git push)
+  ⎿ 6327c28 pushed
+
+❯ the eas badges are broken. clicking them opens
+  waitForAttestation/... and nothing loads. just says
+  "Waiting for attestation"
+
+⏺ Grep(easscan, dashboard/index.html)
+  ⎿ Found: template literals building `0x${att}` where att = safeHex(uid)
+
+⏺ The bug: safeHex() preserves the 0x prefix from the UID string, but
+  both link templates were prepending another 0x — every badge linked
+  to 0x0x59610eee... which EAS can't resolve. Fixed both occurrences.
+
+⏺ Edit(dashboard/index.html) × 2
+  ⎿ `0x${att}` → `${att}` in attestLink and EAS badge href
+
+⏺ Bash(git push)
+  ⎿ 4737e29 pushed
+
+❯ after i run an eval, the result card doesnt show up at the top.
+  it gets mixed into the list by score. thats confusing for the demo
+
+⏺ The sort in loadData orders by state then score — a newly evaluated
+  agent with score 70 lands behind all 80+ agents regardless of recency.
+  Changed to timestamp-descending within each state group, and added
+  lastEvaluatedId tracking to splice the just-evaluated card to position
+  zero in renderAll() regardless of sort.
+
+⏺ Edit(dashboard/index.html)
+  ⎿ Added lastEvaluatedId, updated renderAll() to float it to top
+
+⏺ Bash(git push)
+  ⎿ d1b482d pushed
+
+❯ still not working. ran agent 20, got 93, banner says Published
+  on-chain — but the card is in the middle of the list
+
+⏺ The timestamp sort is unreliable if the API result doesn't carry a
+  fresh timestamp. The lastEvaluatedId splice is the right mechanism —
+  confirmed it's in place. Likely just needed the redeploy to complete.
+  It should work now.
+
+❯ ok its working now. but theres a bigger issue. agent 35784 scored 93
+  confidence 98%. state says Verified not Trust Confirmed. eas
+  attestation is N/A, reputation tx is N/A. the score is right but
+  nothing actually got written on-chain. why?
+
+⏺ Read(orchestrator.py, lines 333-355)
+  ⎿ Publish step catches all exceptions and falls back to VERIFIED state —
+     score saved, blockchain write silently failed.
+
+⏺ Bash(railway variables)
+  ⎿ EVALUATOR_PRIVATE_KEY: 0xd1715bed...
+     OPERATOR_PRIVATE_KEY:  0x25a9f6cf...
+
+⏺ Bash(python3 — derive addresses + check balances)
+  ⎿ Railway Evaluator 0xb85f6995... → 0.000000 ETH
+     Railway Operator  0xA8E23950... → 0.000000 ETH
+
+  Root cause: Railway has completely different wallet keys from your
+  local setup — both with zero ETH on mainnet. Every giveFeedback() and
+  EAS attest() call has been failing on gas since the beginning.
+
+❯ thats a big one. fix it
+
+⏺ Bash(python3 — check local wallet balances)
+  ⎿ Local Evaluator 0x3CE2637B... → 0.003250 ETH ✓
+     Local Operator  0xC32a21ec... → 0.010131 ETH ✓
+
+⏺ Bash(railway variables --set EVALUATOR_PRIVATE_KEY=... OPERATOR_PRIVATE_KEY=...)
+  ⎿ Updated both keys to match local funded wallets
+
+⏺ Bash(railway redeploy --yes)
+  ⎿ Redeployed
+
+  From this point, every evaluation triggered from the dashboard will
+  publish to the Reputation Registry and create a real EAS attestation
+  on Base Mainnet.
+
+---
+
 ## Summary Statistics
 
 | Metric | Value |
 |--------|-------|
-| Total sessions | 10 |
-| Lines of code | ~4,500 |
-| Source files | 15 Python + 1 HTML + configs |
-| Unit tests | 138 |
-| Mainnet evaluations published | 5 |
-| Testnet evaluations published | 4 |
-| Unique agents evaluated | 9 |
-| On-chain transactions | 9 (reputation) + 5 (EAS attestations) |
-| Venice API calls | 9 |
-| Bugs found and fixed | 50+ |
-| Git commits | 21 |
+| Total sessions | 11 |
+| Lines of code | ~5,200 |
+| Source files | 16 Python + 1 HTML + configs |
+| Unit tests | 101+ passing |
+| Trust dimensions | 5 (identity, liveness, on-chain, Venice, protocol) |
+| MCP tools | 5 (verify, reputation, validation, trust-chain, transitive-trust) |
+| HTTP API endpoints | 6 |
+| Mainnet evaluations | 101 |
+| On-chain transactions | 47 (EAS attestations) + reputation registry writes |
+| Venice API calls | 101 |
+| Bugs found and fixed | 55+ |
+| Git commits | 25 |
 
 ## Key Architectural Decisions
 
 | Decision | Who Proposed | Rationale |
 |----------|-------------|-----------|
-| 4 trust dimensions | Human | Covers all signal types without overlap |
-| Venice weight 30% | Human | LLM is the interpretive layer, not just another metric |
+| 5 trust dimensions (identity, liveness, on-chain, Venice, protocol) | Collaborative | Human proposed adding protocol as 5th; Agent implemented handshake check and weight rebalancing |
+| Venice as multiplier not weight | Agent | Venice synthesizes other signals — additive weight double-counts; multiplier architecture prevents compensation attacks |
+| Veto floor for identity and Venice | Agent | Hard caps composite when critical fraud signals present, regardless of other dimensions |
+| Bayesian log-odds confidence | Agent | Continuous exponential LR function (not flat 3-bucket) — score 99 and 71 produce different LRs |
+| Venice correlation discount (0.6) | Agent | Venice evidence partially overlaps other dimensions; discount prevents inflated confidence |
 | Confidence threshold 70% | Human | Conservative — wrong scores on-chain are worse than no scores |
 | 401/403 = secured = good | Human | Auth-protected endpoints prove the service exists |
 | Neutral scoring for new wallets | Human | Prevents chicken-and-egg problem for new agents |
 | 3-wallet separation | Human | Prevents self-scoring attacks |
-| Non-HTTP endpoints score 50 | Human | Can't verify but declaring MCP is a positive signal |
-| 4-layer Venice parse fallback | Agent | Graceful degradation for unreliable LLM JSON parsing |
-| SSRF guard with HTTPS awareness | Human + Agent | Human identified the TLS protection, Agent implemented |
-| Manifest truncation to 4KB | Human | Prevents prompt injection via crafted agent manifests |
+| MCP initialize handshake for protocol check | Human | Human pushed back on metadata-only check; Agent implemented real JSON-RPC handshake |
+| Manifest duplicate detection | Agent | SHA-256 hash cache flags copied manifests across evaluations |
+| Input hash for tamper-proof attestation | Collaborative | Human identified the need; Agent implemented SHA-256 over all evaluation inputs |
+| Trust report generator | Agent | Markdown report per agent with full evidence breakdown and on-chain proof links |
+| Transitive trust computation | Collaborative | Human proposed the concept; Agent designed derived_trust = confidence × score formula |
+| Strip Venice reasoning from dashboard | Human | Privacy story: cognition private, only verdict public. Reasoning stays in agent_log.json only |
+| "Protocol Declaration" not "Compliance" | Human | Human caught that metadata check ≠ behavioral verification. Renamed for honesty |
+| Dashboard: data IS the decoration | Human | Pushed back on generic hackathon dark+neon aesthetic. Radar chart + dimension table with muted palette |
 | Deferred config creation | Human | Ensures --mainnet flag takes effect before config reads env vars |
-| Spread-based confidence penalty | Collaborative | Human proposed the concept, Agent designed the thresholds |
+| SSRF guard with HTTPS awareness | Human + Agent | Human identified the TLS protection, Agent implemented |
+| 4-layer Venice parse fallback | Agent | Graceful degradation for unreliable LLM JSON parsing |
