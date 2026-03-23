@@ -159,8 +159,8 @@
     <!-- SCORE DISTRIBUTION -->
     <div id="dist-section" class="crd p-6 mb-8 an" style="animation-delay:0.12s;display:none">
         <div class="flex items-center justify-between mb-4">
-            <span class="text-[12px] font-semibold text-[#9498ad]">Score Distribution — <span id="dist-total" class="text-white">0</span> agents evaluated</span>
-            <span class="text-[10px] text-[#7a7f96]">Conservative scoring: system abstains rather than guess</span>
+            <span class="text-[12px] font-semibold text-[#9498ad]">Trust Confirmed — Score Distribution (<span id="dist-total" class="text-white">0</span> published)</span>
+            <span class="text-[10px] text-[#7a7f96]">Published agents only · abstentions omitted</span>
         </div>
         <div id="dist-chart" class="flex items-end gap-1.5 h-16"></div>
         <div class="flex justify-between mt-1 text-[9px] text-[#7a7f96] mono">
@@ -399,31 +399,27 @@ function renderCard(e) {
 }
 
 function renderDistribution(data) {
-    if (!data.length) return;
+    const pub = data.filter(e => e.state === 'PUBLISHED' || e.state === 'VERIFIED');
+    if (!pub.length) return;
     const sec = document.getElementById('dist-section');
     sec.style.display = 'block';
-    document.getElementById('dist-total').textContent = data.length;
+    document.getElementById('dist-total').textContent = pub.length;
 
-    // 10 buckets: 0-9, 10-19, ..., 90-100
+    // 10 buckets: 0-9, 10-19, ..., 90-100 — published agents only
     const buckets = Array(10).fill(0);
-    const pubBuckets = Array(10).fill(0);
-    data.forEach(e => {
+    pub.forEach(e => {
         const s = e.composite_score ?? 0;
         const b = Math.min(9, Math.floor(s / 10));
         buckets[b]++;
-        if (e.state === 'PUBLISHED' || e.state === 'VERIFIED') pubBuckets[b]++;
     });
     const maxB = Math.max(...buckets, 1);
     const colors = ['#c9635e','#c9635e','#c9a83e','#c9a83e','#c9a83e','#c9a83e','#5a8fa8','#5a8fa8','#5cb88a','#5cb88a'];
     const chart = document.getElementById('dist-chart');
     chart.innerHTML = buckets.map((cnt, i) => {
-        const h = Math.max(4, Math.round((cnt / maxB) * 56));
-        const pubH = cnt > 0 ? Math.round((pubBuckets[i] / cnt) * h) : 0;
+        const h = Math.max(cnt > 0 ? 8 : 2, Math.round((cnt / maxB) * 56));
         const label = i === 9 ? '90–100' : `${i*10}–${i*10+9}`;
-        return `<div class="flex-1 flex flex-col items-center gap-0.5" title="${label}: ${cnt} agents (${pubBuckets[i]} published)">
-            <div style="height:${h}px;width:100%;border-radius:3px 3px 0 0;background:${colors[i]};opacity:0.25;position:relative;overflow:hidden">
-                <div style="position:absolute;bottom:0;left:0;right:0;height:${pubH}px;background:${colors[i]};opacity:1;border-radius:3px 3px 0 0"></div>
-            </div>
+        return `<div class="flex-1 flex flex-col items-center gap-0.5" title="${label}: ${cnt} published">
+            <div style="height:${h}px;width:100%;border-radius:3px 3px 0 0;background:${colors[i]};opacity:${cnt>0?1:0.12}"></div>
         </div>`;
     }).join('');
 }
@@ -447,8 +443,10 @@ function resetPipeline(){document.getElementById('eval-pipeline').style.display=
 const FB={operator:{wallet:'0xC32a21ec6d714D5Dd95a1Bc0b60ba8FA9dCABfDd'},evaluator:{wallet:'0x3CE2637B630c8caB992d0C15Ba94d4b144099Fd9'},chain:{registries:{identity_sepolia:'0x8004A818BFB912233c491871b3d84c89A494BD9e',reputation_sepolia:'0x8004B663056A597Dffe9eCcC1965A193B7388713',eas:'0x4200000000000000000000000000000000000021'}}};
 async function loadAgent(){let a=null;const ps=['../agent.json','agent.json','/agent.json'];if(API_BASE)ps.unshift(`${API_BASE}/agent.json`);for(const p of ps){try{const r=await fetch(p);if(r.ok){a=await r.json();break}}catch(_){}}if(!a)a=FB;try{document.getElementById('operator-wallet').textContent=a.operator?.wallet||'';document.getElementById('evaluator-wallet').textContent=a.evaluator?.wallet||'';if(a.operator?.erc8004_agent_id)document.getElementById('agent-id').textContent=`#${a.operator.erc8004_agent_id}`;const rg=a.chain?.registries;if(rg){const ex='https://sepolia.basescan.org';const set=(id,addr)=>{const el=document.getElementById(id);if(el&&addr){el.textContent=addr.slice(0,14)+'…';el.href=`${ex}/address/${addr}`}};set('identity-registry',rg.identity_sepolia||rg.identity_mainnet);set('reputation-registry',rg.reputation_sepolia||rg.reputation_mainnet);set('eas-contract',rg.eas);if(a.operator?.erc8004_agent_id)document.getElementById('sentinel-agent-id').textContent=`#${a.operator.erc8004_agent_id}`}}catch(_){}}
 
+const RAILWAY_URL='https://sentinel-trust-oracle-production.up.railway.app';
 const params=new URLSearchParams(location.search),rawApi=params.get('api')||'';
-const API_BASE=(rawApi===''||rawApi.startsWith('/')||/^https?:\/\/localhost[:/]/.test(rawApi)||rawApi.startsWith(location.origin))?rawApi:'';
+const isLocalhost=/^https?:\/\/(localhost|127\.0\.0\.1)[:/]/.test(location.href);
+const API_BASE=rawApi?(rawApi.startsWith('/')||/^https?:\/\/localhost[:/]/.test(rawApi)||rawApi.startsWith(location.origin)?rawApi:''):(isLocalhost?RAILWAY_URL:'');
 
 async function runLiveEval(){
     const input=document.getElementById('eval-input'),btn=document.getElementById('eval-btn'),status=document.getElementById('eval-status'),stxt=document.getElementById('eval-status-text'),errEl=document.getElementById('eval-error'),okEl=document.getElementById('eval-success');
