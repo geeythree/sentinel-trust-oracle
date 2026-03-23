@@ -253,14 +253,60 @@ Terminal: WITHHELD_LOW_CONFIDENCE | FAILED
 | Base Mainnet | — | Code ready, pending ERC-8004 team deployment |
 | Base Sepolia | — | Code ready, pending ERC-8004 team deployment |
 
-## Known Limitations & Future Work
+## Known Bugs
 
-| Area | Current State | Next Step |
-|------|--------------|-----------|
-| **Liveness checking** | HTTP HEAD/GET per endpoint — verifies reachability and auth status. | Add TLS certificate validation, response schema checks, and semantic verification (does the endpoint behave like an AI agent or just return 200?). |
-| **Sybil resistance** | Separate evaluator wallet prevents self-scoring, but a determined attacker could register many agents. | Weight reputation by evaluator stake or use attestation graphs to detect evaluation rings. |
-| **Discovery scale** | Scans `Registered` events via `eth_getLogs` — O(n blocks). | Migrate to a Graph Protocol subgraph for instant historical queries. |
-| **Venice model dependency** | Tied to Qwen3-235B via Venice. | Abstract the LLM layer to support model rotation and multi-model consensus scoring. |
+These are real issues observed in production. Not hypothetical limitations — actual behaviour that doesn't match intent.
+
+**1. Ephemeral results on Railway**
+`dashboard/results.json` is written to Railway's ephemeral filesystem. On every redeploy, all evaluation history is wiped from the server. The dashboard re-fetches from `/api/results` which reads this file — so a fresh deploy shows an empty dashboard until evals run again. Workaround: keep a local backup of `results.json` and deploy it with the container, or move to a persistent store.
+
+**2. Validation Registry not deployed**
+The Validation Registry integration (`submit_validation_request`, `submit_validation_response`) is fully implemented in `blockchain.py` but the contract hasn't been deployed by the ERC-8004 team to mainnet yet. Challenge mode (`python3 main.py challenge`) will fail silently on mainnet. Works on Sepolia.
+
+**3. IPFS gateway timeouts**
+Three IPFS gateways are tried in sequence (dweb.link, ipfs.io, cloudflare-ipfs.com) with tenacity retry. On mainnet, roughly 15–20% of agents declare IPFS manifest URIs that time out across all three gateways. These fall back to identity score 0, which unfairly drags down the composite. No fix without a local IPFS node.
+
+**4. Evaluator wallet ETH depletion**
+Each `giveFeedback()` + EAS attestation pair costs ~0.0001–0.0003 ETH in gas on Base Mainnet. With 47 evaluations published, the evaluator wallet has gone from 0.003 ETH down to ~0.002 ETH. At current rate, ~20 more publishes before the wallet runs dry and all evals silently stay in VERIFIED state. Needs topping up before large batch runs.
+
+**5. No rate limiting on `/api/evaluate`**
+The evaluate endpoint has a mutex lock (`_eval_lock`) preventing concurrent evals, but no per-IP rate limiting. A single client can queue repeated evals. On Railway's free tier this could exhaust the evaluator wallet quickly if the endpoint is discovered publicly.
+
+**6. Trust score not re-evaluated on manifest changes**
+Once an agent is in `results.json` as PUBLISHED, the deduplication logic skips it on future discover passes. If the agent owner updates their manifest URI or changes their endpoints, Sentinel will never re-score them. Stale scores accumulate silently.
+
+---
+
+## Future Plans
+
+Roughly in priority order for what would make Sentinel production-ready.
+
+**Persistent storage**
+Replace `results.json` with a proper database (SQLite at minimum, Postgres for scale). Results survive redeploys, queries are indexed, and historical evaluation trends become queryable. This is the single highest-leverage change.
+
+**Scheduled re-evaluation**
+Agents change. Endpoints go down, wallets grow, manifests update. A cron job re-evaluating published agents every 30 days and flagging significant score changes would make the trust scores meaningful over time rather than a one-shot snapshot.
+
+**Graph Protocol subgraph for discovery**
+Current discovery scans `eth_getLogs` across all blocks — slow and rate-limited on public RPCs. A subgraph over the Identity Registry `Registered` events would make discovery instant and enable filtering (e.g. only agents registered in the last 7 days, only agents by capability domain).
+
+**Multi-model consensus**
+Venice runs Qwen3-235B for trust synthesis. A higher-confidence model would run multiple smaller models (or multiple independent Venice calls with different system prompts) and use agreement/disagreement as a confidence signal. Models that agree strongly → high confidence boost. Models that disagree → confidence penalty and human review flag.
+
+**Evaluator staking for sybil resistance**
+The current 3-wallet model prevents self-scoring but doesn't prevent an attacker registering 100 agents and colluding with friends to cross-score them. Requiring evaluators to stake ETH — slashed if they're caught in an evaluation ring (detected via HHI graph analysis) — would make collusion economically irrational.
+
+**WebSocket updates for live evaluation**
+The dashboard polls `/api/results` on load. During a live eval, the pipeline animation is client-side only — there's no server push when the eval completes. A WebSocket endpoint streaming state transitions (`FETCH_IDENTITY`, `CHECK_LIVENESS`, etc.) would make the pipeline animation reflect real progress rather than a fixed timer.
+
+**TLS and semantic endpoint verification**
+Current liveness check: HTTP HEAD, interpret status code. Future: verify TLS certificate validity, check certificate chain, probe the endpoint with a minimal MCP initialize call and validate the response schema. A server returning 200 to any request is not the same as a real AI agent endpoint.
+
+**ENS reverse resolution for all agents**
+Currently ENS lookup is attempted per wallet but skipped if it times out. A background ENS resolution pass over all evaluated agents (using a local ENS resolver or The Graph) would enrich identity scores and surface agents with committed on-chain identities.
+
+**Agent capability graph**
+Sentinel currently evaluates agents in isolation. The transitive trust computation (`compute_transitive_trust`) is implemented but not visualised. A directed graph of "agent A trusts agent B" relationships — rendered in the dashboard — would make the trust network topology visible and help identify high-centrality agents worth evaluating first.
 
 ## Development History
 
