@@ -424,11 +424,15 @@ function renderDistribution(data) {
     }).join('');
 }
 
-let allData=[],currentFilter='published';
+let allData=[],currentFilter='published',lastEvaluatedId=null;
 const SO={'PUBLISHED':0,'VERIFIED':1,'WITHHELD_LOW_CONFIDENCE':2,'FAILED':3};
 function setFilter(f){currentFilter=f;['all','published','withheld'].forEach(x=>document.getElementById('filter-'+x).className='fb'+(x===f?' on':''));renderAll()}
 function renderAll(){
-    let fl=allData;if(currentFilter==='published')fl=allData.filter(e=>e.state==='PUBLISHED'||e.state==='VERIFIED');else if(currentFilter==='withheld')fl=allData.filter(e=>e.state!=='PUBLISHED'&&e.state!=='VERIFIED');
+    let fl=allData.slice();
+    if(currentFilter==='published')fl=fl.filter(e=>e.state==='PUBLISHED'||e.state==='VERIFIED');
+    else if(currentFilter==='withheld')fl=fl.filter(e=>e.state!=='PUBLISHED'&&e.state!=='VERIFIED');
+    // Float the most recently evaluated agent to top
+    if(lastEvaluatedId!==null){const i=fl.findIndex(e=>e.agent_id===lastEvaluatedId);if(i>0){const [item]=fl.splice(i,1);fl.unshift(item);}}
     const c=document.getElementById('evaluations');c.innerHTML=fl.map(renderCard).join('');
     document.getElementById('filter-count').textContent=fl.length+'/'+allData.length;
     document.getElementById('empty-state').style.display=allData.length?'none':'block';
@@ -452,7 +456,7 @@ async function runLiveEval(){
     const input=document.getElementById('eval-input'),btn=document.getElementById('eval-btn'),status=document.getElementById('eval-status'),stxt=document.getElementById('eval-status-text'),errEl=document.getElementById('eval-error'),okEl=document.getElementById('eval-success');
     const aid=parseInt(input.value,10);if(isNaN(aid)||aid<0){errEl.textContent='Enter a valid Agent ID.';errEl.style.display='block';okEl.style.display='none';return}
     btn.disabled=true;input.disabled=true;status.style.display='block';errEl.style.display='none';okEl.style.display='none';stxt.textContent=`Evaluating Agent #${aid}…`;startPipeline();
-    try{const resp=await fetch(`${API_BASE}/api/evaluate`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({agent_id:aid})});if(resp.status===429)throw new Error('Another evaluation in progress.');if(!resp.ok){const e=await resp.json().catch(()=>({detail:resp.statusText}));throw new Error(e.detail||`HTTP ${resp.status}`)}const result=await resp.json();donePipeline();const idx=allData.findIndex(e=>e.agent_id===result.agent_id);if(idx>=0)allData[idx]=result;else allData.unshift(result);allData.sort((a,b)=>{const sa=SO[a.state]??9,sb=SO[b.state]??9;if(sa!==sb)return sa-sb;const ta=a.timestamp?new Date(a.timestamp).getTime():0,tb=b.timestamp?new Date(b.timestamp).getTime():0;return tb-ta;});renderAll();updateStats();
+    try{const resp=await fetch(`${API_BASE}/api/evaluate`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({agent_id:aid})});if(resp.status===429)throw new Error('Another evaluation in progress.');if(!resp.ok){const e=await resp.json().catch(()=>({detail:resp.statusText}));throw new Error(e.detail||`HTTP ${resp.status}`)}const result=await resp.json();donePipeline();const idx=allData.findIndex(e=>e.agent_id===result.agent_id);if(idx>=0)allData[idx]=result;else allData.unshift(result);lastEvaluatedId=result.agent_id;renderAll();updateStats();
     const s=result.composite_score??0;let expl='';if(s>=70)expl='Published on-chain.';else if(s>=40)expl='Mixed signals. Withheld.';else expl='Low trust. Not published.';
     okEl.innerHTML=`<span class="text-white font-bold">Agent #${aid}</span> <span class="font-bold text-lg ${sc(s)}">${s}</span><span class="text-[#7a7f96]">/100 — ${esc(expl)}</span>`;okEl.style.display='block';document.getElementById('evaluations').scrollIntoView({behavior:'smooth',block:'start'})}
     catch(e){errEl.textContent=e.message;errEl.style.display='block';resetPipeline()}
